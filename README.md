@@ -1,93 +1,422 @@
-# ml repository
+# ML Soft Sensor API
 
+This repository provides a FastAPI-based machine learning service for deploying soft sensors. The service allows users to send input data and receive predictions from different machine learning models.
 
+## 🚀 Features
+- Supports multiple ML models (e.g., Random Forest, LSTM, CUBIST, etc.).
+- Uses pre-trained models stored in the `models/` directory.
+- Scales input and output values automatically when required.
+- Provides metadata for available models.
 
-## Getting started
+---
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## 📂 Repository Structure
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+The repository follows this structure:
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/soft-sensor-monitoring-and-maintenance-framework-for-machine-learning-models/ml-repository.git
-git branch -M main
-git push -uf origin main
+ML_repository/
+├── Project_IndPenSim/
+│   ├── services/
+│   │   ├── r/  # Contains R-based models (MATLAB models will be added soon)
+│   ├── models/  # Contains exported ML models (LSTM, CART, Random Forest, SVM, GBM)
+│   ├── configs/  # Contains YAML files with metadata for the models
 ```
 
-## Integrate with your tools
+---
 
-- [ ] [Set up project integrations](https://gitlab.com/soft-sensor-monitoring-and-maintenance-framework-for-machine-learning-models/ml-repository/-/settings/integrations)
+## 📦 Installation
 
-## Collaborate with your team
+### 1️⃣ **Clone the Repository**
+```sh
+git clone https://gitlab.com/camilo.corrales/stamm.git
+cd your-repo-folder
+```
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+### 2️⃣ **Create and Activate Virtual Environment**
+```sh
+python -m venv venv
+# Activate on Windows
+venv\Scripts\activate
+# Activate on Linux/Mac
+source venv/bin/activate
+```
 
-## Test and Deploy
+### 3️⃣ **Install Dependencies**
+```sh
+pip install -r requirements.txt
+```
 
-Use the built-in continuous integration in GitLab.
+---
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+## 🚦 Running the API
 
-***
+Start the FastAPI service using Uvicorn:
+```sh
+uvicorn app:app --host 0.0.0.0 --port 443 --reload
+```
 
-# Editing this README
+After starting, the API will be available at:
+```
+http://localhost:443
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+To view interactive API documentation, open in a browser:
+```
+http://localhost:443/docs
+```
 
-## Suggestions for a good README
+---
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## 📡 API Endpoints
 
-## Name
-Choose a self-explaining name for your project.
+### 🌱🔬 Get Project Information 
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+**Endpoint:** `GET /project_info/`
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+**Response Example:**
+```json
+{
+  "db_config": {
+    "db": "InfluxDB",
+    "version": 2.7,
+    "port": "8080",
+    "bucket": "STAMM Bucket",
+    "org_id": "9079c78425d0d055"
+  },
+  "description": "The dataset used in this work corresponds to a series of experiments that were subsequently utilized to produce a simulation of industrial- scale penicillin fermentation processes (Paul and Thomas, 1996) which describes all the component balances relating to the process variables (Goldrick et al., 2015, 2019). The dataset generated from the industrial-scale penicillin fermentation (IndPenSim) includes 100 batches with each dataset comprising 2238 variables of which 39 variables correspond to process variables (manual and automatic control and online and offline measurements) and the remaining 2199 spond to Raman spectra. Per batch sensors recorded data every 12 min with the average batch length being approximately 230 h. Out of the 100 batches, the first 90 batches were operated under “normal” conditions using three different control strategies: (I) controlled by a recipe driven approach; (II) controlled by an operator and (III) controlled by an Advanced Process Control (APC). The last 10 batches contains faults, resulting in process deviations (Goldrick et al., 2019).",
+  "references": [
+    {
+      "id": "Paul1996",
+      "authors": "Paul, G. and Thomas, S.",
+      "title": "A structured model for hyphal differentiation and penicillin production using penicillium chrysogenum",
+      "journal": "Biotechnology and bioengineering",
+      "year": 1996,
+      "doi": "10.1016/XXX",
+      "apa": "Paul, G. C., & Thomas, C. R. (1996). A structured model for hyphal differentiation and penicillin production using Penicillium chrysogenum. Biotechnology and bioengineering, 51(5), 558-572."
+    }
+    ...
+  ],
+  "variables": [
+    {
+      "name": "Time (h)",
+      "column_type": "Time",
+      "units": "Hour",
+      "renamed_variable": "time",
+      "description": "Elapsed time in hours since the start of the experiment"
+    },
+    {
+      "name": "Aeration rate(Fg:L/h)",
+      "column_type": "Actuator",
+      "units": "Fg:L/h",
+      "renamed_variable": "aeration_rate",
+      "description": "Rate of air supplied to the bioreactor per litre per hour"
+    },
+    {
+      "name": "Agitator RPM(RPM:RPM)",
+      "column_type": "Actuator",
+      "units": "RPM",
+      "renamed_variable": "agitator",
+      "description": "Agitator speed in revolutions per minute, controlling mixing intensity"
+    },
+    {
+      "name": "Sugar feed rate(Fs:L/h)",
+      "column_type": "Actuator",
+      "units": "L/h",
+      "renamed_variable": "sugar_feed_rate",
+      "description": "Rate at which sugar solution is fed into the bioreactor, measured in litres per hour"
+    },
+      ...
+    {
+      "name": "Viscosity(Viscosity_offline:centPoise)",
+      "column_type": "Offline_measurement",
+      "units": "centPoise",
+      "renamed_variable": "viscosity",
+      "description": "Offline measurement of broth viscosity, measured in centipoise"
+    },
+    {
+      "name": "Batch ID",
+      "column_type": "Experiment",
+      "units": "-",
+      "renamed_variable": "experiment_ID",
+      "description": "Unique identifier for the batch or experiment run"
+    }
+  ]
+}
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+### 🔍 List Available Models
+**Endpoint:** `GET /list_models/`
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+**Response Example:**
+```json
+{
+  "available_soft_sensors": [
+    {
+      "name": "random_forest",
+      "model_identification": {
+        "name": "random_forest",
+        "version": "V.1.0",
+        "UUID": "",
+        "author": "Acosta-Pavas, J. C., Robles-Rodriguez, C. E., Griol, D., Daboussi, F., Aceves-Lara, C. A., & Corrales, D. C",
+        "doi": "https://doi.org/10.1016/j.compchemeng.2024.108736",
+        "creation_date": "22-01-2024",
+        "project": "../projects/project_info.yaml"
+      }
+    },
+    {
+      "name": "CART",
+      "model_identification": {
+        "name": "CART",
+        "version": "V.1.0",
+        "UUID": "",
+        "author": "Acosta-Pavas, J. C., Robles-Rodriguez, C. E., Griol, D., Daboussi, F., Aceves-Lara, C. A., & Corrales, D. C",
+        "doi": "https://doi.org/10.1016/j.compchemeng.2024.108736",
+        "creation_date": "22-01-2024",
+        "project": "../projects/project_info.yaml"
+      }
+    },
+    {
+      "name": "SVM",
+      "model_identification": {
+        "name": "SVM",
+        "version": "V.1.0",
+        "UUID": "",
+        "author": "Suarez, C., Astudillo A., Valencia-Mosquera J.F., Metcalfe B., Koehorst J.J., Castillo E. & Corrales, D. C",
+        "doi": "",
+        "creation_date": "26-02-2025",
+        "project": "../projects/project_info.yaml"
+      }
+    },
+    {
+      "name": "GBM",
+      "model_identification": {
+        "name": "GBM",
+        "version": "V.1.0",
+        "UUID": "",
+        "author": "Suarez, C., Astudillo A., Valencia-Mosquera J.F., Metcalfe B., Koehorst J.J., Castillo E. & Corrales, D. C",
+        "doi": "",
+        "creation_date": "17-02-2025",
+        "project": "../projects/project_info.yaml"
+      }
+    },
+    {
+      "name": "LSTM",
+      "model_identification": {
+        "name": "LSTM",
+        "version": "V.1.0",
+        "UUID": "",
+        "author": "Suarez, C., Astudillo A., Valencia-Mosquera J.F., Metcalfe B., Koehorst J.J., Castillo E. & Corrales, D. C",
+        "doi": "",
+        "creation_date": "17-02-2025",
+        "project": "../projects/project_info.yaml"
+      }
+    }
+  ]
+}
+```
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### 🛠 Get Model Metadata
+**Endpoint:** `GET /metadata/{model_name}`
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+**Example Request:**
+```
+GET http://localhost:443/metadata/LSTM
+```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+**Response Example:**
+```json
+{
+  "name": "LSTM",
+  "model_identification": {
+    "name": "LSTM",
+    "version": "V.1.0",
+    "UUID": "",
+    "author": "Suarez, C., Astudillo A., Valencia-Mosquera J.F., Metcalfe B., Koehorst J.J., Castillo E. & Corrales, D. C",
+    "doi": "",
+    "creation_date": "17-02-2025",
+    "project": "../projects/project_info.yaml"
+  },
+  "model_description": {
+    "learner": "Long short-term memory (LSTM)",
+    "model_type": "black box",
+    "model_name": "LSTM without lag features [Python version]",
+    "description": "This is not the soft sensor using the LSTM with lag features proposed in the paper (Metcalfe et al., 2025).",
+    "language": [
+      {
+        "name": "python",
+        "version": "3.12.7"
+      }
+    ],
+    "config_files": {
+      "model_file": "0009_[Python]_penicillin_LSTM.keras"
+    },
+    "packages": [
+      {
+        "package": "tensorflow",
+        "version": "2.18.0",
+        "classes": [
+          "keras.layers.LSTM",
+          "keras.layers.Dropout",
+          "keras.layers.BatchNormalization",
+          "keras.layers.Dense",
+          "keras.models.Sequential",
+          "keras.callbacks.EarlyStopping",
+          "keras.optimizers.Adam"
+        ]
+      },
+      {
+        "package": "sklearn",
+        "version": "1.5.2",
+        "classes": [
+          "preprocessing.MinMaxScaler"
+        ]
+      }
+    ],
+    "input_time_interval": {
+      "time_interval": {
+        "value": 12,
+        "unit": "minutes"
+      },
+      "aggregation": {
+        "method": "NaN",
+        "description": "NaN"
+      },
+      "description": "One measurement every 12 minutes"
+    }
+  },
+  "training_information": {
+    "number_of_instances": 89800,
+    "hyperparameters": {
+      "batch_size": 512,
+      "epochs": 100,
+      "optimizer": {
+        "name": "Adam",
+        "learning_rate": 0.001,
+        "description": "The Adam optimizer is used for training."
+      },
+      "loss_function": {
+        "name": "Mean Squared Error (MSE)",
+        "description": "MSE is used as the loss function to minimize the squared differences between predicted and actual values of penicillin concentration."
+      },
+      "callbacks": {
+        "early_stopping": {
+          "monitor": "val_loss",
+          "patience": 10,
+          "description": "Early stopping is used to halt training when the validation loss stops improving for 10 consecutive epochs."
+        }
+      }
+    },
+    "validation": "Train-test split with early stopping",
+    "experiments_ID": [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 17, 19, 20, 21, 22, 24, 25, 26, 27, 29, 30, 31, 33, 34, 36, 37, 38, 39, 40, 42, 43, 44, 45, 47, 48, 49, 50, 51, 53, 54, 55, 56, 57, 58, 59, 61, 62, 65, 66, 67, 69, 70, 71, 72, 73, 74, 75, 76, 77, 80, 81, 82, 83, 84, 85, 87, 88, 89, 90, 92, 93, 94, 95, 96, 97, 98, 99]
+  },
+  "input_features": [
+    "sugar_feed_rate",
+    "agitator",
+    "temperature",
+    "pH",
+    "dissolved_oxygen_concentration",
+    "vessel_volume",
+    "CO2_percent_in_off_gas",
+    "oxygen_in_percent_in_off_gas"
+  ],
+  "output_features": [
+    "penicillin_concentration"
+  ]
+}
+```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+### 🔮 Make a Prediction
+**Endpoint:** `POST /predict/`
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+**Example Request:**
+```json
+{
+  "model": "CART",
+  "req": {
+    "input_data": {
+      "temperature": 298.22,
+      "pH": 6.4472,
+      "dissolved_oxygen_concentration": 30,
+      "agitator": 100,
+      "CO2_percent_in_off_gas": 0.089514,
+      "oxygen_in_percent_in_off_gas": 0.19595,
+      "vessel_volume": 58479,
+      "sugar_feed_rate": 8
+    }
+  }
+}
+```
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+**Example PowerShell Command:**
+```powershell
+$body = @"
+{
+  "model": "LSTM",
+  "req": {
+    "input_data": {
+      "temperature": 298.22,
+      "pH": 6.4472,
+      "dissolved_oxygen_concentration": 30,
+      "agitator": 100,
+      "CO2_percent_in_off_gas": 0.089514,
+      "oxygen_in_percent_in_off_gas": 0.19595,
+      "vessel_volume": 58479,
+      "sugar_feed_rate": 8
+    }
+  }
+}
+"@
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+$response = Invoke-RestMethod -Uri "http://localhost:443/predict/" -Method Post -Headers @{"Content-Type"="application/json"} -Body $body
 
-## License
-For open source projects, say how it is licensed.
+$response | ConvertTo-Json -Depth 10 | Out-File "response.json"
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Get-Content response.json
+```
+
+**Response Example:**
+```json
+{
+    "predictions":  [
+                        {
+                            "name":  "penicillin_concentration",
+                            "value":  [
+                                          [
+                                              3.6946999993781889E-26
+                                          ]
+                                      ]
+                        }
+                    ]
+}
+```
+
+---
+
+## ⚙️ Configuration
+The repository includes YAML configuration files in the `configs/` directory that define the available models, input/output features, and scaling information.
+
+---
+
+## 🛠 Development & Testing
+
+### Running Unit Tests
+```sh
+pytest tests/
+```
+
+### Linting the Code
+```sh
+flake8 app.py model_registry.py
+```
+
+---
+
+## 📝 License
+This project is licensed under the MIT License.
+
+---
+
+## 📬 Contact
+For questions, contact **David Camilo Corrales** at [David-Camilo.Corrales-Munoz@inrae.fr](mailto:David-Camilo.Corrales-Munoz@inrae.fr).
+
