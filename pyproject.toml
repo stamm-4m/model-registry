@@ -26,7 +26,7 @@ requests = "*"
 tensorflow = "*"
 
 [tool.poetry.scripts]
-stamm = "stamm_ml_repository.app:main"
+stamm_ml = "stamm_ml_repository.app:main"
 
 [tool.poetry.group.test.dependencies]
 pytest-xdist = "^3.6.1"

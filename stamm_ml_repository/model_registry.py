@@ -7,7 +7,7 @@ Created on Fri Mar 14 12:15:33 2025
 
 """
 
-import yaml
+import yaml  # type: ignore
 import os
 import joblib
 import tensorflow as tf

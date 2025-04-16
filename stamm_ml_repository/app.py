@@ -7,22 +7,20 @@ Created on Fri Mar 14 12:17:08 2025
 
 """
 
+import logging
+
+import pandas as pd
+import tensorflow as tf
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import numpy as np
-import joblib
-import pandas as pd
-import requests
-import tensorflow as tf
-from model_registry import predict, soft_sensors, load_model_and_scalers, load_project_info
-from drift_detection.scripts.psi_drift import calculate_psi  # Import PSI calculation
-
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
+from sklearn.tree import DecisionTreeRegressor
 
-import logging
+from .model_registry import soft_sensors, load_model_and_scalers, load_project_info
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def main():
     logging.info("Hello World!")
@@ -55,7 +53,8 @@ def get_project_info():
 async def psi_drift_detection(request: DriftRequest):
     """Endpoint for detecting drift using Population Stability Index (PSI)."""
     try:
-        psi_value = calculate_psi(request.expected_data, request.actual_data)
+        # psi_value = calculate_psi(request.expected_data, request.actual_data)
+        psi_value = -1  # Placeholder for actual PSI calculation
         return {"psi_value": psi_value}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
