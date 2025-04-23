@@ -1,4 +1,4 @@
-![ML Repository Logo](assets/ml_logo.png)
+![ML Repository Logo](assets/ml_repo_logo.png)
 # ML Soft Sensor API
 
 This repository provides a FastAPI-based machine learning service for deploying soft sensors. The service allows users to send input data and receive predictions from different machine learning models.
