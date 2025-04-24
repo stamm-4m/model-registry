@@ -171,7 +171,7 @@ http://localhost:443/docs
         "author": "Acosta-Pavas, J. C., Robles-Rodriguez, C. E., Griol, D., Daboussi, F., Aceves-Lara, C. A., & Corrales, D. C",
         "doi": "https://doi.org/10.1016/j.compchemeng.2024.108736",
         "creation_date": "22-01-2024",
-        "project": "../projects/project_info.yaml"
+        "project": "../project_info.yaml"
       }
     },
     {
@@ -183,7 +183,7 @@ http://localhost:443/docs
         "author": "Acosta-Pavas, J. C., Robles-Rodriguez, C. E., Griol, D., Daboussi, F., Aceves-Lara, C. A., & Corrales, D. C",
         "doi": "https://doi.org/10.1016/j.compchemeng.2024.108736",
         "creation_date": "22-01-2024",
-        "project": "../projects/project_info.yaml"
+        "project": "../project_info.yaml"
       }
     },
     {
@@ -195,7 +195,7 @@ http://localhost:443/docs
         "author": "Suarez, C., Astudillo A., Valencia-Mosquera J.F., Metcalfe B., Koehorst J.J., Castillo E. & Corrales, D. C",
         "doi": "",
         "creation_date": "26-02-2025",
-        "project": "../projects/project_info.yaml"
+        "project": "../project_info.yaml"
       }
     },
     {
@@ -207,7 +207,7 @@ http://localhost:443/docs
         "author": "Suarez, C., Astudillo A., Valencia-Mosquera J.F., Metcalfe B., Koehorst J.J., Castillo E. & Corrales, D. C",
         "doi": "",
         "creation_date": "17-02-2025",
-        "project": "../projects/project_info.yaml"
+        "project": "../project_info.yaml"
       }
     },
     {
@@ -219,7 +219,7 @@ http://localhost:443/docs
         "author": "Suarez, C., Astudillo A., Valencia-Mosquera J.F., Metcalfe B., Koehorst J.J., Castillo E. & Corrales, D. C",
         "doi": "",
         "creation_date": "17-02-2025",
-        "project": "../projects/project_info.yaml"
+        "project": "../project_info.yaml"
       }
     }
   ]
