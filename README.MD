@@ -27,6 +27,14 @@ ML_repository/
 │   ├── app.py             # FastAPI application entry point   
 │   ├── model_registry.py  # ML model management utilities
 │   ├── pyproject.toml     # Poetry configuration
+│   .
+│   .
+│   .
+├── Project_[name]/
+│   .
+│   .
+│   .
+├── Project_[name]/
 ```
 
 ---
