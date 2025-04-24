@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pyyaml
+scikit-learn==1.5.2
+pandas
+requests
+tensorflow
