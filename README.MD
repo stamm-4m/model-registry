@@ -46,6 +46,7 @@ ML_repository/
 git clone https://gitlab.com/stamm-4m/ml-repository.git
 cd your-repo-folder
 ```
+To run the app, navigate to the project folder (Project_IndPenSim) and follow these steps
 
 ### 2️⃣ **Install Poetry (if needed)**
 ```sh
@@ -53,6 +54,8 @@ pip install poetry
 ```
 
 ### 3️⃣ **Install Dependencies**
+
+
 ```sh
 poetry install
 ```
@@ -61,9 +64,11 @@ poetry install
 
 ## 🚦 Running the API
 
-Start the FastAPI service using Uvicorn:
+Start the FastAPI service using Uvicorn (default port 443). To run the app, navigate to the project folder (Project_IndPenSim). Once dependencies are installed, you can start the FastAPI service by running the following command:
+
 ```sh
-poetry run uvicorn app:app --reload --host 0.0.0.0 --port 443
+poetry run python -m app
+
 ```
 
 After starting, the API will be available at:
