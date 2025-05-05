@@ -47,14 +47,7 @@ def get_soft_sensor(model_name: str):
     
     model_config = soft_sensors[model_name]["config"]["ml_model_configuration"]
     
-    return {
-        "name": model_name,
-        "model_identification": model_config["model_identification"],
-        "model_description": model_config["model_description"],
-        "training_information": model_config.get("training_information", {}),
-        "input_features": [feature["name"] for feature in model_config["inputs"]["features"]],
-        "output_features": [output["name"] for output in model_config["outputs"]["predictions"]]
-    }
+    return model_config
 
 @app.get("/list_models/")
 def list_available_soft_sensors():
