@@ -2,6 +2,7 @@ ml_model_configuration:
   model_identification:
     name: "CART"
     version: "V.1.0"
+    ID: "0005_[python]_penicillin_CART"
     UUID: ""
     author: "Acosta-Pavas, J. C., Robles-Rodriguez, C. E., Griol, D., Daboussi, F., Aceves-Lara, C. A., & Corrales, D. C"  
     doi: "https://doi.org/10.1016/j.compchemeng.2024.108736"
@@ -13,7 +14,9 @@ ml_model_configuration:
     model_type: "interpretable"   
     model_name: "CART (Classification And Regression Tree) [Python version]"
     description: "CART built with scikit-learn and the DecisionTreeRegressor class."
-    language: "python"
+    language: 
+      - name: "python"
+        version: "3.12.7"      
     config_files: 
         model_file: "0005_[python]_penicillin_CART.pkl"
     packages:
@@ -39,57 +42,57 @@ ml_model_configuration:
 
   inputs:
     features:
-      - name: "sugar_feed_rate"
-        type: "actuator"  
-        description: "Sugar feed rate (Fs) into the bioreactor."
-        units: "L/h"  
-        lag: 0
-        feature_scaling: 'none'
-      - name: "agitator"
-        type: "actuator"
-        description: "Agitation speed in revolutions per minute."
-        units: "rpm"
-        lag: 0
-        feature_scaling: 'none'        
       - name: "temperature"
         type: "sensor"
         description: "Current temperature (T) in the bioreactor."
         units: "K"
         lag: 0
-        feature_scaling: 'none'        
+        feature_scaling: 'none'
       - name: "pH"
         type: "sensor"
         description: "Current pH level in the bioreactor."
         units: "pH"
         lag: 0
-        feature_scaling: 'none'        
+        feature_scaling: 'none'  
       - name: "dissolved_oxygen_concentration"
         type: "sensor"
         description: "Dissolved oxygen (DO) concentration in the bioreactor."
         units: "mg/L"
         lag: 0
-        feature_scaling: 'none'        
-      - name: "vessel_volume"
-        type: "computed_variable"
-        description: "Total volume of the bioreactor vessel (V)."
-        units: "L"
+        feature_scaling: 'none'  
+      - name: "agitator"
+        type: "actuator"
+        description: "Agitation speed in revolutions per minute."
+        units: "rpm"
         lag: 0
-        feature_scaling: 'none'        
+        feature_scaling: 'none'    
       - name: "CO2_percent_in_off_gas"
         type: "sensor"
         description: "CO2 percentage in the off-gas (CO2,og)."
         units: "%"
         lag: 0
-        feature_scaling: 'none'        
+        feature_scaling: 'none'
       - name: "oxygen_in_percent_in_off_gas"
         type: "sensor"
         description: "O2 percentage in the off-gas (O2,og)."
         units: "%"
         lag: 0
+        feature_scaling: 'none'
+      - name: "vessel_volume"
+        type: "computed_variable"
+        description: "Total volume of the bioreactor vessel (V)."
+        units: "L"
+        lag: 0
+        feature_scaling: 'none'                                                    
+      - name: "sugar_feed_rate"
+        type: "actuator"  
+        description: "Sugar feed rate (Fs) into the bioreactor."
+        units: "L/h"  
+        lag: 0                                 
         feature_scaling: 'none'        
 
   outputs:
-    predictions:
+    information:
       - name: "penicillin_concentration"
         description: "Prediction of the penicillin concentration."
         units: "g L−1"

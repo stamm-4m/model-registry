@@ -1,7 +1,8 @@
 ml_model_configuration:
   model_identification:
-    name: "random_forest"
+    name: "Random Forest"
     version: "V.1.0"
+    ID: "0001_[python]_penicillin_RF"    
     UUID: ""
     author: "Acosta-Pavas, J. C., Robles-Rodriguez, C. E., Griol, D., Daboussi, F., Aceves-Lara, C. A., & Corrales, D. C"  
     doi: "https://doi.org/10.1016/j.compchemeng.2024.108736"
@@ -91,7 +92,7 @@ ml_model_configuration:
         feature_scaling: 'none'        
 
   outputs:
-    predictions:
+    information:
       - name: "penicillin_concentration"
         description: "Prediction of the penicillin concentration."
         units: "g L−1"

@@ -2,6 +2,7 @@ ml_model_configuration:
   model_identification:
     name: "SVM"
     version: "V.1.0"
+    ID: "0007_[python]_penicillin_SVM"    
     UUID: ""
     author: "Suarez, C., Astudillo A., Valencia-Mosquera J.F., Metcalfe B., Koehorst J.J., Castillo E. & Corrales, D. C"  
     doi: ""
@@ -47,58 +48,58 @@ ml_model_configuration:
   inputs:
     scaler: "0007_[Python]_penicillin_SVM_features_scaler.pkl"
     features:
-      - name: "sugar_feed_rate"
-        type: "actuator"  
-        description: "Sugar feed rate (Fs) into the bioreactor."
-        units: "L/h"  
-        lag: 0
-        feature_scaling: 'Z-score'
-      - name: "agitator"
-        type: "actuator"
-        description: "Agitation speed in revolutions per minute."
-        units: "rpm"
-        lag: 0
-        feature_scaling: 'Z-score'      
       - name: "temperature"
         type: "sensor"
         description: "Current temperature (T) in the bioreactor."
         units: "K"
         lag: 0
-        feature_scaling: 'Z-score'        
+        feature_scaling: 'Z-score'         
       - name: "pH"
         type: "sensor"
         description: "Current pH level in the bioreactor."
         units: "pH"
         lag: 0
-        feature_scaling: 'Z-score'        
+        feature_scaling: 'Z-score'   
       - name: "dissolved_oxygen_concentration"
         type: "sensor"
         description: "Dissolved oxygen (DO) concentration in the bioreactor."
         units: "mg/L"
         lag: 0
-        feature_scaling: 'Z-score'        
-      - name: "vessel_volume"
-        type: "computed_variable"
-        description: "Total volume of the bioreactor vessel (V)."
-        units: "L"
+        feature_scaling: 'Z-score'   
+      - name: "agitator"
+        type: "actuator"
+        description: "Agitation speed in revolutions per minute."
+        units: "rpm"
         lag: 0
-        feature_scaling: 'Z-score'        
+        feature_scaling: 'Z-score'     
       - name: "CO2_percent_in_off_gas"
         type: "sensor"
         description: "CO2 percentage in the off-gas (CO2,og)."
         units: "%"
         lag: 0
-        feature_scaling: 'Z-score'        
+        feature_scaling: 'Z-score' 
       - name: "oxygen_in_percent_in_off_gas"
         type: "sensor"
         description: "O2 percentage in the off-gas (O2,og)."
         units: "%"
         lag: 0
-        feature_scaling: 'Z-score'        
+        feature_scaling: 'Z-score' 
+      - name: "vessel_volume"
+        type: "computed_variable"
+        description: "Total volume of the bioreactor vessel (V)."
+        units: "L"
+        lag: 0
+        feature_scaling: 'Z-score'                                                     
+      - name: "sugar_feed_rate"
+        type: "actuator"  
+        description: "Sugar feed rate (Fs) into the bioreactor."
+        units: "L/h"  
+        lag: 0
+        feature_scaling: 'Z-score'   
 
   outputs:
     scaler: "0007_[Python]_penicillin_SVM_target_scaler.pkl"
-    predictions:
+    information:
       - name: "penicillin_concentration"
         description: "Prediction of the penicillin concentration."
         units: "g L−1"

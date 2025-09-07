@@ -72,7 +72,7 @@ def get_prediction(request: PredictionRequest):
     if model_name not in soft_sensors:
         raise HTTPException(status_code=404, detail="Model not found")
 
-    model, input_scaler, output_scaler = load_model_and_scalers(model_name)
+    model, input_scaler, output_scaler, outputs = load_model_and_scalers(model_name)
 
     # Extract feature names in the order they appear in the request
     feature_names = list(input_data.keys())
@@ -112,12 +112,13 @@ def get_prediction(request: PredictionRequest):
         
         print(f"Rescaled prediction: {prediction}")
 
+    print()
     # Structure response
     response = {
-        "predictions": [
+        "output_model": [
             {
-                "name": "penicillin_concentration",
-                "value": prediction.tolist()
+                "metadata": outputs,
+                "prediction": prediction.tolist()
             }
         ]
     }

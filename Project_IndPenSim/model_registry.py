@@ -44,7 +44,8 @@ def load_model_and_scalers(model_name):
         if os.path.exists(output_scaler_path):
             output_scaler = joblib.load(output_scaler_path)
 
-    return model, input_scaler, output_scaler
+    outputs = config["ml_model_configuration"]["outputs"]
+    return model, input_scaler, output_scaler, outputs
 
 # Load all YAML configurations dynamically
 for file in os.listdir(CONFIG_DIR):
