@@ -7,7 +7,7 @@ ml_model_configuration:
     author: "Suarez, C., Astudillo A., Valencia-Mosquera J.F., Metcalfe B., Koehorst J.J., Castillo E. & Corrales, D. C"  
     doi: ""
     creation_date: "17-02-2025"
-    project: "../projects/project_info.yaml"
+    project: "../project_info.yaml"
 
   model_description:
     learner: "Long short-term memory (LSTM)"
@@ -103,49 +103,80 @@ ml_model_configuration:
         description: "Current temperature (T) in the bioreactor."
         units: "K"
         lag: 0
-        feature_scaling: 'Min-Max normalization'        
+        feature_scaling: "Min-Max normalization"
+        expected_range:
+          min: 298   # 25 °C
+          max: 308   # 35 °C
+
       - name: "pH"
         type: "sensor"
         description: "Current pH level in the bioreactor."
         units: "pH"
         lag: 0
-        feature_scaling: 'Min-Max normalization'  
+        feature_scaling: "Min-Max normalization"
+        expected_range:
+          min: 5.5
+          max: 7.5
+
       - name: "dissolved_oxygen_concentration"
         type: "sensor"
         description: "Dissolved oxygen (DO) concentration in the bioreactor."
         units: "mg/L"
         lag: 0
-        feature_scaling: 'Min-Max normalization'  
+        feature_scaling: "Min-Max normalization"
+        expected_range:
+          min: 0
+          max: 10
+
       - name: "agitator"
         type: "actuator"
         description: "Agitation speed in revolutions per minute."
         units: "rpm"
         lag: 0
-        feature_scaling: 'Min-Max normalization'    
+        feature_scaling: "Min-Max normalization"
+        expected_range:
+          min: 100
+          max: 1200
+
       - name: "CO2_percent_in_off_gas"
         type: "sensor"
         description: "CO2 percentage in the off-gas (CO2,og)."
         units: "%"
         lag: 0
-        feature_scaling: 'Min-Max normalization'
+        feature_scaling: "Min-Max normalization"
+        expected_range:
+          min: 0
+          max: 10
+
       - name: "oxygen_in_percent_in_off_gas"
         type: "sensor"
         description: "O2 percentage in the off-gas (O2,og)."
         units: "%"
         lag: 0
-        feature_scaling: 'Min-Max normalization'
+        feature_scaling: "Min-Max normalization"
+        expected_range:
+          min: 10
+          max: 21
+
       - name: "vessel_volume"
         type: "computed_variable"
         description: "Total volume of the bioreactor vessel (V)."
         units: "L"
         lag: 0
-        feature_scaling: 'Min-Max normalization'                                                    
+        feature_scaling: "Min-Max normalization"
+        expected_range:
+          min: 1
+          max: 1000  
+
       - name: "sugar_feed_rate"
-        type: "actuator"  
+        type: "actuator"
         description: "Sugar feed rate (Fs) into the bioreactor."
-        units: "L/h"  
+        units: "L/h"
         lag: 0
-        feature_scaling: 'Min-Max normalization'                                  
+        feature_scaling: "Min-Max normalization"
+        expected_range:
+          min: 0
+          max: 2
 
   outputs:
     scaler: "0009_[Python]_penicillin_LSTM_target_scaler.pkl"
@@ -154,4 +185,7 @@ ml_model_configuration:
         description: "Prediction of the penicillin concentration."
         units: "g L−1"
         forecast_horizon: 0
-        feature_scaling: 'Min-Max normalization'   
+        feature_scaling: "Min-Max normalization"
+        expected_range:
+          min: 0
+          max: 50

@@ -18,23 +18,22 @@ The repository follows this structure:
 
 ```
 ML_repository/
-├── Project_IndPenSim/
-│   ├── services/
-│   │   ├── r/  # Contains R-based models (MATLAB models will be added soon)
-│   ├── models/  # Contains exported ML models (LSTM, CART, Random Forest, SVM, GBM)
-│   ├── model_registry.py  # Central registry for managing ML models
-│   ├── project_info.yaml  # Contains YAML file with metadata for the project
-│   ├── app.py             # FastAPI application entry point   
-│   ├── model_registry.py  # ML model management utilities
-│   ├── pyproject.toml     # Poetry configuration
-│   .
-│   .
-│   .
-├── Project_[name]/
-│   .
-│   .
-│   .
-├── Project_[name]/
+├── UI-FastApi.py           # Streamlit UI to explore model metadata and call FastAPI
+├── core/                   # FastAPI backend
+│   ├── app.py              # Main FastAPI application
+│   ├── model_registry.py   # Model registry logic
+│
+├── projects/               # Organized ML projects
+│   ├── Project_E.Coli/     # Example project (empty structure shown)
+│   ├── Project_IndPenSim/  # Example project with metadata and models
+│       ├── project_info.yaml
+│       ├── configs/        # Model metadata (YAML)
+│       ├── models/         # Exported models & scalers
+│       ├── services/       # Model services (e.g., R, Python, MATLAB)
+│
+├── assets/                 # Static assets (logos, etc.)
+│   └── ml_repo_logo.png
+└── README.md               # Documentation
 ```
 
 ---
