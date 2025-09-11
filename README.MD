@@ -88,9 +88,6 @@ Example project:
 
 ## 🖥️ Streamlit UI
 
-Streamlit → http://localhost:8501
-
-
 The Streamlit UI provides an interactive way to explore your ML projects, inspect models, and run predictions without directly interacting with the FastAPI endpoints.
 
 **Streamlit → [http://localhost:8501](http://localhost:8501)**
@@ -113,6 +110,11 @@ Choose a model from the selected project and explore its metadata, including:
 
 **Run Predictions:**  
 Enter input values interactively and send a prediction request to the FastAPI backend. Results are displayed immediately in the UI.
+
+
+<p align="center">
+  <img src="assets/streamlit_screenshot.png" alt="Streamlit UI" width="600"/>
+</p>
 
 ---
 
