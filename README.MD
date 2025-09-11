@@ -1,14 +1,15 @@
 <img src="assets/ml_repo_logo.png" alt="ML Repository Logo" width="200"/>
 
-# ML Soft Sensor API
+# Model registry
 
 This repository provides a FastAPI-based machine learning service for deploying soft sensors. The service allows users to send input data and receive predictions from different machine learning models.
 
 ## 🚀 Features
 - Supports multiple ML models (e.g., Random Forest, LSTM, CUBIST, etc.).
-- Uses pre-trained models stored in the `models/` directory.
+- Uses pre-trained models.
 - Scales input and output values automatically when required.
 - Provides metadata for available models.
+- Streamlit frontend to explore metadata and interact with the API.
 
 ---
 
@@ -17,7 +18,7 @@ This repository provides a FastAPI-based machine learning service for deploying 
 The repository follows this structure:
 
 ```
-ML_repository/
+model-registry/
 ├── UI-FastApi.py           # Streamlit UI to explore model metadata and call FastAPI
 ├── core/                   # FastAPI backend
 │   ├── app.py              # Main FastAPI application
@@ -42,22 +43,30 @@ ML_repository/
 
 ### 1️⃣ **Clone the Repository**
 ```sh
-git clone https://gitlab.com/stamm-4m/ml-repository.git
+git clone https://gitlab.com/stamm-4m/model-registry.git
 cd your-repo-folder
 ```
 To run the app, navigate to the project folder (Project_IndPenSim) and follow these steps
 
-### 2️⃣ **Install Poetry (if needed)**
+### 🐳 Running with Docker
+
+Build & Run
 ```sh
-pip install poetry
+docker compose up --build -d
+
+```
+Stop
+```sh
+docker compose down
+
 ```
 
-### 3️⃣ **Install Dependencies**
+### 3️⃣ **URL**
 
 
-```sh
-poetry install
-```
+FastAPI → http://localhost:8000/docs
+
+Streamlit → http://localhost:8501
 
 ---
 

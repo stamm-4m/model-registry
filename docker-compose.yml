@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  model-registry:
+    build:
+      context: .
+      dockerfile: Dockerfile.fastapi
+    container_name: ml_model_registry
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./projects:/app/projects
+      - ./assets:/app/assets
+    networks:
+      - ml_net
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    container_name: ml_streamlit
+    ports:
+      - "8501:8501"
+    environment:
+      - FASTAPI_URL=http://model-registry:8000
+    volumes:
+      - ./projects:/app/projects
+      - ./assets:/app/assets
+    depends_on:
+      - model-registry
+    networks:
+      - ml_net
+
+networks:
+  ml_net:
+    driver: bridge

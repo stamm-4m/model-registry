@@ -13,7 +13,9 @@ import os
 import yaml
 
 # --- API Base ---
-API_BASE = "http://localhost:443"  # Adjust if running elsewhere
+# API_BASE = "http://localhost:443"  # Adjust if running elsewhere
+
+API_BASE = os.getenv("FASTAPI_URL", "http://localhost:8000")
 
 # --- Sidebar: Project Selection ---
 st.sidebar.title("🗂️ Project")

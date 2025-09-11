@@ -13,7 +13,8 @@ import joblib
 import tensorflow as tf
 
 # Root repo directory (parent of core/)
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+BASE_DIR = os.path.dirname(__file__)
 
 # Store models per project
 # soft_sensors[project_id] = { model_ID: { "config": ..., "model": ..., "name": model_name } }

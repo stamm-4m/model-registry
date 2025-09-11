@@ -132,5 +132,10 @@ def _predict_logic(model, input_scaler, output_scaler, outputs, request: Predict
     }
 
 if __name__ == "__main__":
+    import os
     import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=443, reload=True)
+
+    # Read port from environment variable, default to 8000
+    PORT = int(os.getenv("FASTAPI_PORT", 8000))
+
+    uvicorn.run("app:app", host="0.0.0.0", port=PORT, reload=True)
