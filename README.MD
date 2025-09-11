@@ -62,26 +62,59 @@ docker compose down
 ```
 ---
 
----
-
 ## ⚙️ FastAPI Endpoints
 
-FastAPI → http://localhost:8000/docs
+You can explore the FastAPI endpoints at: http://localhost:8000/docs
+
+This API allows you to query metadata, variables, models, and make predictions for different ML projects.
+
+Example project:
+
+- **Project Name:** IndPenSim
+- **Project ID:** P0001
+
+### Description:**
+The dataset corresponds to industrial-scale penicillin fermentation simulations (Paul & Thomas, 1996; Goldrick et al., 2015, 2019). It contains 100 batches with 2238 variables each. 39 variables correspond to process variables, and 2199 variables correspond to Raman spectra. Data was collected every 12 minutes, and the first 90 batches represent normal operation under different control strategies. The last 10 batches contain induced faults for process deviation testing.
+
+| Method | Endpoint                            | Description                                                                                                                      |
+| ------ | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/{project_id}/project_info/`       | Get project metadata including description, DB config, references, and variables. Example: `GET /P0001/project_info/`            |
+| GET    | `/{project_id}/db_config/`          | Get database configuration for the project. Example: `GET /P0001/db_config/`                                                     |
+| GET    | `/{project_id}/references/`         | Get list of references for the project. Example: `GET /P0001/references/`                                                        |
+| GET    | `/{project_id}/variables/`          | Get all variables with descriptions, units, and types. Example: `GET /P0001/variables/`                                          |
+| GET    | `/{project_id}/list_models/`        | List all models available for the project. Example: `GET /P0001/list_models/`                                                    |
+| GET    | `/{project_id}/metadata/{model_id}` | Get detailed metadata of a specific model, including input/output scalers and configuration. Example: `GET /P0001/metadata/0009_[Python]_penicillin_LSTM` |
+| POST   | `/{project_id}/predict/{model_id}`  | Predict outputs using a specific model. Example: `POST /P0001/predict/0009_[Python]_penicillin_LSTM` with body:                                           |
+
+---
+
+##: 🖥️ Streamlit UI
 
 Streamlit → http://localhost:8501
 
 
-| Method | Endpoint                            | Description          |
-| ------ | ----------------------------------- | -------------------- |
-| GET    | `/{project_id}/project_info/`       | Get Project Info     |
-| GET    | `/{project_id}/db_config/`          | Get Db Config        |
-| GET    | `/{project_id}/references/`         | Get References       |
-| GET    | `/{project_id}/variables/`          | Get Variables        |
-| GET    | `/{project_id}/list_models/`        | List Models Endpoint |
-| GET    | `/{project_id}/metadata/{model_id}` | Get Model Metadata   |
-| POST   | `/{project_id}/predict/{model_id}`  | Predict              |
+The Streamlit UI provides an interactive way to explore your ML projects, inspect models, and run predictions without directly interacting with the FastAPI endpoints.
 
+**Streamlit → [http://localhost:8501](http://localhost:8501)**
 
+### Features
+
+**Project Selection:**  
+Browse all available projects automatically detected in the `projects/` folder. Projects display human-readable names pulled from their `project_info.yaml`.
+
+**Project Info:**  
+View project description, database configuration, references, and variables directly in the sidebar.
+
+**Model Selection:**  
+Choose a model from the selected project and explore its metadata, including:
+
+- **Overview:** description, programming language, packages, files  
+- **Architecture:** input/output layers, LSTM or other layers  
+- **Inputs & Outputs:** features and predictions  
+- **Training Information:** number of instances, hyperparameters, validation strategy, experiment IDs  
+
+**Run Predictions:**  
+Enter input values interactively and send a prediction request to the FastAPI backend. Results are displayed immediately in the UI.
 
 ---
 
