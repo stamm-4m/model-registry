@@ -72,9 +72,7 @@ Example project:
 
 - **Project Name:** IndPenSim
 - **Project ID:** P0001
-
-### Description:**
-The dataset corresponds to industrial-scale penicillin fermentation simulations (Paul & Thomas, 1996; Goldrick et al., 2015, 2019). It contains 100 batches with 2238 variables each. 39 variables correspond to process variables, and 2199 variables correspond to Raman spectra. Data was collected every 12 minutes, and the first 90 batches represent normal operation under different control strategies. The last 10 batches contain induced faults for process deviation testing.
+- **Description:** the dataset corresponds to industrial-scale penicillin fermentation simulations (Paul & Thomas, 1996; Goldrick et al., 2015, 2019). It contains 100 batches with 2238 variables each. 39 variables correspond to process variables, and 2199 variables correspond to Raman spectra. Data was collected every 12 minutes, and the first 90 batches represent normal operation under different control strategies. The last 10 batches contain induced faults for process deviation testing.
 
 | Method | Endpoint                            | Description                                                                                                                      |
 | ------ | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -88,7 +86,7 @@ The dataset corresponds to industrial-scale penicillin fermentation simulations 
 
 ---
 
-##: 🖥️ Streamlit UI
+## 🖥️ Streamlit UI
 
 Streamlit → http://localhost:8501
 
