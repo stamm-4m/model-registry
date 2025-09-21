@@ -23,14 +23,14 @@ model-registry/
 ├── core/                   # FastAPI backend
 │   ├── app.py              # Main FastAPI application
 │   ├── model_registry.py   # Model registry logic
+│   ├── services/           # Model services (e.g., R, Python, MATLAB)
 │
 ├── projects/               # Organized ML projects
-│   ├── Project_E.Coli/     # Example project (empty structure shown)
+│   ├── Bioindustry_E.Coli/ # Example project (empty structure shown)
 │   ├── Project_IndPenSim/  # Example project with metadata and models
 │       ├── project_info.yaml
 │       ├── configs/        # Model metadata (YAML)
 │       ├── models/         # Exported models & scalers
-│       ├── services/       # Model services (e.g., R, Python, MATLAB)
 │
 ├── assets/                 # Static assets (logos, etc.)
 │   └── ml_repo_logo.png
@@ -76,6 +76,7 @@ Example project:
 
 | Method | Endpoint                            | Description                                                                                                                      |
 | ------ | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/list_projects/`       | List all projects with their ID and basic information. Example: `GET /list_projects/`            |
 | GET    | `/{project_id}/project_info/`       | Get project metadata including description, DB config, references, and variables. Example: `GET /P0001/project_info/`            |
 | GET    | `/{project_id}/db_config/`          | Get database configuration for the project. Example: `GET /P0001/db_config/`                                                     |
 | GET    | `/{project_id}/references/`         | Get list of references for the project. Example: `GET /P0001/references/`                                                        |
