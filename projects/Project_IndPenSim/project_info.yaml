@@ -1,3 +1,10 @@
+project_ID: "P0001"
+project_name: "IndPenSim"
+description: "The dataset used in this work corresponds to a series of experiments that were subsequently utilized to produce a simulation of industrial- scale penicillin fermentation processes (Paul and Thomas, 1996) which describes all the component balances relating to the process variables (Goldrick et al., 2015, 2019). The dataset generated from the industrial-scale penicillin fermentation (IndPenSim) includes 100 batches with each dataset comprising 2238 variables of which 39 variables correspond to process variables (manual and automatic control and online and offline measurements) and the remaining 2199 spond to Raman spectra. Per batch sensors recorded data every 12 min with the average batch length being approximately 230 h. Out of the 100 batches, the first 90 batches were operated under “normal” conditions using three different control strategies: (I) controlled by a recipe driven approach; (II) controlled by an operator and (III) controlled by an Advanced Process Control (APC). The last 10 batches contains faults, resulting in process deviations (Goldrick et al., 2019)."    
+coordinator: "David Camilo Corrales"
+start_date: "01/01/2024"
+end_date: "31/12/2025"
+
 db_config: 
     db: "InfluxDB"
     version: 2.7
@@ -5,9 +12,6 @@ db_config:
     bucket: "STAMM Bucket"
     org_id : "9079c78425d0d055"
 
-description: "The dataset used in this work corresponds to a series of experiments that were subsequently utilized to produce a simulation of industrial- scale penicillin fermentation processes (Paul and Thomas, 1996) which describes all the component balances relating to the process variables (Goldrick et al., 2015, 2019). The dataset generated from the industrial-scale penicillin fermentation (IndPenSim) includes 100 batches with each dataset comprising 2238 variables of which 39 variables correspond to process variables (manual and automatic control and online and offline measurements) and the remaining 2199 spond to Raman spectra. Per batch sensors recorded data every 12 min with the average batch length being approximately 230 h. Out of the 100 batches, the first 90 batches were operated under “normal” conditions using three different control strategies: (I) controlled by a recipe driven approach; (II) controlled by an operator and (III) controlled by an Advanced Process Control (APC). The last 10 batches contains faults, resulting in process deviations (Goldrick et al., 2019)."    
-project_name: "IndPenSim"
-project_ID: "P0001"
 references:
   - id: "Paul1996"
     authors: "Paul, G. and Thomas, S."

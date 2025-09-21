@@ -13,7 +13,6 @@ import joblib
 import tensorflow as tf
 
 # Root repo directory (parent of core/)
-
 BASE_DIR = os.path.dirname(__file__)
 
 # Store models per project
@@ -84,23 +83,29 @@ def load_project(project_id: str):
                 model_file = config["ml_model_configuration"]["model_description"]["config_files"]["model_file"]
                 model_path = os.path.join(paths["MODEL_DIR"], model_file)
 
+                # inside load_project(), replace the extension handling block with this:
                 if os.path.exists(model_path):
                     file_ext = os.path.splitext(model_file)[-1].lower()
+                
                     if file_ext in [".keras", ".h5"]:
                         model = tf.keras.models.load_model(model_path)
                     elif file_ext in [".joblib", ".pkl"]:
                         model = joblib.load(model_path)
+                    elif file_ext in [".rds", ".rdata"]:   # <- R models
+                        model = None  # keep metadata only
+                        print(f"Info: R model {model_file} registered (metadata + REST only).")
                     else:
                         print(f"Warning: Unsupported model file format for {model_file}")
-                        continue
-
+                        model = None
+                
                     models[model_id] = {
                         "config": config,
-                        "model": model,
+                        "model": model,  # None if R
                         "name": model_name
                     }
                 else:
                     print(f"Warning: Model file {model_file} not found!")
+
 
     soft_sensors[project_id] = models
     return models
@@ -136,7 +141,7 @@ def load_model_and_scalers(project_id: str, model_id: str):
             output_scaler = joblib.load(scaler_path)
 
     outputs = config["ml_model_configuration"]["outputs"]
-    return model, input_scaler, output_scaler, outputs
+    return model,config, input_scaler, output_scaler, outputs
 
 # ---------------- Model Utilities ----------------
 

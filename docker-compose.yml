@@ -11,6 +11,9 @@ services:
     volumes:
       - ./projects:/app/projects
       - ./assets:/app/assets
+    environment:
+      # Point Python proxy to R API inside the same Docker network
+      - R_API_URL=http://r-api:8081/predict
     networks:
       - ml_net
 
@@ -28,6 +31,19 @@ services:
       - ./assets:/app/assets
     depends_on:
       - model-registry
+    networks:
+      - ml_net
+
+  r-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.r
+    container_name: ml_r_api
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./projects:/app/projects
+      - ./configs:/app/configs
     networks:
       - ml_net
 
