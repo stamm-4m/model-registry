@@ -8,6 +8,8 @@ ml_model_configuration:
     doi: "https://doi.org/10.1016/j.compchemeng.2024.108736"
     creation_date: "22-01-2024"
     project: "../project_info.yaml"
+    status: "online"
+    status_description: "Model is loaded and ready for predictions."      
 
   model_description:
     learner: "random_forest"

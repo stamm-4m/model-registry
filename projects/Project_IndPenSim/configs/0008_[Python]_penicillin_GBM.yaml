@@ -4,11 +4,14 @@ ml_model_configuration:
     version: "V.1.0"
     ID: "0008_[Python]_penicillin_GBM"
     UUID: ""
-    author: "Suarez, C., Astudillo A., Valencia-Mosquera J.F., Metcalfe B., Koehorst J.J., Castillo E. & Corrales, D. C"  
+    author: "Suarez, C., Astudillo A., Metcalfe B., Koehorst J.J., Castillo E. & Corrales, D. C"  
     doi: ""
     creation_date: "17-02-2025"
     project: "../project_info.yaml"
-
+    status: "offline"
+    status_description: "Model is registered but not currently loaded; predictions are unavailable. ⚠️ Important: When this GradientBoostingRegressor is online, it may sometimes predict negative values
+      for penicillin concentration. This occurs because the model sums the outputs of all trees in the ensemble without enforcing a minimum value, even though the actual target is always non-negative. 
+      To prevent negative predictions, consider using model with ID: 0010_[Python]_penicillin_HGB"
   model_description:
     learner: "Gradient Boosting Machine (GBM)"
     model_type: "black box"   
@@ -20,7 +23,7 @@ ml_model_configuration:
     config_files: 
         model_file: "0008_[Python]_penicillin_GBM.pkl"
     packages:
-        - package: "sklearn.tree"
+        - package: "sklearn.ensemble"
           class: "GradientBoostingRegressor"
           version: "1.5.2"            
     input_time_interval: 

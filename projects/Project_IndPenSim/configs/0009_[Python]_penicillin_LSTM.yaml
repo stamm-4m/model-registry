@@ -8,6 +8,8 @@ ml_model_configuration:
     doi: ""
     creation_date: "17-02-2025"
     project: "../project_info.yaml"
+    status: "online"
+    status_description: "Model is loaded and ready for predictions."      
 
   model_description:
     learner: "Long short-term memory (LSTM)"

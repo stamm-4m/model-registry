@@ -9,7 +9,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import pandas as pd
 import tensorflow as tf
-from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor, HistGradientBoostingRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.svm import SVR
 import requests
@@ -147,9 +147,11 @@ def _predict_logic(model, input_scaler, output_scaler, outputs, request: Predict
     input_data = request.req.get("input_data", {})
     feature_names = list(input_data.keys())
     features_df = pd.DataFrame([input_data], columns=feature_names)
+    print("THE MODEL IS ...")
+    print(model)
 
     # Preprocessing depending on model type
-    if isinstance(model, (DecisionTreeRegressor, GradientBoostingRegressor, RandomForestRegressor)):
+    if isinstance(model, (DecisionTreeRegressor, GradientBoostingRegressor, HistGradientBoostingRegressor, RandomForestRegressor)):
         scaled_features = features_df
     elif isinstance(model, SVR):
         scaled_features = input_scaler.transform(features_df)
