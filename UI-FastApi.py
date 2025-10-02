@@ -119,6 +119,20 @@ except requests.exceptions.RequestException as e:
 # --- Main: Detailed Model View ---
 st.markdown(f"<h3>🔍 Model Details: {model_name}</h3>", unsafe_allow_html=True)
 
+# --- Get model status from YAML metadata ---
+status = config.get("model_identification", {}).get("status", "").lower()
+desc = config.get("model_identification", {}).get("status_description", "No status description available.")
+
+color = "green" if status == "online" else "red"
+status_circle = f"<div style='display:inline-block;width:15px;height:15px;border-radius:50%;background-color:{color};margin-right:8px;'></div>"
+
+st.markdown(
+    f"<div style='display:flex;align-items:center;'>{status_circle}<b>Status:</b> {status.capitalize()}</div>",
+    unsafe_allow_html=True
+)
+st.write(desc)
+
+
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
     ["Overview", "Architecture", "Inputs", "Outputs", "Training Info", "Run Prediction"]
 )

@@ -4,7 +4,7 @@ ml_model_configuration:
     version: "V.1.0"
     ID: "0009_[Python]_penicillin_LSTM"
     UUID: ""
-    author: "Suarez, C., Astudillo A., Valencia-Mosquera J.F., Metcalfe B., Koehorst J.J., Castillo E. & Corrales, D. C"  
+    author: "Suarez, C., Astudillo A., Metcalfe B., Koehorst J.J., Castillo E. & Corrales, D. C"  
     doi: ""
     creation_date: "17-02-2025"
     project: "../project_info.yaml"
