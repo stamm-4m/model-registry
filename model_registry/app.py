@@ -30,7 +30,7 @@ app = Dash(
     __name__,
     external_stylesheets=external_stylesheets,
     server=server,
-    suppress_callback_exceptions=True
+    suppress_callback_exceptions=True,
 )
 app.layout = app_layout()
 register_callbacks(app)
