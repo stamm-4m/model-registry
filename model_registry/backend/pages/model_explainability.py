@@ -6,13 +6,13 @@ from model_registry.backend.components.top_toolbar import top_toolbar
 #from shapash.explainer.smart_explainer import SmartExplainer
 
 
-def monitoring_layout():
+def model_explainability_layout():
 
    # data = load_breast_cancer(as_frame=True)
     #X = data.data
     #y = data.target
 
- #   model = RandomForestClassifier(n_estimators=50, random_state=42)
+  #  model = RandomForestClassifier(n_estimators=50, random_state=42)
   #  model.fit(X, y)
 
    # xpl = SmartExplainer(model=model)
@@ -24,9 +24,9 @@ def monitoring_layout():
     return html.Div(
         [
             top_toolbar(),
-            html.H3("Model Monitoring & Explainability"),
+            html.H3("Model Explainability"),
             dcc.Graph(
-                figure=[],
+                figure={},
                 config={"displayModeBar": False}
             )
         ],

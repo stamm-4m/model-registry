@@ -15,6 +15,7 @@ def layout(session_data=None):
 def app_layout():
     return html.Div([
         dcc.Location(id="url", refresh=False),
+        dcc.Store(id="models-grid-data"),
         dcc.Store(id="user-session", storage_type="session"),
         html.Div(id="page-content")
     ])

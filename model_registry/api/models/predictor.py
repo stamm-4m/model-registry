@@ -2,7 +2,6 @@ import pandas as pd
 from model_registry.api.models.prediction_request import PredictionRequest
 import tensorflow as tf
 from fastapi import HTTPException
-from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
 from sklearn.tree import DecisionTreeRegressor
 

@@ -2,24 +2,26 @@
 name = "ml-repository-app"
 version = "0.1.0"
 description = "Model Repository Dash application"
-authors = ["Carlos <carlos@email.com>"]
+authors = ["Carlos <csuarez@unicauca.edu.co>"]
 packages = [
     { include = "model_registry/backend" },
     { include = "model_registry/api" }
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.11,<3.14"
+python = ">=3.11,<3.12"
 dash = ">=2.11,<3.0"
 plotly = ">=5.0.0,<6.0.0"
 dash-bootstrap-components = "^1.6"
-gunicorn = "23.0.0"
-pyyaml = "^6.0.3"
 uvicorn = "^0.38.0"
 fastapi = "^0.125.0"
+gunicorn = "23.0.0"
+pyyaml = "^6.0.3"
 dotenv = "^0.9.9"
-tensorflow = "2.20.0"
 pandas = "^2.3.3"
+tensorflow = "^2.20.0"
+scikit-learn = "^1.8.0"
+dash-ag-grid = "^32.3.4"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10"
@@ -29,8 +31,9 @@ pytest = "^8.1"
 pytest-cov = "^4.0"
 
 [tool.poetry.scripts]
-ml-repository-app = "model_registry.app:main"
+ml-repository-backend = "model_registry.backend.app_backend:main"
+ml-repository-api = "model_registry.api.app_api:main"
 
 [build-system]
 requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api" 
+build-backend = "poetry.core.masonry.api"

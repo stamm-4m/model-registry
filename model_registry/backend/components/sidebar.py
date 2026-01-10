@@ -27,8 +27,8 @@ def sidebar(session_data = None):
         dbc.Nav(
             [   
                 dbc.NavLink(
-                    html.Span([html.Span("Monitoring", className="nav-text")], className="nav-item-content"),
-                    href="/monitoring",
+                    html.Span([html.Span("Model Explainability", className="nav-text")], className="nav-item-content"),
+                    href="/model-explainability",
                     className="sidebar-link",
                     active="exact",
                 ),

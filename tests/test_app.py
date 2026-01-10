@@ -1,4 +1,4 @@
-from model_registry.app import app
+from model_registry.backend.app_backend import app
 
 
 def test_create_app():

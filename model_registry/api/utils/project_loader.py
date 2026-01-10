@@ -2,6 +2,8 @@ import yaml
 import os
 import joblib
 import tensorflow as tf
+import logging
+logger = logging.getLogger(__name__)
 
 # Root repo directory (parent of core/)
 BASE_DIR = os.path.dirname(__file__)
@@ -14,7 +16,7 @@ soft_sensors = {}
 
 def list_projects_by_id():
     """Return a dict mapping project_ID to project folder names."""
-    projects_dir = os.path.join(BASE_DIR, "projects")
+    projects_dir = os.path.join(BASE_DIR,"../","projects")
     project_map = {}
     if not os.path.exists(projects_dir):
         return project_map
@@ -41,7 +43,7 @@ def get_project_folder_from_id(project_id: str):
 def get_project_paths(project_id: str):
     """Return important directories/files for a given project_ID."""
     project_folder = get_project_folder_from_id(project_id)
-    project_dir = os.path.join(BASE_DIR, "projects", project_folder)
+    project_dir = os.path.join(BASE_DIR,"../" "projects", project_folder)
     return {
         "CONFIG_DIR": os.path.join(project_dir, "configs"),
         "MODEL_DIR": os.path.join(project_dir, "models"),
@@ -68,7 +70,7 @@ def load_project(project_id: str):
                 model_name = config["ml_model_configuration"]["model_identification"]["name"]
                 model_id = config["ml_model_configuration"]["model_identification"].get("ID")
                 if not model_id:
-                    print(f"Warning: Model {model_name} has no ID, skipping.")
+                    logger.warning(f"Warning: Model {model_name} has no ID, skipping.")
                     continue
 
                 model_file = config["ml_model_configuration"]["model_description"]["config_files"]["model_file"]
@@ -78,24 +80,25 @@ def load_project(project_id: str):
                 if os.path.exists(model_path):
                     file_ext = os.path.splitext(model_file)[-1].lower()
                 
-                    if file_ext in [".keras", ".h5"]:
+                    """ if file_ext in [".keras", ".h5"]:
                         model = tf.keras.models.load_model(model_path)
                     elif file_ext in [".joblib", ".pkl"]:
                         model = joblib.load(model_path)
                     elif file_ext in [".rds", ".rdata"]:   # <- R models
                         model = None  # keep metadata only
-                        print(f"Info: R model {model_file} registered (metadata + REST only).")
+                        logger.info(f"Info: R model {model_file} registered (metadata + REST only).")
                     else:
-                        print(f"Warning: Unsupported model file format for {model_file}")
+                        logger.warning(f"Warning: Unsupported model file format for {model_file}")
                         model = None
-                
+                     """    
+                    model = None
                     models[model_id] = {
                         "config": config,
                         "model": model,  # None if R
                         "name": model_name
                     }
                 else:
-                    print(f"Warning: Model file {model_file} not found!")
+                    logger.warning(f"Warning: Model file {model_file} not found!")
 
 
     soft_sensors[project_id] = models

@@ -1,7 +1,38 @@
 from dash import html,dcc,dash_table
+import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 
 def home_layout():
+    models_grid = dag.AgGrid(
+        id="models-grid",
+        columnDefs=[
+            {"headerName": "Model", "field": "model_name"},
+            {"headerName": "Author", "field": "authors", "width": 600},
+
+            {
+                "headerName": "Status",
+                "field": "status",
+                "cellRenderer": "StatusRenderer",
+                "width": 100
+            },
+            {
+                "headerName": "Edit",
+                "field": "edit",
+                "cellRenderer": "EditIconRenderer",
+                "width": 80
+            }
+        ],
+        rowData=[],
+        defaultColDef={
+            "sortable": True,
+            "filter": True,
+            "resizable": True
+        },
+        dashGridOptions={
+            "rowHeight": 45
+        }
+    )
+
     return dbc.Container(
         fluid=True,
         className="vh-100 p-4",
@@ -65,53 +96,7 @@ def home_layout():
             # =========================
             dbc.Card(
                 dbc.CardBody([
-                    dash_table.DataTable(
-                        id="models-table",
-                        columns=[
-                            {"name": "Model name", "id": "model_name"},
-                            {"name": "Authors", "id": "authors"},
-                            {
-                                "name": "Actions",
-                                "id": "actions",
-                                "presentation": "markdown"
-                            },
-                        ],
-                        data=[
-                            {
-                                "model_name": "EEGNet v1",
-                                "authors": "Carlos Suarez",
-                                "actions": (
-                                    '<span title="Monitoring">📊</span>&nbsp;&nbsp;'
-                                    '<span title="Reports">📄</span>&nbsp;&nbsp;'
-                                    '<span title="Edit model">✏️</span>&nbsp;&nbsp;'
-                                    '<span title="Delete model">🗑️</span>'
-                                )
-                            },
-                            {
-                                "model_name": "CNN Classifier",
-                                "authors": "Alice, Bob",
-                                "actions": (
-                                    '<span title="Monitoring">📊</span>&nbsp;&nbsp;'
-                                    '<span title="Reports">📄</span>&nbsp;&nbsp;'
-                                    '<span title="Edit model">✏️</span>&nbsp;&nbsp;'
-                                    '<span title="Delete model">🗑️</span>'
-                                )
-                            }
-                        ],
-                        markdown_options={"html": True},
-                        style_table={
-                            "overflowX": "auto"
-                        },
-                        style_cell={
-                            "textAlign": "center",
-                            "padding": "10px",
-                        },
-                        style_header={
-                            "backgroundColor": "#f8f9fa",
-                            "fontWeight": "bold",
-                        },
-                        style_as_list_view=True,
-                    )
+                    models_grid
                 ]),
                 className="shadow-lg"
             )

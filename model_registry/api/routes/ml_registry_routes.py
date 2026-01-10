@@ -1,15 +1,8 @@
 
 from fastapi import HTTPException,APIRouter
-
-from flask import app
-import pandas as pd
-import tensorflow as tf
-from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor, HistGradientBoostingRegressor
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.svm import SVR
 from model_registry.api.models.prediction_request import PredictionRequest
 
-router = APIRouter(prefix="/api/ml", tags=["ML"])
+router = APIRouter(prefix="", tags=["ML"])
 
 from model_registry.api.models.predictor import ModelPredictor
 
@@ -20,6 +13,8 @@ from model_registry.api.utils.project_loader import (
     list_models_by_id,
     load_model_and_scalers,
 )
+import logging
+logger = logging.getLogger(__name__)
 # ---------------- Project Metadata ----------------
 
 @router.get("/list_projects/")
@@ -45,9 +40,20 @@ def list_projects():
         return projects
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error listing projects: {e}")
-        
+    
 @router.get("/{project_id}/project_info/")
 def get_project_info(project_id: str):
+    """Get information about project
+
+    Args:
+        project_id (str): identification of project
+
+    Raises:
+        HTTPException: No info for project ID
+
+    Returns:
+        stream: Project metadata information
+    """
     info = load_project_info(project_id)
     if not info:
         raise HTTPException(status_code=404, detail=f"No info for project ID {project_id}")
