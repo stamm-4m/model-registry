@@ -1,8 +1,13 @@
+import datetime
+from fastapi import HTTPException
 import yaml
 import os
 import joblib
 import tensorflow as tf
 import logging
+import json
+import tempfile
+import shutil
 logger = logging.getLogger(__name__)
 
 # Root repo directory (parent of core/)
@@ -54,8 +59,8 @@ def get_project_paths(project_id: str):
 
 def load_project(project_id: str):
     """Load all models and config for a given project_ID into registry using model_ID as key."""
-    if project_id in soft_sensors:
-        return soft_sensors[project_id]  # Already loaded
+    #if project_id in soft_sensors:
+    #    return soft_sensors[project_id]  # Already loaded
 
     paths = get_project_paths(project_id)
     models = {}
@@ -160,3 +165,78 @@ def load_project_info(project_id: str):
         with open(paths["PROJECT_INFO_FILE"], "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
     return {}
+
+# ---------------- Model save utils ----------------
+
+def load_model(project_id: str, model_id: str):
+    paths = get_project_paths(project_id)
+
+    logger.debug(f"Loading model '{model_id}' for project '{project_id}'")
+    logger.debug(f"Paths: {paths}")
+
+    # ---- Paths reales ----
+
+    config_file = os.path.join(
+        paths["CONFIG_DIR"],
+        f"{model_id}.yaml"
+    )
+
+    # ---- Validaciones ----
+    if not os.path.isfile(config_file):
+        raise HTTPException(
+            404,
+            f"Config file '{model_id}.yaml' not found for project '{project_id}'"
+        )
+
+    # ---- Load files ----
+    with open(config_file, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+def save_model(project_id: str, model_id: str, model_config: dict) -> None:
+    paths = get_project_paths(project_id)
+
+    config_path = os.path.join(
+        paths["CONFIG_DIR"],
+        f"{model_id}.yaml"
+    )
+
+    if not os.path.isfile(config_path):
+        raise HTTPException(
+            404,
+            f"Config file '{model_id}.yaml' not found for project '{project_id}'"
+        )
+
+    # ---- Backup ----
+    backup_path = config_path + ".bak"
+    shutil.copy2(config_path, backup_path)
+
+    # ---- Escritura atómica ----
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        delete=False,
+        dir=paths["CONFIG_DIR"],
+        suffix=".tmp"
+    ) as tmp:
+        yaml.safe_dump(
+            model_config,
+            tmp,
+            sort_keys=False,
+            allow_unicode=True
+        )
+        tmp_path = tmp.name
+
+    shutil.move(tmp_path, config_path)
+
+
+def deep_update(original: dict, updates: dict) -> dict:
+    for key, value in updates.items():
+        if (
+            isinstance(value, dict)
+            and isinstance(original.get(key), dict)
+        ):
+            deep_update(original[key], value)
+        else:
+            original[key] = value
+    return original
+

@@ -9,7 +9,11 @@ def normalize_date(value):
         return None
 
     try:
-        # DD-MM-YYYY → YYYY-MM-DD
+        datetime.strptime(value, "%Y-%m-%d")
+        return value
+    except ValueError:
+        pass
+    try:
         return datetime.strptime(value, "%d-%m-%Y").date().isoformat()
     except ValueError:
         return None
@@ -64,6 +68,7 @@ def package_row(index, package="", version=""):
                 md=2,
             ),
         ],
+        id={"type": "package-row", "index": index},
         className="mb-2",
         align="center",
     )

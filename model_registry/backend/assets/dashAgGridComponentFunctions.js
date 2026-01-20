@@ -7,3 +7,7 @@ window.dashAgGridComponentFunctions.StatusRenderer = function (props) {
 window.dashAgGridComponentFunctions.EditIconRenderer = function () {
     return "✏️";
 };
+  
+window.dashAgGridComponentFunctions.DeleteIconRenderer = function () {
+    return "🗑️";
+}

@@ -1,20 +1,21 @@
 from dash import Input, Output, State,html, callback_context,ALL
+import dash
 import dash_ag_grid as dag
 from dash.exceptions import PreventUpdate
 from model_registry.backend.config.settings import API_BASE_URL
 import requests
 import logging
 import json
+
+from model_registry.backend.utils.utils_home import delete_model_from_registry
 logger = logging.getLogger(__name__)
 def register_home_callbacks(app):
     @app.callback(
         Output("models-grid", "rowData"),
         Output("models-grid-data", "data"),
-        Input("filter-project", "value"),
-        Input("filter-model", "value"),
-        Input("filter-author", "value")
+        Input("filter-project", "value")
     )
-    def update_models_table(project_id, model_filter, author_filter):
+    def update_models_table(project_id):
         """
         Fetch all models from the API and filter based on dropdowns.
         """
@@ -47,39 +48,126 @@ def register_home_callbacks(app):
                 row = {
                     "model_name": m.get("model_name"),
                     "authors": m.get("metadata", {}).get("author"),
+                    "creation_data": m.get("metadata", {}).get("creation_date"),
+                    "version": m.get("metadata", {}).get("version"),
                     "status": m.get("metadata", {}).get("status", "offline"),
                     "project_id": pid,
                     "model_id": m.get("metadata", {}).get("ID"),
-                    "actions": "edit"  # 👈 dummy value (obligatorio)
+                    "actions": "edit"
                 }
                 # Aplicar filtros de dropdown
-                if model_filter and model_filter.lower() not in row["model_name"].lower():
+                if project_id and project_id != row["project_id"]:
                     continue
-                if author_filter and author_filter.lower() not in row["authors"].lower():
-                    continue
+               
                 table_data.append(row)
 
         return table_data, table_data
 
     @app.callback(
         Output("url", "pathname"),
+        Output("confirm-delete-model", "displayed"),
+        Output("model-to-delete", "data"),
         Input("models-grid", "cellClicked"),
-         State("models-grid-data", "data"),
+        State("models-grid-data", "data"),
         prevent_initial_call=True
     )
-    def on_grid_click(event,rows_data):
+    def on_grid_click(event, rows_data):
+        
         if not event:
             raise PreventUpdate
 
-        # Solo reaccionar si hacen click en Actions
-        if event["colId"] != "edit":
-            raise PreventUpdate
-        #logger.debug(f"Clicked on edit icon for row: {event}")
+        col_id = event.get("colId")
         row_index = event.get("rowIndex")
+
         if row_index is None:
             raise PreventUpdate
 
         row = rows_data[row_index]
 
-        return f"/edit-model/{row['project_id']}/{row['model_id']}"
+        # ===== EDIT =====
+        if col_id == "edit":
+            return (
+                f"/edit-model/{row['project_id']}/{row['model_id']}",
+                False,
+                None
+            )
+
+        # ===== DELETE =====
+        if col_id == "delete":
+            return (
+                dash.no_update,
+                True,
+                {
+                    "project_id": row["project_id"],
+                    "model_id": row["model_id"]
+                }
+            )
+
+        raise PreventUpdate
+    
+    @app.callback(
+        Output("url", "pathname", allow_duplicate=True),
+        Output("models-grid-data", "data", allow_duplicate=True),
+        Input("confirm-delete-model", "submit_n_clicks"),
+        State("model-to-delete", "data"),
+        State("models-grid-data", "data"),
+        prevent_initial_call=True
+    )
+    def delete_model(submit, model_info, rows_data):
+        if not submit or not model_info:
+            raise PreventUpdate
+
+        project_id = model_info["project_id"]
+        model_id = model_info["model_id"]
+
+        # Delete model from disk and registry
+        delete_model_from_registry(project_id, model_id)
+
+        # Quitar el modelo de la grilla
+        updated_rows = [
+            r for r in rows_data
+            if not (
+                r["project_id"] == project_id
+                and r["model_id"] == model_id
+            )
+        ]
+
+        return f"/home", updated_rows
+
+    
+    @app.callback(
+        Output("project-required-modal", "is_open", allow_duplicate=True),
+        Output("url", "pathname", allow_duplicate=True),
+        Input("add-model", "n_clicks"),
+        State("filter-project", "value"),
+        State("project-required-modal", "is_open"),
+        prevent_initial_call=True,
+    )
+    def go_back_to_list(n_clicks, project_id, is_open):
+        if not n_clicks:
+            raise PreventUpdate
+
+        if not project_id:
+            return True, dash.no_update
+
+        return False, f"/model-upload/{project_id}"
+    
+    @app.callback(
+        Output("project-required-modal", "is_open", allow_duplicate=True),
+        Input("close-project-modal", "n_clicks"),
+        State("project-required-modal", "is_open"),
+        prevent_initial_call=True,
+    )
+    def close_modal(n_clicks, is_open):
+        return not is_open
+    
+    @app.callback(
+        Output("url","pathname", allow_duplicate=True),
+        Input("add-project", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def update_add_project(n_clicks):
+        return "/add-project"
+    
+
 

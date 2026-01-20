@@ -7,11 +7,14 @@ router = APIRouter(prefix="", tags=["ML"])
 from model_registry.api.models.predictor import ModelPredictor
 
 from model_registry.api.utils.project_loader import (
+    deep_update,
+    load_model,
     load_project,
     list_projects_by_id,
     load_project_info,
     list_models_by_id,
     load_model_and_scalers,
+    save_model,
 )
 import logging
 logger = logging.getLogger(__name__)
@@ -106,6 +109,17 @@ def get_model_metadata(project_id: str, model_id: str):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+# ---  ------------- Model update ----------------
+@router.put("/{project_id}/update/{model_id}")
+def update_model(project_id: str, model_id: str, payload: dict):
+    model = load_model(project_id, model_id)
+
+    updated_model = deep_update(model, payload)
+    #backup_model(project_id, model_id, model)
+    save_model(project_id, model_id, updated_model)
+
+    return {"status": "ok"}
+
 # ---------------- Prediction Endpoint ----------------
 
 @router.post("/{project_id}/predict/{model_id}")
@@ -134,4 +148,6 @@ def predict(project_id: str, model_id: str, request: PredictionRequest):
 
     # Otherwise -> run Python prediction
     return ModelPredictor(model, input_scaler, output_scaler, outputs).predict(request)
+
+
 

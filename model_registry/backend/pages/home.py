@@ -1,6 +1,7 @@
 from dash import html,dcc,dash_table
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
+from model_registry.backend.utils.utils_home import get_option_projects_dropdown
 
 def home_layout():
     models_grid = dag.AgGrid(
@@ -8,6 +9,8 @@ def home_layout():
         columnDefs=[
             {"headerName": "Model", "field": "model_name"},
             {"headerName": "Author", "field": "authors", "width": 600},
+            {"headerName": "Creation Date", "field": "creation_data", "width": 150},
+            {"headerName": "Version", "field": "version", "width": 150},
 
             {
                 "headerName": "Status",
@@ -18,8 +21,16 @@ def home_layout():
             {
                 "headerName": "Edit",
                 "field": "edit",
+                "filter": False,
                 "cellRenderer": "EditIconRenderer",
                 "width": 80
+            },
+            {
+                "headerName": "Delete",
+                "field": "delete",
+                "filter": False,
+                "cellRenderer": "DeleteIconRenderer",
+                "width": 100
             }
         ],
         rowData=[],
@@ -32,7 +43,7 @@ def home_layout():
             "rowHeight": 45
         }
     )
-
+    projetcs_options = get_option_projects_dropdown()
     return dbc.Container(
         fluid=True,
         className="vh-100 p-4",
@@ -50,43 +61,31 @@ def home_layout():
             dbc.Card(
                 dbc.CardBody([
                     dbc.Row([
-                        dbc.Col(
-                            dcc.Dropdown(
+                        dbc.Col([
+                            dbc.FormFloating([
+                                dcc.Dropdown(
                                 id="filter-project",
-                                options=[
-                                    {"label": "Project A", "value": "project_a"},
-                                    {"label": "Project B", "value": "project_b"},
-                                ],
+                                options=projetcs_options,
                                 placeholder="Project name",
                                 clearable=True
-                            ),
-                            md=4
-                        ),
-                        dbc.Col(
-                            dcc.Dropdown(
-                                id="filter-model",
-                                options=[
-                                    {"label": "Model X", "value": "model_x"},
-                                    {"label": "Model Y", "value": "model_y"},
-                                ],
-                                placeholder="Model name",
-                                clearable=True
-                            ),
-                            md=4
-                        ),
-                        dbc.Col(
-                            dcc.Dropdown(
-                                id="filter-author",
-                                options=[
-                                    {"label": "Alice", "value": "alice"},
-                                    {"label": "Bob", "value": "bob"},
-                                ],
-                                placeholder="Author",
-                                clearable=True
-                            ),
-                            md=4
-                        ),
-                    ])
+                                ),
+                                
+                            ],className="mb-3"),
+                        ]),                        
+                    ]),
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                dbc.Button(
+                                    "Add Project",
+                                    id="add-project",
+                                    color="primary",
+                                ),
+                                width="auto",
+                            )
+                        ],
+                        className="align-items-center mt-4",
+                    )
                 ]),
                 className="mb-4 shadow-sm"
             ),
@@ -96,10 +95,51 @@ def home_layout():
             # =========================
             dbc.Card(
                 dbc.CardBody([
-                    models_grid
+                    models_grid,
+
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                dbc.Button(
+                                    "Add Model",
+                                    id="add-model",
+                                    color="primary",
+                                ),
+                                width="auto",
+                            )
+                        ],
+                        className="align-items-center mt-4",
+                    )
                 ]),
                 className="shadow-lg"
+            ),
+
+            dcc.ConfirmDialog(
+                id="confirm-delete-model",
+                message="Are you sure you want to delete this model? This action cannot be undone."
+            ),
+
+            dcc.Store(id="model-to-delete"),
+
+            dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("Project Required")),
+                dbc.ModalBody(
+                    "Please select a project name before adding a new model."
+                ),
+                dbc.ModalFooter(
+                dbc.Button(
+                        "OK",
+                        id="close-project-modal",
+                        className="ms-auto",
+                        n_clicks=0
+                    )
+                ),
+            ],
+            id="project-required-modal",
+            is_open=False,
             )
+
         ]
     )
 

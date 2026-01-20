@@ -5,6 +5,7 @@ from model_registry.backend.pages.not_found import not_found_layout
 from model_registry.backend.pages.model_upload import model_upload_layout
 from model_registry.backend.pages.model_explainability import model_explainability_layout
 from model_registry.backend.pages.edit_model import edit_model_layout
+from model_registry.backend.pages.add_project import add_project_layout
 
 import logging
 
@@ -23,8 +24,14 @@ def register_sidebar_callbacks(app):
             return login_form()
         if pathname == "/" or pathname == "/home":
             return home_layout()
-        elif pathname == "/model-upload":
-            return model_upload_layout()
+        elif pathname.startswith("/model-upload"):
+            parts = pathname.strip("/").split("/")
+            if len(parts) != 2:
+                return not_found_layout()
+            _, project_id = parts
+
+            return model_upload_layout(project_id)
+        
         elif pathname == "/model-explainability":
             return model_explainability_layout()
         elif pathname.startswith("/edit-model"):
@@ -34,6 +41,8 @@ def register_sidebar_callbacks(app):
             _, project_id, model_id = parts
 
             return edit_model_layout(project_id, model_id)
+        elif pathname == "/add-project":
+            return add_project_layout()
         else:
             return not_found_layout()
         

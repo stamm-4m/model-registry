@@ -1,7 +1,7 @@
 import sqlite3
 import os
 base_path = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(base_path, "../", "data","users.db")
+db_path = os.path.join(base_path, "../", "data","database.db")
     
 
 def get_user_by_username(username):
@@ -29,3 +29,18 @@ def insert_user(username, password_hashed, role='user'):
         return False
     finally:
         conn.close()
+
+def list_users(role_filter=None):
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    if role_filter:
+        cursor.execute("SELECT id, username, role FROM users WHERE role = ?", (role_filter,))
+    else:
+        cursor.execute("SELECT id, username, role FROM users")
+    
+    rows = cursor.fetchall()
+    conn.close()
+
+    return [dict(row) for row in rows]

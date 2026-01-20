@@ -5,6 +5,7 @@ import flask
 from model_registry.backend.utils.logging_config import setup_logging
 from model_registry.backend.layouts.main_layout import app_layout
 from model_registry.backend.callbacks import register_callbacks
+from model_registry.backend.models.db_init import init_db
 
 # Logging config
 setup_logging()
@@ -25,7 +26,11 @@ app = Dash(
 )
 app.layout = app_layout()
 register_callbacks(app)
-
+db_initialized = False
+# Initialize DB
+if not db_initialized:
+    init_db()
+    db_initialized = True
 
 def main():
     app.run(debug=True, host="0.0.0.0", port=8050)

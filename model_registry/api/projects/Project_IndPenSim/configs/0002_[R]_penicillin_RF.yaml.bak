@@ -7,7 +7,7 @@ ml_model_configuration:
     author: Acosta-Pavas, J. C., Robles-Rodriguez, C. E., Griol, D., Daboussi, F.,
       Aceves-Lara, C. A., & Corrales, D. C
     doi: https://doi.org/10.1016/j.compchemeng.2024.108736
-    creation_date: '2022-01-24'
+    creation_date: '2024-01-24'
     project: ../project_info.yaml
     status: online
     status_description: Model is loaded and ready for predictions.
