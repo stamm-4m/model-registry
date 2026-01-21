@@ -1,6 +1,11 @@
 # Model Registry
 
-A central registry for managing, browsing, and serving machine learning models (Python and R). This repository provides a REST API, a web dashboard, and utilities to load and manage project/model metadata.
+A centralized registry for managing, browsing, and serving machine learning models (Python and R).
+This project provides:
+- A Backend service for model and project management
+- A REST API to interact with models and metadata
+- A Web/Dashboard layer
+- Utilities to load, register, and manage ML projects and artifacts
 
 ## Overview
 
@@ -14,6 +19,35 @@ A central registry for managing, browsing, and serving machine learning models (
 - Poetry for dependency and environment management (recommended)
 - Optional: R if you use the R model artifacts, Docker for containerized deployments
 
+## Project Structure
+
+```
+model-registry/
+├── model_registry/
+│   ├── api/
+│   │   ├── config/
+│   │   ├── models/
+│   │   ├── projects/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   ├── utils/
+│   │   └── app_api.py
+│   └── backend/
+│       ├── assets/
+│       ├── callbacks/
+│       ├── components/
+│       ├── config/
+│       ├── data/
+│       ├── layouts/
+│       ├── models/
+│       ├── pages/
+│       ├── services/
+│       └── app_backend.py
+├── LICENSE
+├── pyproject.toml
+└── README.md
+```
+
 ## Setup with Poetry
 
 1. Install Poetry (if not installed):
@@ -26,79 +60,74 @@ curl -sSL https://install.python-poetry.org | python3 -
 (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
 ```
 
-2. Install dependencies and create the virtual environment:
+2. Verify installation:
 
 ```bash
 poetry install
 ```
 
-3. Activate the virtual environment (optional):
+3. Install dependencies and create the virtual environment:
 
 ```bash
-poetry shell
-```
-
-4. Run commands inside Poetry environment without shell:
-
-```bash
-poetry run python model_registry/app.py
+poetry install
 ```
 
 Notes:
 
 - Project metadata and dependencies are defined in `pyproject.toml`.
-- If you prefer a global venv, you can use `poetry export` to generate a requirements file.
 
-## Running the application
+## Running the application Poetry
 
-- Entry point: `model_registry/app.py` — this starts the API/dashboard depending on project configuration.
+The project is split into  **two main services** :
 
-Example (Poetry):
+▶ Backend Service
+
+Starts the core backend responsible for model and project management.
 
 ```bash
-poetry run python model_registry/app.py
+poetry run ml-repository-backend
 ```
 
 Adjust the command as needed for your deployment (WSGI server, Docker, etc.).
 
-## Tests
+▶ API Service
 
-- Example tests are in `tests/test_app.py`.
-
-Run tests with Poetry:
+Starts the REST API layer
 
 ```bash
-poetry run pytest -q
+poetry run ml-repository-api
+```
+💡 Run each service in a separate terminal during development.
+
+## Quick Start (Docker)
+
+The easiest way to run the Model Registry locally is using Docker Compose.
+
+### Requirements
+- Docker
+- Docker Compose v2+
+
+### Run
+
+```bash
+git clone https://github.com/your-org/model-registry.git
+cd model-registry
+docker compose up --build
 ```
 
-## Adding a project or model
+Open the following URLs in your browser:
 
-1. Add your project folder under `projects/<ProjectName>/` with a `project_info.yaml` file.
-2. Put model artifacts in `projects/<ProjectName>/models/` and configuration files under `configs/`.
-3. Use `model_registry/utils/project_loader.py` to load project metadata programmatically.
+Service  -	URL
+- Backend (Dashboard)	http://localhost:8050
+- API (REST)	http://localhost:8081
 
-## Packaging & deployment suggestions
+Health check
 
-- Local dev: use `poetry run` commands or `poetry shell`.
-- Production: serve via a WSGI server (Gunicorn/uvicorn) or containerize with Docker.
+If the containers are running, you should see logs similar to:
 
-Example minimal Dockerfile guidance:
+- Backend running on port 8050
 
-```dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY pyproject.toml poetry.lock* /app/
-RUN pip install poetry && poetry config virtualenvs.create false && poetry install --no-dev --no-interaction
-COPY . /app
-CMD ["poetry", "run", "python", "model_registry/app.py"]
-```
-
-## Useful files and locations
-
-- `model_registry/app.py` — main entry point
-- `model_registry/utils/project_loader.py` — helper to load projects
-- `model_registry/services/r/` — R scripts and instructions for R-based models
-- `pyproject.toml` — dependency and package configuration
+- API running on port 8081
 
 ## Contributing
 
@@ -109,12 +138,3 @@ CMD ["poetry", "run", "python", "model_registry/app.py"]
 
 See [LICENSE](LICENSE)
 
----
-
-If you want, I can also:
-
-- Add a `Dockerfile` and `docker-compose.yml` for local testing
-- Export a `requirements.txt` from Poetry (`poetry export -f requirements.txt`) for non-Poetry environments
-- Add CI steps (GitHub Actions) to run tests and linting
-
-Tell me which of the above you'd like next.
