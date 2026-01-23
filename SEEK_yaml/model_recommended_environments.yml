@@ -1,0 +1,104 @@
+AUTO2000:
+  title: AUTO2000
+
+celldesigner:
+  title: CellDesigner (SBML ODE Solver)
+
+CellNetAnalyzer:
+  title: CellNetAnalyzer
+
+CellSys:
+  title: CellSys
+
+copasi:
+  title: Copasi
+
+CPLEX:
+  title: CPLEX Interactive Optimizer
+
+Docker:
+  title: Docker
+
+FLAME:
+  title: FLAME
+
+Gromacs:
+  title: Gromacs
+
+insilico discovery:
+  title: Insilico Discovery
+
+JADE:
+  title: JADE
+
+Julia:
+  title: Julia
+
+Jupyter Notebook:
+  title: Jupyter Notebook
+
+Keras:
+  title: Keras
+
+Jarnac:
+  title: Jarnac (Systems Biology Workbench)
+
+jws online:
+  title: JWS Online
+
+Mathematica:
+  title: Mathematica
+
+matlab:
+  title: Matlab
+
+MeVisLab:
+  title: MeVisLab
+
+MoBi:
+  title: MoBi
+
+morpheus:
+  title: Morpheus
+
+PathwayLab:
+  title: PathwayLab
+
+PKSim:
+  title: PK-Sim
+
+PottersWheel:
+  title: PottersWheel
+
+PyTorch:
+  title: PyTorch
+
+Python:
+  title: Python
+
+PySCeS:
+  title: Python Simulator for Cellular Systems (PySCeS)
+
+R:
+  title: R
+
+RStudio:
+  title: RStudio
+
+roadrunner:
+  title: roadrunner (Systems Biology Workbench)
+
+SBTOOLBOX2:
+  title: Systems Biology Toolbox 2
+
+Scikit-learn:
+  title: Scikit-learn
+
+TensorFlow:
+  title: TensorFlow
+
+VCELL:
+  title: Virtual Cell
+
+XPPAUT:
+  title: XPP-Aut

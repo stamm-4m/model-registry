@@ -37,6 +37,26 @@ def list_projects_by_id():
                     project_map[project_id] = project_folder
     return project_map
 
+def list_projects():
+    """Return a list of available info projects with name, project id)."""
+
+    projects_dir = os.path.join(BASE_DIR,"../","projects")
+    projects = []
+    if not os.path.exists(projects_dir):
+        return projects
+
+    for project_folder in os.listdir(projects_dir):
+        project_path = os.path.join(projects_dir, project_folder)
+        info_file = os.path.join(project_path, "project_info.yaml")
+        if os.path.exists(info_file):
+            with open(info_file, "r", encoding="utf-8") as f:
+                info = yaml.safe_load(f)
+                project_id = info.get("project_ID")
+                if project_id:
+                    project_name = info.get("project_name", project_folder)
+                    projects.append({"name": project_name, "id": project_id})
+    return projects
+
 def get_project_folder_from_id(project_id: str):
     """Return the folder name of a project given its project_ID."""
     project_map = list_projects_by_id()
@@ -171,8 +191,8 @@ def load_project_info(project_id: str):
 def load_model(project_id: str, model_id: str):
     paths = get_project_paths(project_id)
 
-    logger.debug(f"Loading model '{model_id}' for project '{project_id}'")
-    logger.debug(f"Paths: {paths}")
+    #logger.debug(f"Loading model '{model_id}' for project '{project_id}'")
+    #logger.debug(f"Paths: {paths}")
 
     # ---- Paths reales ----
 

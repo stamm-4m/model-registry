@@ -9,6 +9,8 @@ from model_registry.backend.pages.add_project import add_project_layout
 
 import logging
 
+from model_registry.backend.pages.upload_model_ibisba import add_upload_model_ibisba_layout
+
 logger = logging.getLogger(__name__)
 
 def register_sidebar_callbacks(app):
@@ -24,14 +26,14 @@ def register_sidebar_callbacks(app):
             return login_form()
         if pathname == "/" or pathname == "/home":
             return home_layout()
+        if pathname == "/model-upload-ibisba":
+            return add_upload_model_ibisba_layout()
         elif pathname.startswith("/model-upload"):
             parts = pathname.strip("/").split("/")
             if len(parts) != 2:
                 return not_found_layout()
             _, project_id = parts
-
             return model_upload_layout(project_id)
-        
         elif pathname == "/model-explainability":
             return model_explainability_layout()
         elif pathname.startswith("/edit-model"):

@@ -11,4 +11,6 @@ def check_env_var(var_name):
     return value
 
 API_BASE_URL = check_env_var("API_BASE_URL")
-
+# --   - IBISBA HUB config ---  
+MODEL2SEEK_API_TOKEN = check_env_var("MODEL2SEEK_API_TOKEN")
+MODEL2SEEK_BASE_URL = check_env_var("MODEL2SEEK_BASE_URL")
