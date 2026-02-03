@@ -1,6 +1,8 @@
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
 WORKDIR /app
 
 # System dependencies
@@ -17,7 +19,7 @@ COPY pyproject.toml poetry.lock* ./
 
 # Install Python dependencies (no venv inside container)
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-dev --no-interaction
+    && poetry install --without dev --no-interaction --no-root
 
 # Copy source code
 COPY model_registry ./model_registry
