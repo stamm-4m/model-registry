@@ -99,6 +99,10 @@ poetry run ml-repository-api
 ```
 💡 Run each service in a separate terminal during development.
 
+## Configure .env
+
+To configure the project environment variables, rename the .env.example file to .env in both the api and backend directories.
+
 ## Quick Start (Docker)
 
 The easiest way to run the Model Registry locally is using Docker Compose.
