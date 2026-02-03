@@ -1,13 +1,13 @@
-from dash import Input, Output, State,html, callback_context,ALL
-import dash
-import dash_ag_grid as dag
-from dash.exceptions import PreventUpdate
-from model_registry.backend.config.settings import API_BASE_URL
-import requests
 import logging
-import json
 
+import dash
+import requests
+from dash import Input, Output, State
+from dash.exceptions import PreventUpdate
+
+from model_registry.backend.config.settings import API_BASE_URL
 from model_registry.backend.utils.utils_home import delete_model_from_registry
+
 logger = logging.getLogger(__name__)
 def register_home_callbacks(app):
     @app.callback(
@@ -132,7 +132,7 @@ def register_home_callbacks(app):
             )
         ]
 
-        return f"/home", updated_rows
+        return "/home", updated_rows
 
     
     @app.callback(

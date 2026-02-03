@@ -1,13 +1,12 @@
-import datetime
-from fastapi import HTTPException
-import yaml
-import os
-import joblib
-import tensorflow as tf
 import logging
-import json
-import tempfile
+import os
 import shutil
+import tempfile
+
+import joblib
+import yaml
+from fastapi import HTTPException
+
 logger = logging.getLogger(__name__)
 
 # Root repo directory (parent of core/)
@@ -30,7 +29,7 @@ def list_projects_by_id():
         project_path = os.path.join(projects_dir, project_folder)
         info_file = os.path.join(project_path, "project_info.yaml")
         if os.path.exists(info_file):
-            with open(info_file, "r", encoding="utf-8") as f:
+            with open(info_file, encoding="utf-8") as f:
                 info = yaml.safe_load(f)
                 project_id = info.get("project_ID")
                 if project_id:
@@ -49,7 +48,7 @@ def list_projects():
         project_path = os.path.join(projects_dir, project_folder)
         info_file = os.path.join(project_path, "project_info.yaml")
         if os.path.exists(info_file):
-            with open(info_file, "r", encoding="utf-8") as f:
+            with open(info_file, encoding="utf-8") as f:
                 info = yaml.safe_load(f)
                 project_id = info.get("project_ID")
                 if project_id:
@@ -90,7 +89,7 @@ def load_project(project_id: str):
 
     for file in os.listdir(paths["CONFIG_DIR"]):
         if file.endswith(".yaml"):
-            with open(os.path.join(paths["CONFIG_DIR"], file), "r", encoding="utf-8") as f:
+            with open(os.path.join(paths["CONFIG_DIR"], file), encoding="utf-8") as f:
                 config = yaml.safe_load(f)
                 model_name = config["ml_model_configuration"]["model_identification"]["name"]
                 model_id = config["ml_model_configuration"]["model_identification"].get("ID")
@@ -182,7 +181,7 @@ def load_project_info(project_id: str):
     """Load project metadata for a given project_ID."""
     paths = get_project_paths(project_id)
     if os.path.exists(paths["PROJECT_INFO_FILE"]):
-        with open(paths["PROJECT_INFO_FILE"], "r", encoding="utf-8") as f:
+        with open(paths["PROJECT_INFO_FILE"], encoding="utf-8") as f:
             return yaml.safe_load(f)
     return {}
 
@@ -209,7 +208,7 @@ def load_model(project_id: str, model_id: str):
         )
 
     # ---- Load files ----
-    with open(config_file, "r", encoding="utf-8") as f:
+    with open(config_file, encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 def save_model(project_id: str, model_id: str, model_config: dict) -> None:

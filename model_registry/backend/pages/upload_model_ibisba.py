@@ -1,7 +1,9 @@
-from dash import html
 import dash_bootstrap_components as dbc
+from dash import html
 
-from model_registry.backend.utils.utils_upload_model_ibisba import get_available_projects
+from model_registry.backend.utils.utils_upload_model_ibisba import (
+    get_available_projects,
+)
 
 
 def add_upload_model_ibisba_layout():
@@ -137,6 +139,23 @@ def add_upload_model_ibisba_layout():
                 id="upload-form-collapse",
                 is_open=False,
             ),
+            # =========================
+            # Modal comfirmation information
+            # =========================
+            dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("Confirm model upload")),
+                dbc.ModalBody(id="confirm-upload-body"),
+                dbc.ModalFooter(
+                    [
+                        dbc.Button("Cancel", id="cancel-upload-btn", color="secondary"),
+                        dbc.Button("Confirm upload", id="confirm-upload-btn", color="primary"),
+                    ]
+                ),
+            ],
+            id="confirm-upload-modal",
+            is_open=False,
+        )
         ],
         fluid=True,
     )

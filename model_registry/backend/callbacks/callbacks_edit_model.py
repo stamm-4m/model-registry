@@ -1,11 +1,19 @@
 import logging
-import requests
-import json
-from dash import Input, Output, State, ctx, ALL, MATCH
-from dash.exceptions import PreventUpdate
+
 import dash_bootstrap_components as dbc
+import requests
+from dash import ALL, Input, Output, State, ctx
+from dash.exceptions import PreventUpdate
+
 from model_registry.backend.config.settings import API_BASE_URL
-from model_registry.backend.utils.utils_edit_model import feature_item, new_feature, package_row, output_item, new_output
+from model_registry.backend.utils.utils_edit_model import (
+    feature_item,
+    new_feature,
+    new_output,
+    output_item,
+    package_row,
+)
+
 logger = logging.getLogger(__name__)
 
 def register_edit_model_callbacks(app):
@@ -115,7 +123,7 @@ def register_edit_model_callbacks(app):
         project_id = info["project_id"]
 
         # Change to destination accordind to project_id to load model list
-        return f"/home"
+        return "/home"
     
 # ---------------- SAVE ----------------#
     @app.callback(

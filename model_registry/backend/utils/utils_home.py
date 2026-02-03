@@ -1,5 +1,12 @@
 import os
-from model_registry.api.utils.project_loader import get_project_paths, list_projects_by_id, load_project_info
+
+from model_registry.api.utils.project_loader import (
+    get_project_paths,
+    list_projects_by_id,
+    load_project_info,
+)
+
+
 def get_option_projects_dropdown():
     project_map = list_projects_by_id()
     options = []

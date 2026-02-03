@@ -1,5 +1,7 @@
-from dash import html, dcc
+from dash import dcc, html
+
 from model_registry.backend.components.top_toolbar import top_toolbar
+
 #from sklearn.datasets import load_breast_cancer
 #from sklearn.ensemble import RandomForestClassifier
 

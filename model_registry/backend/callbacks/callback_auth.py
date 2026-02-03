@@ -1,9 +1,12 @@
+import logging
+
 import dash
-from dash import Input, Output, State, html, ALL
+from dash import ALL, Input, Output, State, html
+
 from model_registry.backend.layouts.auth_layout import login_form
 from model_registry.backend.layouts.main_layout import layout
-from model_registry.backend.services.auth_service import authenticate    
-import logging
+from model_registry.backend.services.auth_service import authenticate
+
 logger = logging.getLogger(__name__)
 
 def register_auth_callbacks(app):

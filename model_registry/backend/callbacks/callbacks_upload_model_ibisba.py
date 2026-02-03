@@ -1,14 +1,18 @@
-import re
-from dash import html, dcc, Input, Output, State
-import dash
-import dash_bootstrap_components as dbc
-from dash.exceptions import PreventUpdate
 import logging
 import os
+
+from dash import Input, Output, State, html
+from dash.exceptions import PreventUpdate
+
 from model_registry.api.utils.project_loader import load_model
-from model_registry.backend.services.model2seek_service import upload_model_to_seek
-from model_registry.backend.utils.utils_model_upload import get_path_config_folder,get_path_models_folder
-from model_registry.backend.utils.utils_upload_model_ibisba import get_available_models_options
+from model_registry.backend.services.model2seek_service import check_model_vars_service
+from model_registry.backend.utils.utils_model_upload import (
+    get_path_config_folder,
+    get_path_models_folder,
+)
+from model_registry.backend.utils.utils_upload_model_ibisba import (
+    get_available_models_options,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -54,57 +58,114 @@ def register_upload_model_ibisba_callbacks(app):
         model_title = f"Model {model_id} Title"
         return True, metadata_yaml_path, model_file_name, model_file_path, model_title   
     
+
+    @app.callback(
+        Output("confirm-upload-modal", "is_open"),
+        Output("confirm-upload-body", "children"),
+        Input("upload-model-btn", "n_clicks"),
+        State("model-project-id-ibisba", "value"),
+        State("model-creators", "value"),
+        prevent_initial_call=True,
+    )
+    def validate_and_preview_model(n_clicks, project_id_ibisba, model_creators):
+        if not n_clicks:
+            raise PreventUpdate
+
+        if not model_creators:
+            return False, "Model creators cannot be empty"
+
+        if isinstance(model_creators, str):
+            creators_list = [int(c.strip()) for c in model_creators.split(",") if c.strip()]
+        elif isinstance(model_creators, list):
+            creators_list = model_creators
+        else:
+            return False, "Invalid format for model creators"
+
+        # 🔍 VALIDACIÓN CENTRAL
+        try:
+            (
+                project_info,
+                creators_info,
+                organisms_info,
+                simple_output,
+            ) = check_model_vars_service(
+                containing_project_id=project_id_ibisba,
+                model_creators=creators_list,
+                model_organisms=[],
+            )
+        except Exception as e:
+            logger.exception("Model validation failed")
+            return False, f"❌ Validation error: {str(e)}"
+
+        # 🪟 Contenido del modal
+        body = html.Div(
+            [
+                html.H5("Project"),
+                html.P(project_info.get("title")),
+
+                html.H5("Creators"),
+                html.Ul(
+                    [
+                        html.Li(
+                            f"{c.get('name')} ({c.get('orcid', 'no ORCID')})"
+                        )
+                        for c in creators_info.values()
+                    ]
+                ),
+            ]
+        )
+
+        return True, body
+
+
     @app.callback(
         Output("upload-status", "children"),
-        Input("upload-model-btn", "n_clicks"),
+        Input("confirm-upload-btn", "n_clicks"),
         State("metadata-yaml-path", "value"),
         State("model-file-name", "value"),
         State("model-file-path", "value"),
         State("model-project-id-ibisba", "value"),
         State("model-title", "value"),
         State("model-creators", "value"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
     )
-    def save_model(
+    def save_model_confirmed(
         n_clicks,
         yaml_path,
         model_file_name,
         model_file_path,
         project_id_ibisba,
         model_title,
-        model_creators
+        model_creators,
     ):
         if not n_clicks:
             raise PreventUpdate
-        if not model_creators:
-            raise ValueError("Model creators cannot be empty")
 
         if isinstance(model_creators, str):
-            model_creators_list = [
-                int(c.strip())
-                for c in model_creators.split(",")
-                if c.strip()
-            ]
-        elif isinstance(model_creators, list):
-            model_creators_list = model_creators
+            model_creators_list = [int(c.strip()) for c in model_creators.split(",")]
         else:
-            raise ValueError("Invalid format for model creators")
-
-        if not model_creators_list:
-            raise ValueError("Model creators list is empty")
+            model_creators_list = model_creators
         
         try:
             #logger.debug(f"model_creators: {model_creators}")
             #logger.debug(f"project id ibisba: {project_id_ibisba}")
-            upload_model_to_seek(
-                yaml_path,
-                model_file_name,
-                model_file_path,
-                project_id_ibisba,
-                model_title,
-                model_creators_list
-            )
+            #upload_model_to_seek(
+            #    yaml_path,
+            #    model_file_name,
+            #    model_file_path,
+            #    project_id_ibisba,
+            #    model_title,
+            #    model_creators_list
+            #)
             return "✅ Model successfully uploaded to IBISBA"
 
         except Exception as e:
             return f"❌ Upload failed: {str(e)}"
+
+    @app.callback(
+        Output("confirm-upload-modal", "is_open",allow_duplicate=True),
+        Input("cancel-upload-btn", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def close_modal(n_clicks):
+        return False

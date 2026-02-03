@@ -1,5 +1,6 @@
 from dash import Input, Output, State
 
+
 def register_toolbar_callbacks(app):
     @app.callback(
         Output("settings-modal", "is_open"),

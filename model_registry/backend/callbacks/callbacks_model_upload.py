@@ -1,14 +1,25 @@
-from dash import html, Input, Output, State, ALL, ctx
 import base64
-import dash
-from dash.exceptions import PreventUpdate
-import yaml
-import os
-import dash_bootstrap_components as dbc
 import logging
+import os
+
+import yaml
+from dash import ALL, Input, Output, State, ctx, html
+from dash.exceptions import PreventUpdate
+
 from model_registry.backend.utils.model_metadata_extractor import ModelMetadataExtractor
-from model_registry.backend.utils.utils_edit_model import feature_item, new_feature, new_output, normalize_date, output_item,package_row
-from model_registry.backend.utils.utils_model_upload import get_path_models_folder, get_path_config_folder
+from model_registry.backend.utils.utils_edit_model import (
+    feature_item,
+    new_feature,
+    new_output,
+    normalize_date,
+    output_item,
+    package_row,
+)
+from model_registry.backend.utils.utils_model_upload import (
+    get_path_config_folder,
+    get_path_models_folder,
+)
+
 logger = logging.getLogger(__name__)
 
 allowed_extensions = ["pkl", "yaml", "rds", "h5", "joblib", "r", "keras"]
@@ -402,7 +413,7 @@ def register_model_upload_callbacks(app):
         with open(yaml_path, "w", encoding="utf-8") as f:
             yaml.dump(payload, f, sort_keys=False)
 
-        return f"/home", html.Div([
+        return "/home", html.Div([
             html.P("Configuration saved successfully."),
             html.P(f"YAML file path: {yaml_path}")
         ])

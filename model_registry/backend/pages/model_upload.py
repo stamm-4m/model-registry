@@ -1,7 +1,7 @@
-from dash import dcc, html
 import dash_bootstrap_components as dbc
+from dash import dcc, html
 
-   
+
 def model_upload_layout(project_id):
         """Property that generates the layout for the upload component and additional form."""
         return html.Div([

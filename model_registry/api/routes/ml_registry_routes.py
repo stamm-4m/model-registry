@@ -1,22 +1,24 @@
 
-from fastapi import HTTPException,APIRouter
+from fastapi import APIRouter, HTTPException
+
 from model_registry.api.models.prediction_request import PredictionRequest
 
 router = APIRouter(prefix="", tags=["ML"])
 
-from model_registry.api.models.predictor import ModelPredictor
+import logging
 
+from model_registry.api.models.predictor import ModelPredictor
 from model_registry.api.utils.project_loader import (
     deep_update,
-    load_model,
-    load_project,
-    list_projects_by_id,
-    load_project_info,
     list_models_by_id,
+    list_projects_by_id,
+    load_model,
     load_model_and_scalers,
+    load_project,
+    load_project_info,
     save_model,
 )
-import logging
+
 logger = logging.getLogger(__name__)
 # ---------------- Project Metadata ----------------
 

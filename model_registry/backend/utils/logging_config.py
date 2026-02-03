@@ -1,6 +1,7 @@
 import logging
 import sys
 
+
 def setup_logging():
     root_logger = logging.getLogger()
     for handler in root_logger.handlers[:]:

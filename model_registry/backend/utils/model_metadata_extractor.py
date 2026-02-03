@@ -1,7 +1,6 @@
 import os
 import re
 from datetime import datetime
-from typing import Optional
 
 
 class ModelMetadataExtractor:
@@ -43,7 +42,7 @@ class ModelMetadataExtractor:
 
         return metadata
 
-    def _extract_language(self) -> Optional[str]:
+    def _extract_language(self) -> str | None:
         """
         Extract programming language from filename.
 

@@ -1,17 +1,17 @@
 import pandas as pd
-from model_registry.api.models.prediction_request import PredictionRequest
+import requests
 import tensorflow as tf
 from fastapi import HTTPException
-from sklearn.svm import SVR
-from sklearn.tree import DecisionTreeRegressor
-
 from sklearn.ensemble import (
     GradientBoostingRegressor,
     HistGradientBoostingRegressor,
     RandomForestRegressor,
 )
-import requests
+from sklearn.svm import SVR
+from sklearn.tree import DecisionTreeRegressor
+
 from model_registry.api.config.settings import R_API_URL
+from model_registry.api.models.prediction_request import PredictionRequest
 
 
 class ModelPredictor:

@@ -1,7 +1,9 @@
-from dash import html,dcc,dash_table
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
+from dash import dcc, html
+
 from model_registry.backend.utils.utils_home import get_option_projects_dropdown
+
 
 def home_layout():
     models_grid = dag.AgGrid(

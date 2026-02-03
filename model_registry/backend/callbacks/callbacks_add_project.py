@@ -1,13 +1,13 @@
-import sqlite3
-import re
-from dash import html, dcc, Input, Output, State
-import dash
-import dash_bootstrap_components as dbc
-from dash.exceptions import PreventUpdate
 import logging
+import re
+
+from dash import Input, Output, State
+from dash.exceptions import PreventUpdate
+
 from model_registry.backend.models.project_model import insert_project
 from model_registry.backend.models.user_model import list_users
 from model_registry.backend.models.user_project_model import assign_user_to_project
+
 logger = logging.getLogger(__name__)
 def register_add_project_callbacks(app):
    

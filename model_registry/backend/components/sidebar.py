@@ -1,5 +1,6 @@
-from dash import html, dcc
 import dash_bootstrap_components as dbc
+from dash import dcc, html
+
 
 def sidebar(session_data = None):
     is_admin = session_data and session_data.get("role") == "admin"

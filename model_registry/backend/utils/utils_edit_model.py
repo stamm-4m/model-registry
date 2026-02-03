@@ -1,7 +1,9 @@
-import dash_bootstrap_components as dbc
-from datetime import datetime
-import uuid
 import logging
+import uuid
+from datetime import datetime
+
+import dash_bootstrap_components as dbc
+
 logger = logging.getLogger(__name__)
 
 def normalize_date(value):

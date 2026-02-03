@@ -1,11 +1,11 @@
-from dash import Dash
 import dash_bootstrap_components as dbc
 import flask
+from dash import Dash
 
-from model_registry.backend.utils.logging_config import setup_logging
-from model_registry.backend.layouts.main_layout import app_layout
 from model_registry.backend.callbacks import register_callbacks
+from model_registry.backend.layouts.main_layout import app_layout
 from model_registry.backend.models.db_init import init_db
+from model_registry.backend.utils.logging_config import setup_logging
 
 # Logging config
 setup_logging()

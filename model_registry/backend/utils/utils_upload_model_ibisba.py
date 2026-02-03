@@ -1,4 +1,5 @@
-import logging  
+import logging
+
 from model_registry.api.utils.project_loader import list_models_by_id, list_projects
 
 logger = logging.getLogger(__name__)

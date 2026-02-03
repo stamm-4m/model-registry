@@ -1,6 +1,8 @@
-from dash import html, dcc
 import dash_bootstrap_components as dbc
+from dash import dcc, html
+
 from model_registry.backend.components.sidebar import sidebar
+
 
 def layout(session_data=None):
     return dbc.Container([

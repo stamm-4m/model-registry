@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from model_registry.backend.utils.logging_config import setup_logging
 from model_registry.api.routes.ml_registry_routes import router as ml_router
+from model_registry.backend.utils.logging_config import setup_logging
 
 # Logging config
 setup_logging()

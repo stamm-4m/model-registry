@@ -1,6 +1,7 @@
 from model_registry.backend.models.user_model import get_user_by_username
 from model_registry.backend.utils.security import check_password
 
+
 def authenticate(username, password):
     user = get_user_by_username(username)
     if user and check_password(password, user['password']):

@@ -1,5 +1,6 @@
-from dash import html
 import dash_bootstrap_components as dbc
+from dash import html
+
 
 def not_found_layout():
     return dbc.Container(

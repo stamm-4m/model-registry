@@ -1,6 +1,7 @@
 
 from model_registry.api.utils.project_loader import get_project_paths
 
+
 def get_path_models_folder(project_id: str | None = None) -> str:
     """
     Return the path to the models folder.

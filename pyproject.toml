@@ -29,6 +29,7 @@ isort = "^5.12"
 flake8 = "7.3.0"
 pytest = "^8.1"
 pytest-cov = "^4.0"
+ruff = "0.14.14"
 
 [tool.poetry.scripts]
 ml-repository-backend = "model_registry.backend.app_backend:main"
@@ -37,3 +38,27 @@ ml-repository-api = "model_registry.api.app_api:main"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+# checkers configuration
+select = [
+    "E",  # pycodestyle
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # bugbear
+    "UP", # pyupgrade
+]
+
+ignore = [
+    "E501",  # line too long (Black lo maneja)
+]
+
+exclude = [
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
