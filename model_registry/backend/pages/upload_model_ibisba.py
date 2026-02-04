@@ -12,7 +12,20 @@ def add_upload_model_ibisba_layout():
     options_projects_ibisba = get_available_projects_ibisba()
     return dbc.Container(
         [
-            html.H2("Upload model to IBISBA (FAIRDOM-SEEK)"),
+            html.H2(
+                style={"color":"#3f8814"},
+                children=[
+                    html.Img(
+                        src="/assets/icon-ibisba.jpeg",
+                        style={
+                            "height": "56px",
+                            "marginRight": "10px",
+                            "verticalAlign": "middle",
+                        },
+                    ),
+                    "Push models to IBISBA hub" 
+                ]
+            ),
             html.Hr(),
 
             # =========================
