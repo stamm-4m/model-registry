@@ -16,13 +16,13 @@ def sidebar(session_data = None):
             n_clicks=0
         ),
         html.Hr(),
-        html.Img(
-            src="/assets/logo-white.png",
-            className="logo-slider"
-        ),
-        html.P(
-            "Model Registry", className="text-center",style={"color": "white"}
-        ),
+        html.A(
+            html.Img(
+                src="/assets/ml_repo_logo.png",
+                className="logo-slider"
+            ),
+            href="/"
+        ),     
         html.Hr() if is_authenticated else None,
         html.H4(f"Welcome, {session_data.get('user')}",style={"color": "white"}) if is_authenticated else None,
         dbc.Nav(
