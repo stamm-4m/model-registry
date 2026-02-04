@@ -1,3 +1,4 @@
+from pyexpat import model
 import pandas as pd
 import requests
 import tensorflow as tf
@@ -25,34 +26,24 @@ class ModelPredictor:
         self.output_scaler = output_scaler
         self.outputs = outputs
 
-    def predict(self, input_data: dict):
-        """
-        Predict output from input data dict.
-        
-        Args:
-            input_data (dict): Mapping of feature names to values.
-
-        Returns:
-            dict: Prediction result in standard format.
-        """
-        features_df = pd.DataFrame([input_data], columns=list(input_data.keys()))
+    def predict(self, request: PredictionRequest):
+        input_data = request.req.get("input_data", {})
+        feature_names = list(input_data.keys())
+        features_df = pd.DataFrame([input_data], columns=feature_names)
+        print("THE MODEL IS ...")
+        print(self.model)
 
         # Preprocessing depending on model type
         if isinstance(self.model, (DecisionTreeRegressor, GradientBoostingRegressor, HistGradientBoostingRegressor, RandomForestRegressor)):
             scaled_features = features_df
         elif isinstance(self.model, SVR):
-            if self.input_scaler is None:
-                raise HTTPException(status_code=400, detail="Input scaler is required for SVR")
             scaled_features = self.input_scaler.transform(features_df)
         elif isinstance(self.model, tf.keras.Model):
-            if self.input_scaler is None:
-                raise HTTPException(status_code=400, detail="Input scaler is required for Keras model")
             scaled_features = self.input_scaler.transform(features_df)
             scaled_features = scaled_features.reshape((scaled_features.shape[0], 1, scaled_features.shape[1]))
         else:
             raise HTTPException(status_code=400, detail="Unsupported model type")
 
-        # Make prediction
         prediction = self.model.predict(scaled_features)
 
         # Rescale if needed
@@ -70,6 +61,7 @@ class ModelPredictor:
                 }
             ]
         }
+
     def _proxy_to_r_api(project_id: str, model_id: str, request: PredictionRequest):
         try:
 

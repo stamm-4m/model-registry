@@ -4,6 +4,7 @@ import shutil
 import tempfile
 
 import joblib
+import tensorflow as tf
 import yaml
 from fastapi import HTTPException
 
@@ -80,7 +81,7 @@ def load_project(project_id: str):
     """Load all models and config for a given project_ID into registry using model_ID as key."""
     #if project_id in soft_sensors:
     #    return soft_sensors[project_id]  # Already loaded
-
+    logger.info(f"Loading project '{project_id}'")
     paths = get_project_paths(project_id)
     models = {}
 
@@ -104,7 +105,7 @@ def load_project(project_id: str):
                 if os.path.exists(model_path):
                     file_ext = os.path.splitext(model_file)[-1].lower()
                 
-                    """ if file_ext in [".keras", ".h5"]:
+                    if file_ext in [".keras", ".h5"]:
                         model = tf.keras.models.load_model(model_path)
                     elif file_ext in [".joblib", ".pkl"]:
                         model = joblib.load(model_path)
@@ -114,8 +115,8 @@ def load_project(project_id: str):
                     else:
                         logger.warning(f"Warning: Unsupported model file format for {model_file}")
                         model = None
-                     """    
-                    model = None
+                       
+                    
                     models[model_id] = {
                         "config": config,
                         "model": model,  # None if R
@@ -133,7 +134,7 @@ def load_project(project_id: str):
 def load_model_and_scalers(project_id: str, model_id: str):
     """Loads the model and its associated scalers for a project_ID using model_ID as key."""
     models = load_project(project_id)
-
+    logger.info(f"Models loaded for project '{project_id}': {list(models.keys())}")
     if model_id not in models:
         raise ValueError(f"Model ID '{model_id}' not found in project_ID '{project_id}'")
 

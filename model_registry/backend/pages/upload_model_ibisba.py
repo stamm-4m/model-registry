@@ -1,13 +1,15 @@
 import dash_bootstrap_components as dbc
-from dash import html
+from dash import html, dcc
 
 from model_registry.backend.utils.utils_upload_model_ibisba import (
-    get_available_projects,
+    get_available_projects,get_available_creators, get_available_projects_ibisba
 )
 
 
 def add_upload_model_ibisba_layout():
     options_projects = get_available_projects()
+    options_creators = get_available_creators()
+    options_projects_ibisba = get_available_projects_ibisba()
     return dbc.Container(
         [
             html.H2("Upload model to IBISBA (FAIRDOM-SEEK)"),
@@ -90,12 +92,12 @@ def add_upload_model_ibisba_layout():
 
                         dbc.FormFloating(
                             [
-                                dbc.Input(
+                                dbc.Select(
                                     id="model-project-id-ibisba",
-                                    type="number",
-                                    placeholder="model.py",
+                                    options=options_projects_ibisba,
+                                    placeholder="Select a project in IBISBA hub",
                                 ),
-                                dbc.Label("Projetc id IBISBA"),
+                                dbc.Label("Project id IBISBA"),
                             ],
                             className="mb-3",
                         ),
@@ -114,13 +116,16 @@ def add_upload_model_ibisba_layout():
 
                         dbc.FormFloating(
                             [
-                                dbc.Input(
+                                 dcc.Dropdown(
                                     id="model-creators",
-                                    type="text",
+                                    options=options_creators,
+                                    placeholder="Model creators in IBISBA hub",
+                                    value=[],
+                                    multi=True,
+                                    className="form-control"
                                 ),
-                                dbc.Label(
-                                    "Creators (FAIRDOM person IDs, comma separated)"
-                                ),
+                                
+                                
                             ],
                             className="mb-3",
                         ),

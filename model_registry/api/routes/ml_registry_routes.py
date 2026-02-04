@@ -131,6 +131,7 @@ def predict(project_id: str, model_id: str, request: PredictionRequest):
     """
     try:
         model, config, input_scaler, output_scaler, outputs = load_model_and_scalers(project_id, model_id)
+        logger.info(f"Model and scalers loaded for project '{project_id}', model '{model}'")
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -149,6 +150,7 @@ def predict(project_id: str, model_id: str, request: PredictionRequest):
         return ModelPredictor._proxy_to_r_api(project_id, model_id, request)
 
     # Otherwise -> run Python prediction
+    logger.info(f"Running prediction for project '{project_id}', model '{model}' using Python model.")
     return ModelPredictor(model, input_scaler, output_scaler, outputs).predict(request)
 
 
