@@ -167,6 +167,9 @@ def register_home_callbacks(app):
         prevent_initial_call=True,
     )
     def update_add_project(n_clicks):
+        if not n_clicks:
+            raise PreventUpdate
+        logger.debug(f"Add project clicked {n_clicks} times")
         return "/add-project"
     
 

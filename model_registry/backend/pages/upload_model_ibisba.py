@@ -144,7 +144,7 @@ def add_upload_model_ibisba_layout():
             # =========================
             dbc.Modal(
             [
-                dbc.ModalHeader(dbc.ModalTitle("Confirm model upload")),
+                dbc.ModalHeader(dbc.ModalTitle("Confirm information for upload to the IBISBA Hub")),
                 dbc.ModalBody(id="confirm-upload-body"),
                 dbc.ModalFooter(
                     [
