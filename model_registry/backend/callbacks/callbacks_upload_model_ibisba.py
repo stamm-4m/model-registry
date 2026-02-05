@@ -11,7 +11,9 @@ from model_registry.backend.utils.utils_model_upload import (
     get_path_models_folder,
 )
 from model_registry.backend.utils.utils_upload_model_ibisba import (
+    get_available_creators,
     get_available_models_options,
+    get_available_projects_ibisba,
 )
 
 logger = logging.getLogger(__name__)
@@ -35,12 +37,14 @@ def register_upload_model_ibisba_callbacks(app):
         Output("model-file-name", "value"),
         Output("model-file-path", "value"),
         Output("model-title", "value"),
+        Output("model-creators", "options"),
+        Output("model-project-id-ibisba", "options"),
         Input("available-models-dropdown", "value"),
         State("projects-dropdown", "value")
     )
     def on_model_selected(model_id, project_id):
         if not model_id:
-            return False, "", "", "", ""
+            return False, "", "", "", "", [], []
         # Here you would typically fetch model details based on model_id
         # For demonstration, we will use placeholder values
         info_model = load_model(project_id, model_id)
@@ -56,7 +60,18 @@ def register_upload_model_ibisba_callbacks(app):
             model_file,
         )
         model_title = f"Model {model_id} Title"
-        return True, metadata_yaml_path, model_file_name, model_file_path, model_title   
+        try:
+            options_creators = get_available_creators()
+        except Exception:
+            logger.exception("Failed to fetch available creators")
+            options_creators = []
+        try:
+            options_projects_ibisba = get_available_projects_ibisba()
+        except Exception:
+            logger.exception("Failed to fetch available projects in IBISBA")
+            options_projects_ibisba = []
+
+        return True, metadata_yaml_path, model_file_name, model_file_path, model_title, options_creators, options_projects_ibisba
     
 
     @app.callback(
@@ -81,7 +96,7 @@ def register_upload_model_ibisba_callbacks(app):
         else:
             return False, "Invalid format for model creators"
 
-        # 🔍 VALIDACIÓN CENTRAL
+        # check model variables
         try:
             (
                 project_info,
@@ -97,7 +112,7 @@ def register_upload_model_ibisba_callbacks(app):
             logger.exception("Model validation failed")
             return False, f"❌ Validation error: {str(e)}"
 
-        # 🪟 Contenido del modal
+        # modal content
         body = html.Div(
             [
                 html.H5("Project"),

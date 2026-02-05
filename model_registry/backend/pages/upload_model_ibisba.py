@@ -8,8 +8,6 @@ from model_registry.backend.utils.utils_upload_model_ibisba import (
 
 def add_upload_model_ibisba_layout():
     options_projects = get_available_projects()
-    options_creators = get_available_creators()
-    options_projects_ibisba = get_available_projects_ibisba()
     return dbc.Container(
         [
             html.H2(
@@ -107,7 +105,7 @@ def add_upload_model_ibisba_layout():
                             [
                                 dbc.Select(
                                     id="model-project-id-ibisba",
-                                    options=options_projects_ibisba,
+                                    options=[],
                                     placeholder="Select a project in IBISBA hub",
                                 ),
                                 dbc.Label("Project id IBISBA"),
@@ -131,7 +129,7 @@ def add_upload_model_ibisba_layout():
                             [
                                  dcc.Dropdown(
                                     id="model-creators",
-                                    options=options_creators,
+                                    options=[],
                                     placeholder="Model creators in IBISBA hub",
                                     value=[],
                                     multi=True,
