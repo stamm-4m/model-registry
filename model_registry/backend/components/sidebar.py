@@ -34,7 +34,7 @@ def sidebar(session_data = None):
                     active="exact",
                 ),
                 dbc.NavLink(
-                    html.Span([html.Span("Model upload IBISBA hub", className="nav-text")], className="nav-item-content"),
+                    html.Span([html.Span("Push models to IBISBA hub", className="nav-text")], className="nav-item-content"),
                     href="/model-upload-ibisba",
                     className="sidebar-link",
                     active="exact",
