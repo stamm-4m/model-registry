@@ -21,6 +21,14 @@ def home_layout():
                 "width": 100
             },
             {
+                "headerName": "Register to",
+                "field": "register_to",
+                "filter": False,
+                "cellRenderer": "RegisterToRenderer",
+                "dangerously_allow_unsafe_html": True,
+                "width": 120
+            },
+            {
                 "headerName": "Edit",
                 "field": "edit",
                 "filter": False,

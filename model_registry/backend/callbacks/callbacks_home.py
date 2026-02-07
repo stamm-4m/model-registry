@@ -91,6 +91,14 @@ def register_home_callbacks(app):
                 False,
                 None
             )
+        
+        # ===== REGISTER TO =====
+        if col_id == "register_to":
+            return (
+                f"/model-upload-ibisba/{row['project_id']}/{row['model_id']}",
+                False,
+                None
+            )
 
         # ===== DELETE =====
         if col_id == "delete":

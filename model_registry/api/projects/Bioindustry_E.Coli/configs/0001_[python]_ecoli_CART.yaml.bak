@@ -56,16 +56,16 @@ ml_model_configuration:
       test_instances: 41
     preprocessing:
       x_features_used:
-      - Temperature
-      - pH
-      - pO2
-      - Pressure
-      - Agitation
-      - Glucose feed setup
-      - O2 Gas out
-      - Base Weight
-      - Substrate Weight
-      - ACIT
+      - temperature
+      - ph
+      - po2
+      - pressure
+      - agitation
+      - glucose_feed_setup
+      - o2_gas_out
+      - base_weight
+      - substrate_weight
+      - acit
       x_scaling: StandardScaler (z-score)
       y_scaling: StandardScaler (z-score), then inverse_transform to original g/L
       negative_values_policy: clip_to_zero (max(0, x)) applied to dataset
@@ -92,7 +92,7 @@ ml_model_configuration:
   inputs:
     scaler: scaler_X_Biomass.joblib
     features:
-    - name: Temperature
+    - name: temperature
       type: sensor
       units: °C
       lag: 0
@@ -101,7 +101,7 @@ ml_model_configuration:
         min: 15
         max: 45
       description: Bioreactor temperature (online).
-    - name: pH
+    - name: ph
       type: sensor
       units: pH
       lag: 0
@@ -110,7 +110,7 @@ ml_model_configuration:
         min: 5
         max: 8.5
       description: Bioreactor pH (online).
-    - name: pO2
+    - name: po2
       type: sensor
       units: '%'
       lag: 0
@@ -119,7 +119,7 @@ ml_model_configuration:
         min: 0
         max: 100
       description: Dissolved oxygen (online).
-    - name: Pressure
+    - name: pressure
       type: sensor
       units: mbar
       lag: 0
@@ -128,7 +128,7 @@ ml_model_configuration:
         min: 0
         max: 2000
       description: Bioreactor pressure (online).
-    - name: Agitation
+    - name: agitation
       type: actuator
       units: rpm
       lag: 0
@@ -137,7 +137,7 @@ ml_model_configuration:
         min: 0
         max: 2500
       description: Agitation speed (online).
-    - name: Glucose feed setup
+    - name: glucose_feed_setup
       type: actuator
       units: g/h
       lag: 0
@@ -146,7 +146,7 @@ ml_model_configuration:
         min: 0
         max: 500
       description: Glucose feed setup/setpoint (online).
-    - name: O2 Gas out
+    - name: o2_gas_out
       type: sensor
       units: '%'
       lag: 0
@@ -155,7 +155,7 @@ ml_model_configuration:
         min: 0
         max: 25
       description: O2 fraction in off-gas (gas analyzer).
-    - name: Base Weight
+    - name: base_weight
       type: computed_variable
       units: g
       lag: 0
@@ -164,7 +164,7 @@ ml_model_configuration:
         min: 0
         max: 10000
       description: Base solution weight.
-    - name: Substrate Weight
+    - name: substrate_weight
       type: computed_variable
       units: g
       lag: 0
@@ -173,24 +173,23 @@ ml_model_configuration:
         min: 0
         max: 10000
       description: Substrate weight.
-    - name: ACIT
+    - name: acit
       type: actuator
       units: mL
       lag: 0
       feature_scaling: z-score (StandardScaler)
       expected_range:
-        min: 0
+        min: 1
         max: 100000
       description: Acid totalizer (ACIT).
   outputs:
-    scaler: scaler_y_Biomass.joblib
     information:
-    - name: Biomass
+    - name: biomass_concentration
       units: g/L
       forecast_horizon: 0
       feature_scaling: z-score (StandardScaler) + inverse_transform
       expected_range:
         min: 0
-        max: 201
+        max: 200
       description: Biomass concentration prediction returned in original scale (g/L)
         after inverse transform.

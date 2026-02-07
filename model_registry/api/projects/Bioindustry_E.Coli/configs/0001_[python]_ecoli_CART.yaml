@@ -183,7 +183,6 @@ ml_model_configuration:
         max: 100000
       description: Acid totalizer (ACIT).
   outputs:
-    #scaler: scaler_y_Biomass.joblib
     information:
     - name: biomass_concentration
       units: g/L

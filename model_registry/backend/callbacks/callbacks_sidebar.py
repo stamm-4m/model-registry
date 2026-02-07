@@ -30,8 +30,12 @@ def register_sidebar_callbacks(app):
             return login_form()
         if pathname == "/" or pathname == "/home":
             return home_layout()
-        if pathname == "/model-upload-ibisba":
-            return add_upload_model_ibisba_layout()
+        if pathname.startswith("/model-upload-ibisba"):
+            parts = pathname.strip("/").split("/")
+            if len(parts) != 3:
+                return not_found_layout()
+            _, project_id, model_id = parts
+            return add_upload_model_ibisba_layout(project_id, model_id)
         elif pathname.startswith("/model-upload"):
             parts = pathname.strip("/").split("/")
             if len(parts) != 2:
