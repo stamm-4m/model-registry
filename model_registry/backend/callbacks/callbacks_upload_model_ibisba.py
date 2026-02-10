@@ -88,9 +88,9 @@ def register_upload_model_ibisba_callbacks(app):
         except Exception:
             logger.exception("Failed to fetch available organisms")
             options_organisms = []
-        options_creators = [{"label": "Creator 1", "value": 226}]
-        options_projects_ibisba = [{"label": "Project 17", "value": 97}]
-        options_organisms = [{"label": "Organism 4", "value": 950658006}]
+        options_creators = [{"label": "Carlos Suarez", "value": 226}]
+        options_projects_ibisba = [{"label": "Project STAMM", "value": 97}]
+        options_organisms = [{"label": "Organism ", "value": 950658006}]
 
         return True, True, model_title, options_creators, options_projects_ibisba, options_organisms
 
