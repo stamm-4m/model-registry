@@ -9,24 +9,24 @@ def home_layout():
     models_grid = dag.AgGrid(
         id="models-grid",
         columnDefs=[
-            {"headerName": "Model", "field": "model_name"},
-            {"headerName": "Author", "field": "authors", "width": 600},
+            {"headerName": "Model", "field": "model_name","width": 120},
+            {"headerName": "Author", "field": "authors", "width": 120},
             {"headerName": "Creation Date", "field": "creation_data", "width": 150},
             {"headerName": "Version", "field": "version", "width": 150},
 
-            {
-                "headerName": "Status",
-                "field": "status",
-                "cellRenderer": "StatusRenderer",
-                "width": 100
-            },
             {
                 "headerName": "Register to",
                 "field": "register_to",
                 "filter": False,
                 "cellRenderer": "RegisterToRenderer",
                 "dangerously_allow_unsafe_html": True,
-                "width": 120
+                "width": 150
+            },
+            {
+                "headerName": "Status",
+                "field": "status",
+                "cellRenderer": "StatusRenderer",
+                "width": 80
             },
             {
                 "headerName": "Edit",
@@ -40,7 +40,7 @@ def home_layout():
                 "field": "delete",
                 "filter": False,
                 "cellRenderer": "DeleteIconRenderer",
-                "width": 100
+                "width": 80
             }
         ],
         rowData=[],
@@ -51,7 +51,8 @@ def home_layout():
         },
         dashGridOptions={
             "rowHeight": 45
-        }
+        },
+        columnSize="sizeToFit",
     )
     projetcs_options = get_option_projects_dropdown()
     return dbc.Container(
