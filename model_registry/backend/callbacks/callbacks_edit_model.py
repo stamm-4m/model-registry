@@ -1,4 +1,6 @@
+import base64
 import logging
+import os
 
 import dash_bootstrap_components as dbc
 import requests
@@ -13,8 +15,10 @@ from model_registry.backend.utils.utils_edit_model import (
     output_item,
     package_row,
 )
+from model_registry.backend.utils.utils_model_upload import get_path_models_folder
 
 logger = logging.getLogger(__name__)
+allowed_extensions = ["pkl", "yaml", "rds", "h5", "joblib", "r", "keras"]
 
 def register_edit_model_callbacks(app):
 
@@ -346,4 +350,65 @@ def register_edit_model_callbacks(app):
                 f"❌ Unexpected error: {str(e)}",
                 color="danger",
                 dismissable=True,
+            )
+
+    @app.callback(
+        Output("edit_config_model_file_status", "children"),
+        Input("edit_config_model_file_upload", "filename"),
+        Input("edit_config_model_file_upload", "contents"),
+        State("edit_config_model_file", "value"),
+        State("edit-model-info", "data"),
+        prevent_initial_call=True
+    )
+    def update_model_file(filename, contents, current_value, model_info):
+
+        if not filename:
+            raise PreventUpdate
+        
+        if contents is None or filename is None:
+            return dbc.Alert("No file has been uploaded.", color="danger", dismissable=True)
+
+        # Validate allowed extensions
+        extension = filename.split('.')[-1].lower()
+        if extension not in allowed_extensions:
+            return dbc.Alert(
+                f"File type not allowed. Only allowed types are: {', '.join(allowed_extensions)}",
+                color="danger",
+                dismissable=True
+            )
+        
+        original_extension = current_value.split('.')[-1].lower()
+
+        if extension != original_extension:
+            return dbc.Alert(
+                f"File must be a .{original_extension} file",
+                color="danger",
+                dismissable=True
+            )
+
+
+        # Decode the uploaded file
+        content_type, content_string = contents.split(',')
+        decoded = base64.b64decode(content_string)
+        try:
+            # Create the storage folder if it does not exist
+            upload_folder = get_path_models_folder(model_info["project_id"])
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
+            # Save the file in the "Models" folder
+            filepath = os.path.join(upload_folder, current_value)
+            with open(filepath, "wb") as f:
+                f.write(decoded)     
+
+            return  dbc.Alert(
+                f"File updated successfully",
+                color="success",
+                dismissable=True
+            )
+        except Exception as e:
+            logger.exception("Error updating model file")
+            return dbc.Alert(
+                f"Error updating model file: {str(e)}",
+                color="danger",
+                dismissable=True
             )

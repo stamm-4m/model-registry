@@ -225,15 +225,39 @@ def edit_model_layout(project_id, model_id):
                             ],md=6,),
 
                             dbc.Col([
-                                dbc.FormFloating([
-                                    dbc.Input(
-                                        id="edit_config_model_file",
-                                        type="text",
-                                        placeholder="Configuration Model File",
-                                        value=model["model_description"]["config_files"].get("model_file", ""),
-                                    ),
-                                    dbc.Label("Model File"),
-                                ], className="mb-3"),
+                                html.Div(
+                                    [
+
+                                        # Campo flotante (solo lectura)
+                                        dbc.FormFloating(
+                                            [
+                                                dbc.Input(
+                                                    id="edit_config_model_file",
+                                                    type="text",
+                                                    placeholder="Model File",
+                                                    value=model["model_description"]["config_files"].get("model_file", ""),
+                                                    disabled=True,  # importante
+                                                ),
+                                                dbc.Label("Model File"),
+                                            ],
+                                            className="mb-3",
+                                        ),
+
+                                        # Botón para reemplazar archivo
+                                        dcc.Upload(
+                                            id="edit_config_model_file_upload",
+                                            children=dbc.Button(
+                                                "Replace file",
+                                                color="outline-primary",
+                                                className="w-100"
+                                            ),
+                                            multiple=False,
+                                        ),
+
+                                        html.Div(id="edit_config_model_file_status", className="mt-2"),
+                                    ]
+                                ),
+
                                 dbc.FormFloating([
                                     dbc.Input(
                                         id="edit_config_server",
