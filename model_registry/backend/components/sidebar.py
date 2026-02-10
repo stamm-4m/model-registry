@@ -28,14 +28,14 @@ def sidebar(session_data = None):
         dbc.Nav(
             [   
                 dbc.NavLink(
-                    html.Span([html.Span("Model Explainability", className="nav-text")], className="nav-item-content"),
-                    href="/model-explainability",
+                    html.Span([html.Span("Models", className="nav-text")], className="nav-item-content"),
+                    href="/",
                     className="sidebar-link",
                     active="exact",
                 ),
                 dbc.NavLink(
-                    html.Span([html.Span("Push models to IBISBA hub", className="nav-text")], className="nav-item-content"),
-                    href="/model-upload-ibisba",
+                    html.Span([html.Span("Model Explainability", className="nav-text")], className="nav-item-content"),
+                    href="/model-explainability",
                     className="sidebar-link",
                     active="exact",
                 ),
