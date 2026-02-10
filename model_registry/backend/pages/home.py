@@ -9,10 +9,10 @@ def home_layout():
     models_grid = dag.AgGrid(
         id="models-grid",
         columnDefs=[
-            {"headerName": "Model", "field": "model_name","width": 120},
-            {"headerName": "Author", "field": "authors", "width": 120},
-            {"headerName": "Creation Date", "field": "creation_data", "width": 150},
-            {"headerName": "Version", "field": "version", "width": 150},
+            {"headerName": "Model", "field": "model_name","width": 100},
+            {"headerName": "Author", "field": "authors", "width": 100},
+            {"headerName": "Creation Date", "field": "creation_data", "width": 100},
+            {"headerName": "Version", "field": "version", "width": 60},
 
             {
                 "headerName": "Register to",
@@ -20,27 +20,27 @@ def home_layout():
                 "filter": False,
                 "cellRenderer": "RegisterToRenderer",
                 "dangerously_allow_unsafe_html": True,
-                "width": 150
+                "width": 100
             },
             {
                 "headerName": "Status",
                 "field": "status",
                 "cellRenderer": "StatusRenderer",
-                "width": 80
+                "width": 40
             },
             {
                 "headerName": "Edit",
                 "field": "edit",
                 "filter": False,
                 "cellRenderer": "EditIconRenderer",
-                "width": 80
+                "width": 40
             },
             {
                 "headerName": "Delete",
                 "field": "delete",
                 "filter": False,
                 "cellRenderer": "DeleteIconRenderer",
-                "width": 80
+                "width": 40
             }
         ],
         rowData=[],
@@ -52,7 +52,7 @@ def home_layout():
         dashGridOptions={
             "rowHeight": 45
         },
-        columnSize="sizeToFit",
+        columnSize="responsiveSizeToFit",
     )
     projetcs_options = get_option_projects_dropdown()
     return dbc.Container(
