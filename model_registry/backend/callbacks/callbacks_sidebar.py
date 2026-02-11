@@ -5,6 +5,7 @@ from dash import Input, Output, State
 from model_registry.backend.layouts.auth_layout import login_form
 from model_registry.backend.pages.add_project import add_project_layout
 from model_registry.backend.pages.edit_model import edit_model_layout
+from model_registry.backend.pages.help import help_layout
 from model_registry.backend.pages.home import home_layout
 from model_registry.backend.pages.model_explainability import (
     model_explainability_layout,
@@ -53,6 +54,8 @@ def register_sidebar_callbacks(app):
             return edit_model_layout(project_id, model_id)
         elif pathname == "/add-project":
             return add_project_layout()
+        elif pathname == "/help":
+            return help_layout()
         else:
             return not_found_layout()
         

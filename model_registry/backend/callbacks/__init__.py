@@ -5,6 +5,7 @@ from model_registry.backend.callbacks.callbacks_add_project import (
 from model_registry.backend.callbacks.callbacks_edit_model import (
     register_edit_model_callbacks,
 )
+from model_registry.backend.callbacks.callbacks_help import register_help_callbacks
 from model_registry.backend.callbacks.callbacks_home import register_home_callbacks
 from model_registry.backend.callbacks.callbacks_model_upload import (
     register_model_upload_callbacks,
@@ -29,3 +30,4 @@ def register_callbacks(app):
     register_edit_model_callbacks(app)
     register_add_project_callbacks(app)
     register_upload_model_ibisba_callbacks(app)
+    register_help_callbacks(app)
