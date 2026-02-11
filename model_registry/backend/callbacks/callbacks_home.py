@@ -77,13 +77,20 @@ def register_home_callbacks(app):
             raise PreventUpdate
 
         col_id = event.get("colId")
-        row_index = event.get("rowIndex")
-
-        if row_index is None:
+        row_id = event.get("rowId")  # 👈 USAR ESTO
+        logger.debug(f"Grid click event: {event}")
+        if not row_id:
             raise PreventUpdate
 
-        row = rows_data[row_index]
+        # Buscar por model_id real
+        row = next(
+            (r for r in rows_data if str(r["model_id"]) == str(row_id)),
+            None
+        )
 
+        if not row:
+            raise PreventUpdate
+        logger.debug(f"Grid clicked: row_index={row_id} col={col_id}, row={row}")
         # ===== EDIT =====
         if col_id == "edit":
             return (

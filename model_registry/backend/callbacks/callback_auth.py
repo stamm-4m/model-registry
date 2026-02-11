@@ -20,7 +20,7 @@ def register_auth_callbacks(app):
         prevent_initial_call="initial_duplicate"
     )
     def display_main_page(pathname, logout_clicks, session_data):
-        logger.debug(f"URL changed to {pathname} with session {session_data} and logout clicks {logout_clicks}")
+        #logger.debug(f"URL changed to {pathname} with session {session_data} and logout clicks {logout_clicks}")
         ctx = dash.callback_context
 
         if not ctx.triggered:

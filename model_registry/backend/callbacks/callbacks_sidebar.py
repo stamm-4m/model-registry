@@ -26,7 +26,7 @@ def register_sidebar_callbacks(app):
         State("user-session", "data")
     )
     def display_page(pathname, session_data):
-        logger.debug(f"Navigating to {pathname} with session {session_data}")
+        #logger.debug(f"Navigating to {pathname} with session {session_data}")
         if not session_data or not session_data.get("authenticated"):
             return login_form()
         if pathname == "/" or pathname == "/home":

@@ -50,7 +50,9 @@ def home_layout():
             "resizable": True
         },
         dashGridOptions={
-            "rowHeight": 45
+            "rowHeight": 45,
+            "getRowId": "params.data.model_id"
+
         },
         columnSize="responsiveSizeToFit",
     )
@@ -78,7 +80,8 @@ def home_layout():
                                 id="filter-project",
                                 options=projetcs_options,
                                 placeholder="Project name",
-                                clearable=True
+                                clearable=True,
+                                value=projetcs_options[0]["value"] if projetcs_options else None,
                                 ),
                                 
                             ],className="mb-3"),
