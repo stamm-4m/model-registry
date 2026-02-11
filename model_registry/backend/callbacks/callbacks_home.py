@@ -77,7 +77,7 @@ def register_home_callbacks(app):
             raise PreventUpdate
 
         col_id = event.get("colId")
-        row_id = event.get("rowId")  # 👈 USAR ESTO
+        row_id = event.get("rowId") 
         logger.debug(f"Grid click event: {event}")
         if not row_id:
             raise PreventUpdate
