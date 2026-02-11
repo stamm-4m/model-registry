@@ -40,7 +40,6 @@ def sidebar(session_data = None):
                     active="exact",
                 ),
                 html.Hr(),
-                dbc.NavLink("About us", href="/about-us", className="sidebar-link", active="exact"),
                 dbc.NavLink("Help", href="/help", className="sidebar-link", active="exact"),
         
             ],
