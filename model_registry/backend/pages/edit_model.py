@@ -129,11 +129,11 @@ def edit_model_layout(project_id, model_id):
                                     ],className="mb-3"),
 
                                     dbc.FormFloating([
-                                        dbc.Input(
+                                        dbc.Textarea(
                                             id="edit_status_description",
-                                            type="text",
                                             placeholder="Status Description",
                                             value=model["model_identification"].get("status_description", ""),
+                                            style={"height": "100px"},
                                         ),
                                         dbc.Label("Status Description"),
                                     ],className="mb-3"), 

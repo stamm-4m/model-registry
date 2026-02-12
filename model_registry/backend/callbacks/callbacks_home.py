@@ -82,7 +82,7 @@ def register_home_callbacks(app):
         if not row_id:
             raise PreventUpdate
 
-        # Buscar por model_id real
+        # Find model_id real
         row = next(
             (r for r in rows_data if str(r["model_id"]) == str(row_id)),
             None
@@ -95,6 +95,12 @@ def register_home_callbacks(app):
         if col_id == "edit":
             return (
                 f"/edit-model/{row['project_id']}/{row['model_id']}",
+                False,
+                None
+            )
+        if col_id == "details":
+            return (
+                f"/details-model/{row['project_id']}/{row['model_id']}",
                 False,
                 None
             )

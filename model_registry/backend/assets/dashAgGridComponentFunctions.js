@@ -28,3 +28,7 @@ window.dashAgGridComponentFunctions.RegisterToRenderer = function () {
 window.dashAgGridComponentFunctions.DeleteIconRenderer = function () {
     return "🗑️";
 }
+
+window.dashAgGridComponentFunctions.DetailsIconRenderer = function () {
+    return "👁️";
+}

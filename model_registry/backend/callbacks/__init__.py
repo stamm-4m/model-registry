@@ -2,6 +2,7 @@ from model_registry.backend.callbacks.callback_auth import register_auth_callbac
 from model_registry.backend.callbacks.callbacks_add_project import (
     register_add_project_callbacks,
 )
+from model_registry.backend.callbacks.callbacks_details_model import register_details_model_callbacks
 from model_registry.backend.callbacks.callbacks_edit_model import (
     register_edit_model_callbacks,
 )
@@ -31,3 +32,4 @@ def register_callbacks(app):
     register_add_project_callbacks(app)
     register_upload_model_ibisba_callbacks(app)
     register_help_callbacks(app)
+    register_details_model_callbacks(app)

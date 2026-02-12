@@ -33,7 +33,7 @@ ml_model_configuration:
       rest_api: ''
     packages:
     - package: sklearn.tree
-      version: unknown
+      version: 1.5.2
     - package: sklearn.preprocessing
       version: unknown
     - package: joblib

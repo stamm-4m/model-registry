@@ -29,6 +29,13 @@ def home_layout():
                 "width": 40
             },
             {
+                "headerName": "Details",
+                "field": "details",
+                "filter": False,
+                "cellRenderer": "DetailsIconRenderer",
+                "width": 40
+            },
+            {
                 "headerName": "Edit",
                 "field": "edit",
                 "filter": False,
