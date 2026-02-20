@@ -17,8 +17,14 @@ library(jsonlite)
 # -----------------------------------------------------------------------------
 # BASE_DIR: root of repository (two levels up when running from core/services/r)
 # -----------------------------------------------------------------------------
-# BASE_DIR <- normalizePath(file.path(dirname(getwd()), "..", ".."))
-BASE_DIR <- "/app"
+BASE_DIR <- Sys.getenv("BASE_DIR")
+
+if (BASE_DIR == "") {
+  # Running locally
+  BASE_DIR <- normalizePath(file.path(getwd(), "..", ".."))
+}
+
+cat("Using BASE_DIR:", BASE_DIR, "\n")
 
 # -----------------------------------------------------------------------------
 # Find metadata: try project-specific, then BASE_DIR/configs, then scan all projects

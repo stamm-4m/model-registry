@@ -7,6 +7,8 @@ services:
       - "8050:8050"
     volumes:
       - ./model_registry:/app/model_registry
+    networks:
+      - ml_net
     restart: unless-stopped
 
   api:
@@ -21,10 +23,26 @@ services:
     depends_on:
       - backend
     environment:
-      R_API_URL: http://backend:8050
+      - R_API_URL=http://r-api:8501/predict
     volumes:
       - ./model_registry:/app/model_registry
+    networks:
+      - ml_net
     restart: unless-stopped
 
+  r-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.r
+    container_name: ml_r_api
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./model_registry:/app/model_registry
+    networks:
+      - ml_net
+    restart: unless-stopped
 
-    
+networks:
+  ml_net:
+    driver: bridge

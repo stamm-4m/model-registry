@@ -46,6 +46,10 @@ desktop.ini
 *.tmp
 *.swp
 
+# R
+.Rhistory
+.RData
+.Rproj.user/
 
 # Project-specific local folders
 # Ignorar carpetas de datos o modelos locales si no las quiere versionar

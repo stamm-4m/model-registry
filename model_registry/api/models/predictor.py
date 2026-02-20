@@ -1,3 +1,4 @@
+import logging
 from pyexpat import model
 import pandas as pd
 import requests
@@ -13,6 +14,10 @@ from sklearn.tree import DecisionTreeRegressor
 
 from model_registry.api.config.settings import R_API_URL
 from model_registry.api.models.prediction_request import PredictionRequest
+import logging
+
+from model_registry.api.utils.project_loader import get_project_folder_from_id
+logger = logging.getLogger(__name__)
 
 
 class ModelPredictor:
@@ -66,13 +71,15 @@ class ModelPredictor:
         try:
 
             payload = request.dict()
-            payload["project_id"] = project_id
+            folder_project_id = get_project_folder_from_id(project_id)
+            logger.debug("PATH_PROJECT_ID: " + folder_project_id)
+            payload["project_id"] = folder_project_id
             payload["model_id"] = model_id
 
             response = requests.post(R_API_URL, json=payload, timeout=30)
             response.raise_for_status()
             r_data = response.json()
-
+            #logger.info(f"Received response from R API for project '{project_id}', model '{model_id}': {r_data}")
             # Ensure schema matches Python _predict_logic
             if "output_model" in r_data and len(r_data["output_model"]) > 0:
                 r_output = r_data["output_model"][0]
