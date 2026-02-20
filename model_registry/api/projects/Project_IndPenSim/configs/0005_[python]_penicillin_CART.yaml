@@ -22,10 +22,9 @@ ml_model_configuration:
     config_files: 
         model_file: "0005_[python]_penicillin_CART.pkl"
     packages:
-        package: 
-            - name: "sklearn.tree"
-            - class: "DecisionTreeRegressor"
-            - version: "1.5.2"            
+        - package: "sklearn.tree"
+          class: "DecisionTreeRegressor"
+          version: "1.5.2"            
     input_time_interval: 
         time_interval:
             value: 12
