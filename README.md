@@ -2,6 +2,7 @@
 
 A centralized registry for managing, browsing, and serving machine learning models (Python and R).
 This project provides:
+
 - A Backend service for model and project management
 - A REST API to interact with models and metadata
 - A Web/Dashboard layer
@@ -97,6 +98,7 @@ Starts the REST API layer
 ```bash
 poetry run ml-repository-api
 ```
+
 💡 Run each service in a separate terminal during development.
 
 ## Configure .env
@@ -108,6 +110,7 @@ To configure the project environment variables, rename the .env.example file to 
 The easiest way to run the Model Registry locally is using Docker Compose.
 
 ### Requirements
+
 - Docker
 - Docker Compose v2+
 
@@ -128,15 +131,15 @@ docker compose up --build
 Open the following URLs in your browser:
 
 Service  -	URL
-- Backend (Dashboard)	http://localhost:8050
+
+- Backend (Dashboard)	http://localhost:8051
 - API (REST)	http://localhost:8081
 
 Health check
 
 If the containers are running, you should see logs similar to:
 
-- Backend running on port 8050
-
+- Backend running on port 8051
 - API running on port 8081
 
 ## Contributing
@@ -147,4 +150,3 @@ If the containers are running, you should see logs similar to:
 ## License
 
 See [LICENSE](LICENSE)
-

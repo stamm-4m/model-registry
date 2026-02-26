@@ -79,7 +79,7 @@ class ModelPredictor:
             response = requests.post(R_API_URL, json=payload, timeout=30)
             response.raise_for_status()
             r_data = response.json()
-            logger.info(f"Received response from R API for project '{project_id}', model '{model_id}': {r_data}")
+            #logger.info(f"Received response from R API for project '{project_id}', model '{model_id}': {r_data}")
             # Ensure schema matches Python _predict_logic
             if "output_model" in r_data and len(r_data["output_model"]) > 0:
                 r_output = r_data["output_model"][0]

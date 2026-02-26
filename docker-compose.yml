@@ -4,7 +4,7 @@ services:
     container_name: model-registry-backend
     command: python model_registry/backend/app_backend.py
     ports:
-      - "8050:8050"
+      - "8051:8051"
     volumes:
       - ./model_registry:/app/model_registry
     networks:

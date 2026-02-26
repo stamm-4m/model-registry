@@ -3,7 +3,7 @@ ml_model_configuration:
     name: CART
     version: V.1.0
     ID: 0001_[python]_ecoli_CART
-    UUID: ''
+    UUID: '0000002'
     author: Jairo Alexander Astudillo Lagos
     doi: 10.1021/acsomega.5c11633
     creation_date: '2026-02-02'

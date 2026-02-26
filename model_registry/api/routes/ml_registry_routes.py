@@ -2,6 +2,7 @@
 from fastapi import APIRouter, HTTPException
 
 from model_registry.api.models.prediction_request import PredictionRequest
+from fastapi import Request
 
 router = APIRouter(prefix="", tags=["ML"])
 
@@ -10,11 +11,8 @@ import logging
 from model_registry.api.models.predictor import ModelPredictor
 from model_registry.api.utils.project_loader import (
     deep_update,
-    list_models_by_id,
     list_projects_by_id,
     load_model,
-    load_model_and_scalers,
-    load_project,
     load_project_info,
     save_model,
 )
@@ -82,55 +80,83 @@ def get_variables(project_id: str):
 # ---------------- Model Endpoints ----------------
 
 @router.get("/{project_id}/list_models/")
-def list_models_endpoint(project_id: str):
+def list_models_endpoint(project_id: str, request: Request):
     """
     List all models in a project with both model_ID and human-readable name.
     """
     try:
-        model_id_map = list_models_by_id(project_id)
-        sensors = load_project(project_id)
+        registry = request.app.state.registry
+
+        models = registry.get_project(project_id)
+
         return [
             {
                 "model_ID": model_id,
-                "model_name": name,
-                "metadata": sensors[model_id]["config"]["ml_model_configuration"]["model_identification"]
+                "model_name": info["name"],
+                "metadata": info["config"]["ml_model_configuration"]["model_identification"]
             }
-            for model_id, name in model_id_map.items()
+            for model_id, info in models.items()
         ]
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.get("/{project_id}/metadata/{model_id}")
-def get_model_metadata(project_id: str, model_id: str):
+def get_model_metadata(project_id: str, model_id: str, request: Request):
     """Return model metadata using model ID."""
     try:
-        models = load_project(project_id)
+        registry = request.app.state.registry
+        models = registry.get_project(project_id)
+
         if model_id not in models:
-            raise ValueError(f"Model ID '{model_id}' not found in project '{project_id}'")
+            raise ValueError(
+                f"Model ID '{model_id}' not found in project '{project_id}'"
+            )
+
         return models[model_id]["config"]["ml_model_configuration"]
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+@router.get("/{project_id}/models_full/")
+def list_models_full(project_id: str, request: Request):
+    try:
+        registry = request.app.state.registry
+        models_full = registry.get_models_full(project_id)
+        return models_full
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ---  ------------- Model update ----------------
 @router.put("/{project_id}/update/{model_id}")
-def update_model(project_id: str, model_id: str, payload: dict):
-    model = load_model(project_id, model_id)
-
-    updated_model = deep_update(model, payload)
-    #backup_model(project_id, model_id, model)
-    save_model(project_id, model_id, updated_model)
-
-    return {"status": "ok"}
+def update_model(project_id: str, model_id: str, payload: dict, request: Request):
+    try:
+        registry = request.app.state.registry
+        registry.update_model(project_id, model_id, payload)
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 # ---------------- Prediction Endpoint ----------------
 
 @router.post("/{project_id}/predict/{model_id}")
-def predict(project_id: str, model_id: str, request: PredictionRequest):
+def predict(project_id: str, model_id: str, request: PredictionRequest, req: Request):
     """
     Predict using a model identified by its ID.
     """
     try:
-        model, config, input_scaler, output_scaler, outputs = load_model_and_scalers(project_id, model_id)
+        registry = req.app.state.registry
+        models = registry.get_project(project_id)
+
+        if model_id not in models:
+            raise HTTPException(status_code=404, detail="Model not found")
+
+        model_info = models[model_id]
+
+        model = model_info["model"]
+        config = model_info["config"]
+        input_scaler = model_info["input_scaler"]
+        output_scaler = model_info["output_scaler"]
+        outputs = config["ml_model_configuration"]["outputs"]
+        
         logger.info(f"Model and scalers loaded for project '{project_id}', model '{model}'")
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

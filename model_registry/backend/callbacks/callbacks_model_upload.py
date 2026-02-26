@@ -6,6 +6,7 @@ import yaml
 from dash import ALL, Input, Output, State, ctx, html
 from dash.exceptions import PreventUpdate
 
+from model_registry.api.utils.project_loader import save_model
 from model_registry.backend.utils.model_metadata_extractor import ModelMetadataExtractor
 from model_registry.backend.utils.utils_edit_model import (
     feature_item,
@@ -405,13 +406,8 @@ def register_model_upload_callbacks(app):
         # SAVE YAML
         # =======================
         logger.info(f"model_info : {model_info}") 
-        yaml_path = os.path.join(
-            get_path_config_folder(model_info["project_id"]),
-            model_id + ".yaml",
-        )
-
-        with open(yaml_path, "w", encoding="utf-8") as f:
-            yaml.dump(payload, f, sort_keys=False)
+        
+        save_model(model_info["project_id"], model_id, payload)
 
         return "/home", html.Div([
             html.P("Configuration saved successfully."),

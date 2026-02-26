@@ -115,12 +115,29 @@ def load_project(project_id: str):
                     else:
                         logger.warning(f"Warning: Unsupported model file format for {model_file}")
                         model = None
-                       
+                    
+                    input_scaler = None
+                    output_scaler = None
+                    # ---- Load input scaler ----
+                    if "scaler" in config["ml_model_configuration"]["inputs"]:
+                        scaler_file = config["ml_model_configuration"]["inputs"]["scaler"]
+                        scaler_path = os.path.join(paths["MODEL_DIR"], scaler_file)
+                        if os.path.exists(scaler_path):
+                            input_scaler = joblib.load(scaler_path)
+
+                    # ---- Load output scaler ----
+                    if "scaler" in config["ml_model_configuration"]["outputs"]:
+                        scaler_file = config["ml_model_configuration"]["outputs"]["scaler"]
+                        scaler_path = os.path.join(paths["MODEL_DIR"], scaler_file)
+                        if os.path.exists(scaler_path):
+                            output_scaler = joblib.load(scaler_path)
                     
                     models[model_id] = {
                         "config": config,
                         "model": model,  # None if R
-                        "name": model_name
+                        "name": model_name,
+                        "input_scaler": input_scaler,
+                        "output_scaler": output_scaler,
                     }
                 else:
                     logger.warning(f"Warning: Model file {model_file} not found!")
@@ -128,39 +145,6 @@ def load_project(project_id: str):
 
     soft_sensors[project_id] = models
     return models
-
-# ---------------- Model and Scaler Loading ----------------
-
-def load_model_and_scalers(project_id: str, model_id: str):
-    """Loads the model and its associated scalers for a project_ID using model_ID as key."""
-    models = load_project(project_id)
-    logger.info(f"Models loaded for project '{project_id}': {list(models.keys())}")
-    if model_id not in models:
-        raise ValueError(f"Model ID '{model_id}' not found in project_ID '{project_id}'")
-
-    model_info = models[model_id]
-    config = model_info["config"]
-    model = model_info["model"]
-
-    paths = get_project_paths(project_id)
-
-    input_scaler = None
-    output_scaler = None
-
-    if "scaler" in config["ml_model_configuration"]["inputs"]:
-        scaler_file = config["ml_model_configuration"]["inputs"]["scaler"]
-        scaler_path = os.path.join(paths["MODEL_DIR"], scaler_file)
-        if os.path.exists(scaler_path):
-            input_scaler = joblib.load(scaler_path)
-
-    if "scaler" in config["ml_model_configuration"]["outputs"]:
-        scaler_file = config["ml_model_configuration"]["outputs"]["scaler"]
-        scaler_path = os.path.join(paths["MODEL_DIR"], scaler_file)
-        if os.path.exists(scaler_path):
-            output_scaler = joblib.load(scaler_path)
-
-    outputs = config["ml_model_configuration"]["outputs"]
-    return model,config, input_scaler, output_scaler, outputs
 
 # ---------------- Model Utilities ----------------
 
