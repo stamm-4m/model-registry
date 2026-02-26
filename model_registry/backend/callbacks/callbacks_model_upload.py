@@ -2,7 +2,6 @@ import base64
 import logging
 import os
 
-import yaml
 from dash import ALL, Input, Output, State, ctx, html
 from dash.exceptions import PreventUpdate
 
@@ -406,9 +405,12 @@ def register_model_upload_callbacks(app):
         # SAVE YAML
         # =======================
         logger.info(f"model_info : {model_info}") 
-        
+        yaml_path = os.path.join(
+            get_path_config_folder(model_info["project_id"]),
+            model_id + ".yaml",
+        )
         save_model(model_info["project_id"], model_id, payload)
-
+        
         return "/home", html.Div([
             html.P("Configuration saved successfully."),
             html.P(f"YAML file path: {yaml_path}")
