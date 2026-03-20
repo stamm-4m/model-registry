@@ -1,0 +1,50 @@
+ml_model_configuration:
+  model_identification:
+    name: Test Model
+    version: 1.0.0
+    ID: 0001_[python]_penicillin_RF - copia
+    UUID: null
+    doi: null
+    author: Suarez
+    creation_date: '2026-01-19'
+    status: offline
+    status_description: null
+    project: ../project_info.yaml
+  model_description:
+    learner: null
+    model_type: null
+    model_name: 0001_[python]_penicillin_RF - copia
+    description: null
+    language:
+      name: python
+      version: null
+    config_files:
+      model_file: 0001_[python]_penicillin_RF - copia.pkl
+      server: null
+      port: null
+      rest_api: null
+    packages:
+    - package: package 1
+      version: 1.5.2
+    input_time_interval:
+      time_interval:
+        value: null
+        unit: null
+      aggregation:
+        method: null
+        description: null
+      description: null
+  training_information:
+    number_of_instances: null
+    hyperparameters:
+      number_of_trees: null
+      max_tree_depth: null
+      min_number_instances_per_leaf: null
+      committees: null
+      instance_based_correction: null
+    validation: null
+    experiments_ID: null
+  inputs:
+    features: []
+  outputs:
+    information: []

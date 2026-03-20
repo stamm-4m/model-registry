@@ -1,0 +1,60 @@
+
+# Entornos virtuales
+venv/
+.venv/
+ENV/
+env/
+
+# Python
+__pycache__/
+.env
+.DS_Store
+
+.python-version
+
+# Packaging / build
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+poetry.lock
+
+# Caches and test artifacts
+.pytest_cache/
+.mypy_cache/
+.cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+
+
+# Temporary files
+*.tmp
+*.swp
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# Project-specific local folders
+# Ignorar carpetas de datos o modelos locales si no las quiere versionar
+# data/
+# projects/*/models/
+
+# Si necesita excluir otros archivos temporales o artefactos, añádalos abajo
+

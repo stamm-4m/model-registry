@@ -1,0 +1,189 @@
+ml_model_configuration:
+  model_identification:
+    name: RF
+    version: V.1.0
+    ID: 0002_[python]_ecoli_RF
+    UUID: ''
+    author: Juan Camilo Pavas Acosta
+    doi: 10.1021/acsomega.5c11633
+    creation_date: '2026-02-02'
+    project: ../project_info.yaml
+    status: online
+    status_description: RF model for biomass prediction. Trained with standardized X and standardized y.
+  model_description:
+    learner: random_forest
+    model_type: ensemble
+    model_name: RF Biomass [Python/Scikit-learn]
+    description: 'RandomForestRegressor (RF) trained to predict Biomass (g/L) in an E. coli fed-batch use case. Training pipeline: - Feature selection: only the 10 online variables listed in inputs.features - X standardization using StandardScaler (z-score) - y standardization using StandardScaler (z-score) Inference: - Apply scaler_X to input features - Predict y_std - Inverse transform using scaler_y to obtain Biomass in g/L
+
+      '
+    language:
+    - name: python
+    - version: 3.x
+    config_files:
+      model_file: 0002_[python]_ecoli_RF.joblib
+      server: ''
+      port: ''
+      rest_api: ''
+    packages:
+    - package: sklearn.ensemble
+      version: unknown
+    - package: sklearn.preprocessing
+      version: unknown
+    - package: joblib
+      version: unknown
+    input_time_interval:
+      time_interval:
+        value: 1
+        unit: hours
+      aggregation:
+        method: NaN
+        description: NaN
+      description: Sampling interval as provided in SoftSensorsData2 (typically around hourly time steps).
+  training_information:
+    number_of_instances: 202
+    train_test_split:
+      method: train_test_split
+      test_size: 0.2
+      train_instances: 161
+      test_instances: 41
+    preprocessing:
+      x_features_used:
+      - temperature
+      - ph
+      - po2
+      - pressure
+      - agitation
+      - glucose_feed_setup
+      - o2_gas_out
+      - base_weight
+      - substrate_weight
+      - acit
+      x_scaling: StandardScaler (z-score)
+      y_scaling: StandardScaler (z-score), then inverse_transform to original g/L
+      negative_values_policy: clip_to_zero (max(0, x)) applied to dataset
+    hyperparameters:
+      model: RandomForestRegressor
+      max_depth: 5
+      random_state: 1
+      number_of_trees: 5
+      max_tree_depth: ''
+      min_number_instances_per_leaf: ''
+      committees: ''
+      instance_based_correction: ''
+    validation:
+      method: RepeatedKFold
+      n_splits: 5
+      n_repeats: 3
+      random_state: 1
+      metrics_in_cv:
+      - R2
+      - MSE
+      - RMSE
+      - MAE
+    experiments_ID: BR02, BR04, BR05, BR06, BR07, BR08
+  inputs:
+    scaler: 0002_[python]_ecoli_RF.joblib
+    features:
+    - name: temperature
+      type: sensor
+      units: °C
+      lag: 0
+      feature_scaling: z-score (StandardScaler)
+      expected_range:
+        min: 15
+        max: 45
+      description: Bioreactor temperature (online).
+    - name: ph
+      type: sensor
+      units: pH
+      lag: 0
+      feature_scaling: z-score (StandardScaler)
+      expected_range:
+        min: 5
+        max: 8.5
+      description: Bioreactor pH (online).
+    - name: po2
+      type: sensor
+      units: '%'
+      lag: 0
+      feature_scaling: z-score (StandardScaler)
+      expected_range:
+        min: 0
+        max: 100
+      description: Dissolved oxygen (online).
+    - name: pressure
+      type: sensor
+      units: mbar
+      lag: 0
+      feature_scaling: z-score (StandardScaler)
+      expected_range:
+        min: 0
+        max: 2000
+      description: Bioreactor pressure (online).
+    - name: agitation
+      type: actuator
+      units: rpm
+      lag: 0
+      feature_scaling: z-score (StandardScaler)
+      expected_range:
+        min: 0
+        max: 2500
+      description: Agitation speed (online).
+    - name: glucose_feed_setup
+      type: actuator
+      units: g/h
+      lag: 0
+      feature_scaling: z-score (StandardScaler)
+      expected_range:
+        min: 0
+        max: 500
+      description: Glucose feed setup/setpoint (online).
+    - name: o2_gas_out
+      type: sensor
+      units: '%'
+      lag: 0
+      feature_scaling: z-score (StandardScaler)
+      expected_range:
+        min: 0
+        max: 25
+      description: O2 fraction in off-gas (gas analyzer).
+    - name: base_weight
+      type: computed_variable
+      units: g
+      lag: 0
+      feature_scaling: z-score (StandardScaler)
+      expected_range:
+        min: 0
+        max: 10000
+      description: Base solution weight.
+    - name: substrate_weight
+      type: computed_variable
+      units: g
+      lag: 0
+      feature_scaling: z-score (StandardScaler)
+      expected_range:
+        min: 0
+        max: 10000
+      description: Substrate weight.
+    - name: acit
+      type: actuator
+      units: mL
+      lag: 0
+      feature_scaling: z-score (StandardScaler)
+      expected_range:
+        min: 0
+        max: 100000
+      description: Acid totalizer (ACIT).
+  outputs:
+    scaler: scaler_y_Biomass.joblib
+    information:
+    - name: biomass
+      units: g/L
+      forecast_horizon: 0
+      feature_scaling: z-score (StandardScaler) + inverse_transform
+      expected_range:
+        min: 0
+        max: 200
+      description: Biomass concentration prediction returned in original scale (g/L)
+        after inverse transform.

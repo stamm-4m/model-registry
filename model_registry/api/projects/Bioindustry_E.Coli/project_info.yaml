@@ -1,0 +1,114 @@
+project_ID: "P0002"
+project_name: "Bioindustry_E.Coli"
+description: >
+  Soft-sensing project for recombinant nanobody production in Escherichia coli (strains WK6: CH10-12 and NbF12-10),
+  using experimental data from 7 fed-batch runs carried out in 5 L bioreactors (Sartorius) with 2 L working volume.
+  Online variables were monitored with MFCS BioPAT (sampling every 5 s) and off-gas was analyzed with an INNOVA 1313
+  gas analyzer (every 5 min). Offline biomass measurements are used as ground-truth to train/validate soft sensors.
+  For the first stage of this project, we focus only on biomass estimation using 10 online variables
+  (temperature, pH, pO2, pressure, agitation, glucose feed setup, substrate weight, base weight, ACIT, O2 Gas out).
+  Data source: IBISBA Knowledge Hub dataset (see 'data_sources').
+
+coordinator: "Juan Camilo Acosta-Pavas"
+contributors:
+  - "David Camilo Corrales"
+  - "Susana Alonso Villela"
+  - "Georgios Georgakilas"
+  - "Luc Fillaudeau"
+  - "César Arturo Aceves-Lara"
+
+start_date: "01/01/2023"
+end_date: "31/12/2026"
+
+data_sources:
+  - name: "IBISBA Knowledge Hub - Nanobody E. coli dataset"
+    url: "https://hub.ibisba.eu/data_files/145"
+    notes: "Experimental datasets used to train ML soft sensors; online (MFCS/INNOVA) and offline measurements."
+
+db_config:
+  db: "InfluxDB"
+  version: "2.7"
+  port: "8080"
+  bucket: "STAMM Bucket"
+  org_id: "9079c78425d0d055"
+
+references:
+  - id: "AcostaPavas2026"
+    authors: "Acosta-Pavas, J. C.; Corrales, D. C.; Alonso Villela, S. M.; Georgakilas, G.; Fillaudeau, L.; Aceves-Lara, C. A."
+    title: "A Framework for Digital Technologies Application in Soft Sensing Monitoring to Recombinant Nanobody Production in Escherichia coli: From Model Explanation to the Study of Potential Scenario"
+    journal: "ACS Omega"
+    year: 2025
+    doi: "10.1021/acsomega.5c11633"
+    apa: "Acosta-Pavas, J. C., Corrales, D. C., Alonso Villela, S. M., Georgakilas, G., Fillaudeau, L., & Aceves-Lara, C. A. (2025). A Framework for Digital Technologies Application in Soft Sensing Monitoring to Recombinant Nanobody Production in Escherichia coli: From Model Explanation to the Study of Potential Scenario. ACS Omega. https://doi.org/10.1021/acsomega.5c11633"
+
+  - id: "AlonsoVillela2021"
+    authors: "Alonso Villela, S. M.; Ghezal-Kraïem, H.; Bouhaouala-Zahar, B.; Bideaux, C.; Aceves Lara, C. A.; Fillaudeau, L."
+    title: "Effect of Temperature on the Production of a Recombinant Antivenom in Fed-Batch Mode"
+    journal: "Applied Microbiology and Biotechnology"
+    year: 2021
+    doi: "10.1007/s00253-021-11093-5 "
+    apa: "Alonso Villela, S. M., Ghezal-Kraïem, H., Bouhaouala-Zahar, B., Bideaux, C., Aceves Lara, C. A., & Fillaudeau, L. (2021). Effect of Temperature on the Production of a Recombinant Antivenom in Fed-Batch Mode. Applied Microbiology and Biotechnology, 105(3), 1017–1030."
+
+variables:
+  # -------------------------
+  # Inputs (online variables)
+  # -------------------------
+  - name: "temperature"
+    column_type: "Sensor"
+    units: "°C"
+    description: "Bioreactor temperature (online; MFCS BioPAT)."
+
+  - name: "ph"
+    column_type: "Sensor"
+    renamed_variable: "ph"
+    description: "Bioreactor pH (online; MFCS BioPAT)."
+
+  - name: "po2"
+    column_type: "Sensor"
+    units: "%"
+    description: "Dissolved oxygen percentage (online; MFCS BioPAT)."
+
+  - name: "pressure"
+    column_type: "Sensor"
+    units: "mbar"
+    description: "Overhead pressure (online; MFCS BioPAT)."
+
+  - name: "agitation"
+    column_type: "Actuator"
+    units: "rpm"
+    description: "Agitation setpoint/speed (online; MFCS BioPAT)."
+
+  - name: "glucose_feed_setup"
+    column_type: "Actuator"
+    units: "g/h"
+    description: "Glucose feed set point (online; MFCS BioPAT)."
+
+  - name: "substrate_weight"
+    column_type: "Computed_variable"
+    units: "g"
+    description: "Substrate weight (online; MFCS BioPAT)."
+
+  - name: "base_weight"
+    column_type: "Computed_variable"
+    units: "g"
+    description: "Base solution weight (online; MFCS BioPAT)."
+
+  - name: "acit"
+    column_type: "Computed_variable"
+    units: "mL"
+    description: "Acid totalizer (ACIT) (online; MFCS BioPAT)."
+
+  - name: "o2_gas_out"
+    column_type: "Sensor"
+    units: "%"
+    description: "O2 fraction in off-gas (online; INNOVA gas analyzer)."
+
+  # -------------------------
+  # Outputs (soft sensor)
+  # -------------------------
+  - name: "biomass_concentration"
+    column_type: "Soft_sensor"
+    units: "g/L"
+    description: "Biomass concentration estimated by soft sensor (trained using offline biomass measurements)."
+
+
