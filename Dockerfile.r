@@ -44,7 +44,7 @@ RUN R -e "install.packages(c('RWeka','plumber','yaml','jsonlite','ranger','Cubis
 
 # Copy API
 WORKDIR /app
-COPY model_registry/services/r/app.R /app/app.R
+COPY model_registry/api/services/r/app.R /app/app.R
 
 # IMPORTANT: must match docker-compose
 EXPOSE 8501
