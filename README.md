@@ -128,7 +128,7 @@ The easiest way to run the Model Registry locally is using Docker Compose.
 Clone the repository with submodules:
 
 ```bash
-git clone --recurse-submodules https://github.com/your-org/model-registry.git
+git clone --recurse-submodules https://gitlab.com/stamm-4m/model-registry.git
 cd model-registry
 git submodule update --init --recursive
 docker compose up --build
