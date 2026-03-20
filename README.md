@@ -1,4 +1,9 @@
+<img src="assets/ml_repo_logo.png" alt="ML Repository Logo" width="200"/>
+
 # Model Registry
+
+This repository provides a FastAPI-based machine learning service for deploying soft sensors. The service allows users to send input data and receive predictions from different machine learning models.
+
 
 A centralized registry for managing, browsing, and serving machine learning models (Python and R).
 This project provides:
@@ -125,6 +130,7 @@ Clone the repository with submodules:
 ```bash
 git clone --recurse-submodules https://github.com/your-org/model-registry.git
 cd model-registry
+git submodule update --init --recursive
 docker compose up --build
 ```
 
