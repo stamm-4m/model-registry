@@ -1,15 +1,15 @@
 import logging
 
-from model_registry.backend.config.settings import (
-        MODEL2SEEK_API_TOKEN,
-        MODEL2SEEK_BASE_URL,
-)
+from model_registry.backend.config.settings import settings
+from model_registry.backend.services.api_client import authenticated_request
 from model_registry.backend.vendor.metadata_tools.fairdom_seek.model2seek import (
         model2seek,
 )
 
 logger = logging.getLogger(__name__)
 
+
+# Service to handle interactions with Model2Seek API
 def upload_model_to_seek(
     metadata_yaml,
     model_filename,
@@ -20,8 +20,8 @@ def upload_model_to_seek(
 ):
     
         m2s = model2seek(
-            base_url=MODEL2SEEK_BASE_URL,
-            token=MODEL2SEEK_API_TOKEN,
+            base_url=settings.MODEL2SEEK_BASE_URL,
+            token=settings.MODEL2SEEK_API_TOKEN,
         )
 
         m2s.start_session()
@@ -40,8 +40,8 @@ def check_model_vars_service(
     model_organisms: list[int],
 ):
     m2s = model2seek(
-        base_url=MODEL2SEEK_BASE_URL,
-        token=MODEL2SEEK_API_TOKEN,
+        base_url=settings.MODEL2SEEK_BASE_URL,
+        token=settings.MODEL2SEEK_API_TOKEN,
     )
 
     m2s.start_session()
@@ -52,7 +52,9 @@ def check_model_vars_service(
         model_organisms=model_organisms,
     )
 
-    
-    
+
+
+
+
                 
 

@@ -2,68 +2,19 @@ import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 
+from model_registry.backend.components.models_grid import get_models_grid
 from model_registry.backend.utils.utils_home import get_option_projects_dropdown
 
 
-def home_layout():
-    models_grid = dag.AgGrid(
-        id="models-grid",
-        columnDefs=[
-            {"headerName": "Model", "field": "model_name","width": 100},
-            {"headerName": "Author", "field": "authors", "width": 100},
-            {"headerName": "Creation Date", "field": "creation_data", "width": 100},
-            {"headerName": "Version", "field": "version", "width": 60},
+def home_layout(projects_options=None):
+    models_grid = get_models_grid()
+    
+    options_projects_dropdown = [ 
+        {"label": p["name"], "value": p["project_ID"]}
+        for p in (projects_options or [])
+    ]
+    
 
-            {
-                "headerName": "Register to",
-                "field": "register_to",
-                "filter": False,
-                "cellRenderer": "RegisterToRenderer",
-                "dangerously_allow_unsafe_html": True,
-                "width": 100
-            },
-            {
-                "headerName": "Status",
-                "field": "status",
-                "cellRenderer": "StatusRenderer",
-                "width": 40
-            },
-            {
-                "headerName": "Details",
-                "field": "details",
-                "filter": False,
-                "cellRenderer": "DetailsIconRenderer",
-                "width": 40
-            },
-            {
-                "headerName": "Edit",
-                "field": "edit",
-                "filter": False,
-                "cellRenderer": "EditIconRenderer",
-                "width": 40
-            },
-            {
-                "headerName": "Delete",
-                "field": "delete",
-                "filter": False,
-                "cellRenderer": "DeleteIconRenderer",
-                "width": 40
-            }
-        ],
-        rowData=[],
-        defaultColDef={
-            "sortable": True,
-            "filter": True,
-            "resizable": True
-        },
-        dashGridOptions={
-            "rowHeight": 45,
-            "getRowId": "params.data.model_id"
-
-        },
-        columnSize="responsiveSizeToFit",
-    )
-    projetcs_options = get_option_projects_dropdown()
     return dbc.Container(
         fluid=True,
         className="vh-100 p-4",
@@ -71,7 +22,7 @@ def home_layout():
 
             # Title
             html.H2(
-                "Model Registry",
+                "Soft sensors",
                 className="text-primary text-center mb-4"
             ),
 
@@ -85,10 +36,10 @@ def home_layout():
                             dbc.FormFloating([
                                 dcc.Dropdown(
                                 id="filter-project",
-                                options=projetcs_options,
+                                options=options_projects_dropdown,
                                 placeholder="Project name",
                                 clearable=True,
-                                value=projetcs_options[0]["value"] if projetcs_options else None,
+                                value=options_projects_dropdown[0]["value"] if options_projects_dropdown else None,
                                 ),
                                 
                             ],className="mb-3"),
@@ -117,7 +68,6 @@ def home_layout():
             dbc.Card(
                 dbc.CardBody([
                     models_grid,
-
                     dbc.Row(
                         [
                             dbc.Col(

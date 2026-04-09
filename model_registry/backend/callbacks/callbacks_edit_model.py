@@ -7,7 +7,7 @@ import requests
 from dash import ALL, Input, Output, State, ctx
 from dash.exceptions import PreventUpdate
 
-from model_registry.backend.config.settings import API_BASE_URL
+from model_registry.backend.config.settings import settings
 from model_registry.backend.utils.utils_edit_model import (
     feature_item,
     new_feature,
@@ -326,7 +326,7 @@ def register_edit_model_callbacks(app):
             # API CALL
             # =======================
             response = requests.put(
-                f"{API_BASE_URL}{info['project_id']}/update/{info['model_id']}",
+                f"{settings.API_BASE_URL}{info['project_id']}/update/{info['model_id']}",
                 json=payload,
                 timeout=10,
             )

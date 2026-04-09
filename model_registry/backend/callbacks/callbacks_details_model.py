@@ -10,7 +10,6 @@ import os
 from dash import ALL, Input, Output, State, ctx
 from dash.exceptions import PreventUpdate
 
-from model_registry.backend.config.settings import API_BASE_URL
 from model_registry.backend.utils.utils_details_model import (
     feature_item,
     output_item

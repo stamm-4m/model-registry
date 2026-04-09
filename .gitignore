@@ -51,10 +51,8 @@ desktop.ini
 .RData
 .Rproj.user/
 
-# Project-specific local folders
-# Ignorar carpetas de datos o modelos locales si no las quiere versionar
-# data/
-# projects/*/models/
+# Alembic
+alembic/versions/*.pyc
+alembic/versions/__pycache__/
 
-# Si necesita excluir otros archivos temporales o artefactos, añádalos abajo
 

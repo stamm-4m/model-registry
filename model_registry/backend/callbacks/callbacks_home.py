@@ -5,7 +5,9 @@ import requests
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from model_registry.backend.config.settings import API_BASE_URL
+from model_registry.backend.config.settings import settings
+from model_registry.backend.services.model_service import list_models
+from model_registry.backend.services.project_service import list_projects
 from model_registry.backend.utils.utils_home import delete_model_from_registry
 
 logger = logging.getLogger(__name__)
@@ -13,38 +15,38 @@ def register_home_callbacks(app):
     @app.callback(
         Output("models-grid", "rowData"),
         Output("models-grid-data", "data"),
-        Input("filter-project", "value")
+        Input("filter-project", "value"),
+        State("user-session", "data"),
     )
-    def update_models_table(project_id):
+    def update_models_table(project_id, session_data):
         """
         Fetch all models from the API and filter based on dropdowns.
         """
-        # 1. List all projects si no hay filtro
+        logger.debug(f"Updating models table for project_id={project_id} with session {session_data}")
         projects = []
         if project_id:
             projects = [project_id]
+        # List all projects si no hay filtro    
         else:
             try:
-                projects_response = requests.get(f"{API_BASE_URL}/list_projects/")
+                projects_response, session_data = list_projects(session_data)
                 projects_response.raise_for_status()
                 projects = [p["project_ID"] for p in projects_response.json()]
             except Exception as e:
                 print(f"Error fetching projects: {e}")
                 return [],[]
 
-        # 2. Recolectar todos los modelos de los proyectos
+        # Recolectar todos los modelos de los proyectos
         table_data = []
         for pid in projects:
             try:
-                models_response = requests.get(f"{API_BASE_URL}{pid}/list_models/")
-                models_response.raise_for_status()
-                models = models_response.json()
-                #logger.debug(f"count models for project {pid}: {models.__len__()}")
+                models_response, session_data = list_models(pid, session_data)
+                logger.debug(f"count models for project {pid}: {models_response.__len__()}")
             except Exception as e:
                 print(f"Error fetching models for project {pid}: {e}")
                 continue
 
-            for m in models:
+            for m in models_response:
                 row = {
                     "model_name": m.get("model_name"),
                     "authors": m.get("metadata", {}).get("author"),
@@ -72,7 +74,7 @@ def register_home_callbacks(app):
         prevent_initial_call=True
     )
     def on_grid_click(event, rows_data):
-        
+        logger.debug(f"Grid cell clicked: {event}")
         if not event:
             raise PreventUpdate
 
@@ -135,6 +137,7 @@ def register_home_callbacks(app):
         prevent_initial_call=True
     )
     def delete_model(submit, model_info, rows_data):
+        logger.debug(f"Delete model submit clicked {submit} with model_info={model_info} and current rows_data length={len(rows_data) if rows_data else 'None'}")
         if not submit or not model_info:
             raise PreventUpdate
 
@@ -165,6 +168,7 @@ def register_home_callbacks(app):
         prevent_initial_call=True,
     )
     def go_back_to_list(n_clicks, project_id, is_open):
+        logger.debug(f"Add model clicked {n_clicks} times with project_id={project_id} and modal open={is_open}")
         if not n_clicks:
             raise PreventUpdate
 
@@ -180,6 +184,7 @@ def register_home_callbacks(app):
         prevent_initial_call=True,
     )
     def close_modal(n_clicks, is_open):
+        logger.debug(f"Close project modal clicked {n_clicks} times with modal open={is_open}")
         return not is_open
     
     @app.callback(
@@ -188,6 +193,7 @@ def register_home_callbacks(app):
         prevent_initial_call=True,
     )
     def update_add_project(n_clicks):
+        logger.debug(f"Add project clicked {n_clicks} times")
         if not n_clicks:
             raise PreventUpdate
         logger.debug(f"Add project clicked {n_clicks} times")

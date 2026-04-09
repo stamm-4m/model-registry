@@ -4,7 +4,7 @@ from dash import dcc, html
 from model_registry.backend.components.sidebar import sidebar
 
 
-def layout(session_data=None):
+def main_layout(session_data=None):
     return dbc.Container([
         # Location component to monitor the URL
         #dcc.Location(id="url", refresh=False),  # Captures changes in the URL
@@ -19,5 +19,6 @@ def app_layout():
         dcc.Location(id="url", refresh=False),
         dcc.Store(id="models-grid-data"),
         dcc.Store(id="user-session", storage_type="session"),
-        html.Div(id="page-content")
+        # Stores data
+        html.Div(id="app-root")
     ])

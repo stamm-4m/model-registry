@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from model_registry.api.routes.ml_registry_routes import router as ml_router
+import model_registry.api.models
+from model_registry.api.routers.ml_registry_router import router as ml_router
+from model_registry.api.routers.auth_router import router as auth_router
 from model_registry.backend.utils.logging_config import setup_logging
 from model_registry.api.core.registry import ModelRegistry
 
@@ -27,10 +28,11 @@ def startup_event():
     """
     registry = ModelRegistry()
     registry.load_all()
-    api.state.registry = registry  # ✅ attach registry safely
-
+    api.state.registry = registry  
 
 # Include API routers
+api.include_router(auth_router)
+# include ml router 
 api.include_router(ml_router)
 
 
@@ -41,6 +43,6 @@ def main():
         "model_registry.api.app_api:api",
         host="0.0.0.0",
         port=8081,
-        reload=True,
+        #reload=True,
         workers=1
     )

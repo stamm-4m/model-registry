@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 import requests
 from dash import dcc, html
 
-from model_registry.backend.config.settings import API_BASE_URL
+from model_registry.backend.config.settings import settings
 from model_registry.backend.utils.utils_edit_model import (
     get_value_from_list_of_dicts,
     normalize_date,
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def edit_model_layout(project_id, model_id):
     response = requests.get(
-        f"{API_BASE_URL}{project_id}/metadata/{model_id}"
+        f"{settings.API_BASE_URL}{project_id}/metadata/{model_id}"
     )
     model = response.json()
     language_data = model.get("model_description", {}).get("language", [])

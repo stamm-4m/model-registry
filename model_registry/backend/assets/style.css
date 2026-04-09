@@ -94,3 +94,9 @@
 .dash-table-container span {
     cursor: pointer;
 }
+.icon-column {
+    height: 46px;
+    margin-right: 10px;
+    vertical-align: middle;
+    cursor: pointer;
+}

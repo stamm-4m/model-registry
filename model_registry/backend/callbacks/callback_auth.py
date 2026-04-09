@@ -4,27 +4,30 @@ import dash
 from dash import ALL, Input, Output, State, html
 
 from model_registry.backend.layouts.auth_layout import login_form
-from model_registry.backend.layouts.main_layout import layout
-from model_registry.backend.services.auth_service import authenticate
+from model_registry.backend.layouts.main_layout import main_layout
+from model_registry.backend.services.auth_service import login_request
 
 logger = logging.getLogger(__name__)
 
 def register_auth_callbacks(app):
 
     @app.callback(
-        Output("page-content", "children"),
+        Output("app-root", "children"),
         Output("user-session", "data"),
         Input("url", "pathname"),
         Input({"type": "logout-button", "index": ALL}, "n_clicks"),
         State("user-session", "data"),
-        prevent_initial_call="initial_duplicate"
+        prevent_initial_call=True
     )
     def display_main_page(pathname, logout_clicks, session_data):
-        #logger.debug(f"URL changed to {pathname} with session {session_data} and logout clicks {logout_clicks}")
+        logger.debug(f"URL changed to {pathname} with session {session_data} and logout clicks {logout_clicks}")
         ctx = dash.callback_context
 
         if not ctx.triggered:
-            raise dash.exceptions.PreventUpdate
+            #raise dash.exceptions.PreventUpdate
+            if not session_data or not session_data.get("authenticated"):
+                return login_form(), {}
+            return main_layout(session_data), session_data
 
         trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
@@ -43,14 +46,14 @@ def register_auth_callbacks(app):
 
         # Si no está autenticado
         if not session_data or not session_data.get("authenticated"):
-            return login_form(), session_data
+            return login_form(), {}
 
         # Navegación normal, permanece en layout principal
-        return layout(session_data), session_data
+        return main_layout(session_data), session_data
 
     @app.callback(
         Output("user-session", "data",allow_duplicate=True),
-        Output("page-content", "children",allow_duplicate=True),
+        Output("app-root", "children",allow_duplicate=True),
         Output("login-message", "children"),
         Input("login-button", "n_clicks"),
         State("login-username", "value"),
@@ -58,16 +61,24 @@ def register_auth_callbacks(app):
         prevent_initial_call=True
     )
     def handle_login(n_clicks, username, password):
+        logger.debug(f"Login attempt with username={username} and password={'*' * len(password) if password else None}")
         if not username or not password:
             return {}, login_form(), "Username or password none"
 
         username = username.strip()
         password = password.strip()
-        user = authenticate(username, password)
+        auth_response  = login_request(username, password)
 
-        if user:
-            session_data = {"authenticated": True, "user": user["username"], "role": user["role"]}
-            return session_data, layout(session_data), ""
+        if auth_response:
+            #session_data = {
+            #    "authenticated": True, "user": auth_response["username"], "role": auth_response["role"]
+            #}
+            session_data = {
+                "authenticated": True,
+                "access_token": auth_response["access_token"],
+                "refresh_token": auth_response["refresh_token"]
+            }
+            return session_data, main_layout(session_data), ""
         
         return {}, login_form(), "Username o password incorrects"
 

@@ -12,7 +12,7 @@ from sklearn.ensemble import (
 from sklearn.svm import SVR
 from sklearn.tree import DecisionTreeRegressor
 
-from model_registry.api.config.settings import R_API_URL
+from model_registry.api.config.settings import settings
 from model_registry.api.models.prediction_request import PredictionRequest
 import logging
 
@@ -76,7 +76,7 @@ class ModelPredictor:
             payload["project_id"] = folder_project_id
             payload["model_id"] = model_id
 
-            response = requests.post(R_API_URL, json=payload, timeout=30)
+            response = requests.post(settings.R_API_URL, json=payload, timeout=30)
             response.raise_for_status()
             r_data = response.json()
             #logger.info(f"Received response from R API for project '{project_id}', model '{model_id}': {r_data}")
