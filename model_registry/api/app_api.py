@@ -36,7 +36,7 @@ api.include_router(auth_router)
 api.include_router(ml_router)
 
 
-def main():
+if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(
