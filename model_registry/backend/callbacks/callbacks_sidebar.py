@@ -1,5 +1,5 @@
 import logging
-
+import dash
 from dash import Input, Output, State
 
 from model_registry.backend.layouts.auth_layout import login_form
@@ -8,6 +8,10 @@ from model_registry.backend.pages.details_model import details_model_layout
 from model_registry.backend.pages.edit_model import edit_model_layout
 from model_registry.backend.pages.help import help_layout
 from model_registry.backend.pages.home import home_layout
+from model_registry.backend.pages.dynamic_models import dynamic_models_layout
+from model_registry.backend.pages.departments import departments_layout
+from model_registry.backend.pages.organizations import organizations_layout
+from model_registry.backend.pages.users import users_layout
 from model_registry.backend.pages.model_explainability import (
     model_explainability_layout,
 )
@@ -56,6 +60,18 @@ def register_sidebar_callbacks(app):
         elif pathname == "/model-explainability":
             return model_explainability_layout()
         
+        elif pathname == "/dynamic-models":
+            return dynamic_models_layout()
+        
+        elif pathname == "/departments":
+            return departments_layout()
+        
+        elif pathname == "/users":
+            return users_layout()
+        
+        elif pathname == "/organizations":
+            return organizations_layout()
+        
         elif pathname.startswith("/edit-model"):
             parts = pathname.strip("/").split("/")
             if len(parts) != 3:
@@ -91,3 +107,43 @@ def register_sidebar_callbacks(app):
         if n_clicks and n_clicks % 2 == 1:
             return "sidebar hidden", "content expanded", "main-content expanded"
         return "sidebar", "content", "content"
+    
+    @app.callback(
+        Output("admin-collapse", "is_open"),
+        Input("admin-toggle", "n_clicks"),
+        Input("url", "pathname"),
+        State("admin-collapse", "is_open"),
+    )
+    def toggle_admin_menu(n, pathname, is_open):
+        ctx = dash.callback_context
+        trigger = ctx.triggered_id
+
+        admin_routes = ["/organizations", "/departments", "/users"]
+        # Si la ruta es una de las rutas admin, abrir el menú
+        if pathname in admin_routes:
+            return True
+
+        # Si el trigger es el toggle del admin, alternar el estado
+        if trigger == "admin-toggle":
+            if not n:
+                return is_open
+            return not is_open
+
+        return is_open
+
+    @app.callback(
+    [
+        Output("organization-link", "className"), 
+        Output("department-link", "className"),
+        Output("users-link", "className"),
+    ], 
+    Input("url", "pathname"),
+    )
+    def update_admin_links(pathname):
+        base = "sidebar-link ms-4"
+
+        return (
+            f"{base} active" if pathname == "/organizations" else base,
+            f"{base} active" if pathname == "/departments" else base,
+            f"{base} active" if pathname == "/users" else base,
+        )

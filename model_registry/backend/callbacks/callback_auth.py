@@ -16,7 +16,7 @@ def register_auth_callbacks(app):
         Output("user-session", "data"),
         Input("url", "pathname"),
         Input({"type": "logout-button", "index": ALL}, "n_clicks"),
-        State("user-session", "data"),
+        Input("user-session", "data"),
         prevent_initial_call=True
     )
     def display_main_page(pathname, logout_clicks, session_data):
@@ -29,20 +29,11 @@ def register_auth_callbacks(app):
                 return login_form(), {}
             return main_layout(session_data), session_data
 
-        trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+        trigger = ctx.triggered_id
 
-        # Detecta logout por ID dinámico solo si se hizo clic
-        if trigger_id.startswith("{") and logout_clicks:
-            import json
-            trigger_id_dict = json.loads(trigger_id)
-            
-            if trigger_id_dict.get("type") == "logout-button":
-                
-                # Recorremos clicks y ejecutamos logout solo si alguno fue clickeado
-                for clicks in logout_clicks:
-                    if clicks and clicks > 0:
-                        print(">> Logout ejecutado")
-                        return login_form(), {}
+        if isinstance(trigger, dict) and trigger.get("type") == "logout-button":
+            print(">> Logout ejecutado")
+            return login_form(), {}
 
         # Si no está autenticado
         if not session_data or not session_data.get("authenticated"):

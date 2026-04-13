@@ -4,7 +4,7 @@ services:
     container_name: model-registry-backend
     command: python model_registry/backend/app_backend.py
     ports:
-      - "8051:8051"
+      - "80:80"
     volumes:
       - ./model_registry:/app/model_registry
     networks:
@@ -17,9 +17,9 @@ services:
     command: >
       uvicorn model_registry.api.app_api:main
       --host 0.0.0.0
-      --port 8081
+      --port 8080
     ports:
-      - "8081:8081"
+      - "8080:8080"
     depends_on:
       - backend
     environment:

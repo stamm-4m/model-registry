@@ -26,8 +26,8 @@ def sidebar(session_data = None):
                 active="exact",
             ),
             dbc.NavLink(
-                html.Span([html.Span("Model Explainability", className="nav-text")], className="nav-item-content"),
-                href="/model-explainability",
+                html.Span([html.Span("Dynamic Models", className="nav-text")], className="nav-item-content"),
+                href="/dynamic-models",
                 className="sidebar-link",
                 active="exact",
             ),
@@ -37,8 +37,35 @@ def sidebar(session_data = None):
         ]   
     # Admin users get an extra link to the admin page    
     if is_admin:
+        nav_items.extend([
+            dbc.NavLink(
+                html.Span(
+                    html.Span("Admin", className="nav-text"),
+                    className="nav-item-content"
+                ),
+                href="#",
+                className="sidebar-link",
+                id="admin-toggle",
+            ),
+            dbc.Collapse(
+                [
+                    dbc.NavLink("Organizations", href="/organizations", className="sidebar-link ms-4", id="organization-link"),
+                    dbc.NavLink("Departments", href="/departments", className="sidebar-link ms-4", id="department-link"),
+                    dbc.NavLink("Users", href="/users", className="sidebar-link ms-4", id="users-link"),
+                ],
+                id="admin-collapse",
+                is_open=False
+            )
+        ])
+    if is_authenticated:
         nav_items.append(
-            dbc.NavLink("Admin", href="/admin", className="sidebar-link", active="exact") 
+            dbc.NavLink(
+                "Logout",
+                id={"type": "logout-button", "index": 0},
+                className="sidebar-link",
+                href="",
+                n_clicks=0
+            )
         )
 
     return html.Div([
