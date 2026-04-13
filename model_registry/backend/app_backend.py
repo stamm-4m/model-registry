@@ -33,7 +33,7 @@ if not db_initialized:
     db_initialized = True
 
 def main():
-    app.run(debug=True, host="0.0.0.0", port=8051)
+    app.run(debug=True, host="0.0.0.0", port=80)
 
 
 # Run

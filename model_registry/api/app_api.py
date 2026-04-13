@@ -42,7 +42,7 @@ def main():
     uvicorn.run(
         "model_registry.api.app_api:api",
         host="0.0.0.0",
-        port=8081,
+        port=8080,
         #reload=True,
         workers=1
     )
