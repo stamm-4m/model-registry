@@ -36,13 +36,14 @@ api.include_router(auth_router)
 api.include_router(ml_router)
 
 
-if __name__ == "__main__":
+def main():
     import uvicorn
-
     uvicorn.run(
         "model_registry.api.app_api:api",
         host="0.0.0.0",
-        port=8080,
-        #reload=True,
-        workers=1
+        port=8080
     )
+
+
+if __name__ == "__main__":
+    main()
