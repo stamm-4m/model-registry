@@ -1,7 +1,7 @@
 from model_registry.backend.repositories.user_repository import UserRepository
 from model_registry.backend.core.exceptions import UserHasRolesException, UserEmailAlreadyExistsException
 from model_registry.backend.models.users import User
-from model_registry.backend.models.departament_user import DepartmentUser
+from model_registry.backend.models.laboratory_user import LaboratoryUser
 from model_registry.backend.utils.security import hash_password
 from sqlalchemy.exc import IntegrityError
 
@@ -15,7 +15,7 @@ class UserService:
         self.user_repo = UserRepository()
         self.db = self.user_repo.db  
         
-    def create_user(self, name, email, password, dept_id):
+    def create_user(self, name, email, password, lab_id):
 
         try:
             password_hash = hash_password(password) if password else None
@@ -29,9 +29,9 @@ class UserService:
             self.db.add(user)
             self.db.flush()
 
-            rel = DepartmentUser(
+            rel = LaboratoryUser(
                 user_id=user.id,
-                department_id=uuid.UUID(dept_id)
+                laboratory_id=uuid.UUID(lab_id)
             )
 
             self.db.add(rel)
@@ -79,7 +79,7 @@ class UserService:
         finally:
             self.user_repo.close()
 
-    def update_user(self, user_id, name, email, password, dept_id):
+    def update_user(self, user_id, name, email, password, lab_id):
 
         user_id = uuid.UUID(user_id)
 
@@ -94,25 +94,34 @@ class UserService:
 
         if password:
             user.password_hash = hash_password(password)
-
-        self.db.query(DepartmentUser).filter(
-            DepartmentUser.user_id == user_id
+        # if exists, update lab association
+        self.db.query(LaboratoryUser).filter(
+            LaboratoryUser.user_id == user_id
         ).update({
-            "department_id": uuid.UUID(dept_id)
+            "laboratory_id": uuid.UUID(lab_id)
         })
+        #else, create new association
+        if not self.db.query(LaboratoryUser).filter(
+            LaboratoryUser.user_id == user_id
+        ).first():
+            rel = LaboratoryUser(
+                user_id=user_id,
+                laboratory_id=uuid.UUID(lab_id)
+            )
+            self.db.add(rel)
 
         self.db.commit()
         self.user_repo.close()
 
         return user
 
-    def get_user_with_department(self, user_id):
+    def get_user_with_laboratory(self, user_id):
 
         user_id = uuid.UUID(user_id)
 
         result = (
-            self.db.query(User, DepartmentUser.department_id)
-            .join(DepartmentUser, DepartmentUser.user_id == User.id)
+            self.db.query(User, LaboratoryUser.laboratory_id)
+            .join(LaboratoryUser, LaboratoryUser.user_id == User.id)
             .filter(User.id == user_id)
             .first()
         )
@@ -123,18 +132,25 @@ class UserService:
             return result
 
         return None, None
+    
+    def get_lab_id_by_user_id(self, user_id):
+        user_id = uuid.UUID(user_id)
+        lab_id = self.user_repo.get_lab_id_by_user_id(user_id)
+        return lab_id
+    
     def get_dept_id_by_user_id(self, user_id):
         user_id = uuid.UUID(user_id)
+        dept_id = self.user_repo.get_dept_id_by_user_id(user_id)
+        return dept_id
+    
+    def get_all_roles_by_user_id(self, user_id):
+        user_id = uuid.UUID(user_id)
+        roles = self.user_repo.get_all_roles_by_user_id(user_id)
+        return roles
+    
+    def assign_roles_to_user(self, user_id, role_ids, laboratory_id=None):
+        
+        self.user_repo.delete_roles_by_user(user_id)
 
-        result = (
-            self.db.query(DepartmentUser.department_id)
-            .filter(DepartmentUser.user_id == user_id)
-            .first()
-        )
-
-        self.user_repo.close()
-
-        if result:
-            return result.department_id
-
-        return None
+        for role_id in role_ids:
+            self.user_repo.create_add_role_to_user(user_id, role_id, laboratory_id)

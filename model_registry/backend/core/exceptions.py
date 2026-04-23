@@ -39,3 +39,16 @@ class UserEmailAlreadyExistsException(Exception):
     def __init__(self, email):
         super().__init__(f"User with email '{email}' already exists.")
         self.email = email
+
+class LaboratoryInUseException(Exception):
+    def __init__(self, departments=0):
+        self.departments = departments
+
+        message = "Cannot delete laboratory because it has:"
+
+        if departments:
+            message += f"\n• {departments} department(s)"
+
+        message += " associated."
+
+        super().__init__(message)

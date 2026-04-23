@@ -7,7 +7,7 @@ from dash.exceptions import PreventUpdate
 
 from model_registry.backend.config.settings import settings
 from model_registry.backend.services.model_service import list_models
-from model_registry.backend.services.project_service import list_projects
+from model_registry.backend.services.project_api_service import list_projects
 from model_registry.backend.utils.utils_home import delete_model_from_registry
 
 logger = logging.getLogger(__name__)

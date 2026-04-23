@@ -5,9 +5,13 @@ import dash_bootstrap_components as dbc
 from model_registry.backend.services.organization_service import OrganizationService
 from model_registry.backend.services.department_service import DepartmentService
 from model_registry.backend.services.user_service import UserService
+from model_registry.backend.services.laboratory_service import LaboratoryService
+from model_registry.backend.utils.utils_laboratory import build_table_laboratories
 from model_registry.backend.utils.utils_organization import build_table
 from model_registry.backend.utils.utils_department import build_table_departments
 from model_registry.backend.utils.utils_users import build_table_users
+import logging
+logger = logging.getLogger(__name__)
 
 
 def register_organizations_table_callbacks(app):
@@ -40,6 +44,19 @@ def register_organizations_table_callbacks(app):
 
         return build_table_departments(rows)
     
+    @app.callback(
+        Output("laboratories-table", "children"),
+        Input("lab-refresh-trigger", "data")
+    )
+    def load_laboratories(_):
+        service = LaboratoryService()
+        rows = service.get_laboratory_all()
+
+        if not rows:
+            return "No laboratories found."
+
+        return build_table_laboratories(rows)
+    
 
     @app.callback(
         Output("users-table", "children"),
@@ -51,5 +68,5 @@ def register_organizations_table_callbacks(app):
 
         if not rows:
             return "No users found."
-
+        logger.debug(f"Loaded users for table: {rows}")
         return build_table_users(rows)

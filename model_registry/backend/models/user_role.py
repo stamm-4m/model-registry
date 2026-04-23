@@ -16,7 +16,7 @@ class UserRole(Base):
     laboratory_id = Column(UUID(as_uuid=True), ForeignKey("laboratories.id"), nullable=True)
 
     created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, onupdate=func.now())
+    updated_at = Column(DateTime, server_default=func.now())
 
     # relationships
     user = relationship("User", backref="user_roles")

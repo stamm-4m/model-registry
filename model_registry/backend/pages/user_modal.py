@@ -33,6 +33,12 @@ def user_modal():
             dcc.Dropdown(
                 id="user-dept-dropdown",
                 placeholder="Select department"
+            ),
+            dbc.Label("Laboratory", className="mt-3", id="lab-label", style={"display": "none"}),
+            dcc.Dropdown(
+                id="user-lab-dropdown",
+                placeholder="Select laboratory",
+                style={"display": "none"}
             )
 
         ]),

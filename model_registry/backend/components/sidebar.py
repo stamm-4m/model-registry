@@ -49,9 +49,8 @@ def sidebar(session_data = None):
             ),
             dbc.Collapse(
                 [
-                    dbc.NavLink("Organizations", href="/organizations", className="sidebar-link ms-4", id="organization-link"),
-                    dbc.NavLink("Departments", href="/departments", className="sidebar-link ms-4", id="department-link"),
-                    dbc.NavLink("Users", href="/users", className="sidebar-link ms-4", id="users-link"),
+                    dbc.NavLink("Organization & People", href="/organizations", className="sidebar-link ms-4", id="organization-link"),
+                    dbc.NavLink("Projects", href="/projects", className="sidebar-link ms-4", id="project-link")
                 ],
                 id="admin-collapse",
                 is_open=False

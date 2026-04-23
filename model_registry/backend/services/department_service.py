@@ -1,8 +1,9 @@
 from model_registry.backend.repositories.department_repository import DepartmentRepository
 from model_registry.backend.core.exceptions import OrganizationInUseException
 from model_registry.backend.models.organization_departament import OrganizationDepartment
-from model_registry.backend.models.departament import Department
-from model_registry.backend.models.departament_user import DepartmentUser
+from model_registry.backend.models.department import Department
+from model_registry.backend.models.laboratory_user import LaboratoryUser
+from model_registry.backend.models.departament_laboratory import DepartmentLaboratory
 
 
 class DepartmentService:
@@ -49,15 +50,15 @@ class DepartmentService:
     def delete_department(self, department_id):
         repo = DepartmentRepository()
 
-        users_count = (
-            repo.db.query(DepartmentUser)
-            .filter(DepartmentUser.department_id == department_id)
+        lab_count = (
+            repo.db.query(DepartmentLaboratory)
+            .filter(DepartmentLaboratory.department_id == department_id)
             .count()
         )
 
-        if users_count > 0:
+        if lab_count > 0:
             repo.close()
-            raise OrganizationInUseException(users=users_count)
+            raise OrganizationInUseException(laboratories=lab_count)
 
         result = repo.delete(department_id)
         repo.close()

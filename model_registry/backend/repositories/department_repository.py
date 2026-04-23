@@ -1,6 +1,6 @@
 from model_registry.backend.repositories.base_repository import BaseRepository
 from model_registry.backend.models.organization_departament import OrganizationDepartment
-from model_registry.backend.models.departament import Department
+from model_registry.backend.models.department import Department
 from model_registry.backend.models.organization import Organization
 
 class DepartmentRepository(BaseRepository):

@@ -43,7 +43,7 @@ def register_user_modal_callbacks(app):
         Input({"type": "btn-edit-dept", "index": ALL}, "n_clicks"),
         prevent_initial_call=True
     )
-    def load_organizations_dropdown(n, n_list):
+    def load_departments_dropdown(n, n_list):
         service = DepartmentService()
         departments = service.get_department_all()
         logger.debug(f"Loaded departments for dropdown: {departments}")
@@ -57,6 +57,7 @@ def register_user_modal_callbacks(app):
         Output("user-email-input", "value"),
         Output("user-password-input", "value"),
         Output("user-dept-dropdown", "value"),
+        Output("user-lab-dropdown", "value"),
         Output("user-edit-id", "data", allow_duplicate=True),
         Output("user-refresh-trigger", "data", allow_duplicate=True),
         Output("user-toast", "is_open", allow_duplicate=True),
@@ -67,17 +68,18 @@ def register_user_modal_callbacks(app):
         State("user-email-input", "value"),
         State("user-password-input", "value"),
         State("user-dept-dropdown", "value"),
+        State("user-lab-dropdown", "value"),
         State("user-edit-id", "data"),
         prevent_initial_call=True
     )
-    def save_user(n, name, email, password, dept_id, user_id):
+    def save_user(n, name, email, password, dept_id, lab_id, user_id):
 
         if not n:
             raise PreventUpdate
 
-        if not name or not email or not password or not dept_id:
+        if not name or not email or not password or not dept_id or not lab_id:
             return (
-                no_update, no_update, no_update, no_update, no_update, no_update,
+                no_update, no_update, no_update, no_update, no_update, no_update, no_update,
                 True,
                 "All fields are required",
                 "warning"
@@ -87,14 +89,14 @@ def register_user_modal_callbacks(app):
         try:
             if user_id:
                 logger.debug(f"Editing user with ID: {user_id}")
-                service.update_user(user_id, name, email, password, dept_id)
+                service.update_user(user_id, name, email, password, lab_id)
             else:
                 logger.debug("Creating new user")
-                service.create_user(name, email, password, dept_id)
+                service.create_user(name, email, password, lab_id)
 
             logger.debug(f"Saved user: {name}, email: {email}")
 
-            return ("", "", "", None, None, time.time(),
+            return ("", "", "", None, None, None, time.time(),
                     True,
                     "User saved successfully",
                     "success"
@@ -102,7 +104,7 @@ def register_user_modal_callbacks(app):
         except UserEmailAlreadyExistsException as e:
             logger.warning(f"Email already exists: {e}")
             return (
-                no_update, no_update, no_update, no_update, no_update, no_update,
+                no_update, no_update, no_update, no_update, no_update, no_update, no_update,
                 True,
                 str(e),
                 "warning"
@@ -110,7 +112,7 @@ def register_user_modal_callbacks(app):
         except Exception as e:
             logger.error(f"Error saving user: {e}")
             return (
-                no_update, no_update, no_update, no_update, no_update, no_update,
+                no_update, no_update, no_update, no_update, no_update, no_update, no_update,
                 True,
                 "Unexpected error saving user",
                 "danger"
@@ -139,6 +141,7 @@ def register_user_modal_callbacks(app):
         service = UserService()
         user = service.get_user(user_id)
         logger.debug(f"Editing user with ID: {user_id}, name: {user.full_name}, email: {user.email}")
+        lab_id = service.get_lab_id_by_user_id(user_id)
         dept_id = service.get_dept_id_by_user_id(user_id)
 
         return True, user.full_name, user.email, str(dept_id), user_id

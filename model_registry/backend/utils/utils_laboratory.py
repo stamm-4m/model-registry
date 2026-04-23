@@ -1,49 +1,36 @@
 from dash import html
 import dash_bootstrap_components as dbc
 
-def build_table_users(users):
+def build_table_laboratories(laboratories):
     return dbc.Table(
         [
             html.Thead(html.Tr([
                 html.Th("Name"),
                 html.Th("Department"),
-                html.Th("Laboratory"),
-                html.Th("Email"),
-                html.Th("Created At"),
-                html.Th("Active"),
+                html.Th("Location"),
                 html.Th("Actions")
             ])),
             html.Tbody([
                 html.Tr([
-                    html.Td(user.full_name),
-                    html.Td(dept_name),
-                    html.Td(lab_name),
-                    html.Td(user.email),
-                    html.Td(user.created_at),
-                    html.Td("Yes" if user.is_active else "No"),
+                    html.Td(lab.name),
+                    html.Td(dept_name),  #
+                    html.Td(lab.location),
                     html.Td([
                         dbc.Button(
                             "Edit",
-                            id={"type": "btn-edit-user", "index": str(user.id)},
+                            id={"type": "btn-edit-lab", "index": str(lab.id)},
                             size="sm",
                             color="warning",
                             className="me-2"
                         ),
                         dbc.Button(
-                            "Roles",
-                            id={"type": "btn-manage-roles", "index": str(user.id)},
-                            size="sm",
-                            color="info",
-                            className="me-2"
-                        ),
-                        dbc.Button(
                             "Delete",
-                            id={"type": "btn-delete-user", "index": str(user.id)},
+                            id={"type": "btn-delete-lab", "index": str(lab.id)},
                             size="sm",
                             color="danger"
                         )
                     ])
-                ]) for user, lab_name, dept_name in users
+                ]) for lab, dept_name in laboratories
             ])
         ],
         bordered=True,
@@ -52,10 +39,10 @@ def build_table_users(users):
         striped=True
     )
 
-def toast_confirm_delete_user():
+def toast_confirm_delete_lab():
     return html.Div([
         dbc.Toast(
-            id="user-toast",
+            id="lab-toast",
             header="Notification",
             is_open=False,
             dismissable=True,
@@ -71,10 +58,10 @@ def toast_confirm_delete_user():
         ),
         dbc.Modal([
             dbc.ModalHeader(dbc.ModalTitle("Confirm Delete")),
-            dbc.ModalBody("Are you sure you want to delete this user?"),
+            dbc.ModalBody("Are you sure you want to delete this laboratory?"),
             dbc.ModalFooter([
-                dbc.Button("Cancel", id="btn-cancel-delete-user", color="secondary"),
-                dbc.Button("Delete", id="btn-confirm-delete-user", color="danger")
+                dbc.Button("Cancel", id="btn-cancel-delete", color="secondary"),
+                dbc.Button("Delete", id="btn-confirm-delete", color="danger")
             ])
-        ], id="delete-user-modal", is_open=False),
+        ], id="delete-lab-modal", is_open=False),
     ])

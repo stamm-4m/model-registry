@@ -9,7 +9,7 @@ from model_registry.backend.pages.edit_model import edit_model_layout
 from model_registry.backend.pages.help import help_layout
 from model_registry.backend.pages.home import home_layout
 from model_registry.backend.pages.dynamic_models import dynamic_models_layout
-from model_registry.backend.pages.departments import departments_layout
+from model_registry.backend.pages.projects import projects_layout
 from model_registry.backend.pages.organizations import organizations_layout
 from model_registry.backend.pages.users import users_layout
 from model_registry.backend.pages.model_explainability import (
@@ -20,7 +20,7 @@ from model_registry.backend.pages.not_found import not_found_layout
 from model_registry.backend.pages.upload_model_ibisba import (
     add_upload_model_ibisba_layout,
 )
-from model_registry.backend.services.project_service import list_projects
+from model_registry.backend.services.project_api_service import list_projects
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +63,8 @@ def register_sidebar_callbacks(app):
         elif pathname == "/dynamic-models":
             return dynamic_models_layout()
         
-        elif pathname == "/departments":
-            return departments_layout()
+        elif pathname == "/projects":
+            return projects_layout()
         
         elif pathname == "/users":
             return users_layout()
@@ -134,8 +134,7 @@ def register_sidebar_callbacks(app):
     @app.callback(
     [
         Output("organization-link", "className"), 
-        Output("department-link", "className"),
-        Output("users-link", "className"),
+        Output("project-link", "className")
     ], 
     Input("url", "pathname"),
     )
@@ -144,6 +143,5 @@ def register_sidebar_callbacks(app):
 
         return (
             f"{base} active" if pathname == "/organizations" else base,
-            f"{base} active" if pathname == "/departments" else base,
-            f"{base} active" if pathname == "/users" else base,
+            f"{base} active" if pathname == "/projects" else base
         )

@@ -13,7 +13,10 @@ from model_registry.backend.callbacks.callbacks_edit_model import (
 from model_registry.backend.callbacks.callbacks_help import register_help_callbacks
 from model_registry.backend.callbacks.callbacks_home import register_home_callbacks
 from model_registry.backend.callbacks.callbacks_modal_departament import register_department_modal_callbacks
+from model_registry.backend.callbacks.callbacks_modal_laboratory import register_laboratory_modal_callbacks
+from model_registry.backend.callbacks.callbacks_modal_project import register_project_modal_callbacks
 from model_registry.backend.callbacks.callbacks_modal_user import register_user_modal_callbacks
+from model_registry.backend.callbacks.callbacks_modal_user_roles import register_user_modal_role_callbacks
 from model_registry.backend.callbacks.callbacks_model_upload import (
     register_model_upload_callbacks,
 )
@@ -47,3 +50,6 @@ def register_callbacks(app):
     register_delete_department_modal_callbacks(app)
     register_user_modal_callbacks(app)
     register_delete_user_modal_callbacks(app)
+    register_laboratory_modal_callbacks(app)
+    register_user_modal_role_callbacks(app)
+    register_project_modal_callbacks(app)

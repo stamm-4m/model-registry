@@ -1,7 +1,8 @@
 from model_registry.backend.repositories.base_repository import BaseRepository
 from model_registry.backend.models.organization import Organization
 from model_registry.backend.models.organization_departament import OrganizationDepartment
-from model_registry.backend.models.departament_user import DepartmentUser
+from model_registry.backend.models.departament_laboratory import DepartmentLaboratory
+from model_registry.backend.models.laboratory_user import LaboratoryUser
 from sqlalchemy.sql import func
 
 
@@ -58,11 +59,17 @@ class OrganizationRepository(BaseRepository):
             return False
 
         dept_ids = [d[0] for d in departments]
-
-        #users related to those departments
+        #laboratories related to those departments
+        laboratories = (
+            self.db.query(DepartmentLaboratory.laboratory_id)
+            .filter(DepartmentLaboratory.department_id.in_(dept_ids))
+            .all()
+        )
+        lab_ids = [l[0] for l in laboratories]
+        #users related to those laboratories
         users = (
-            self.db.query(DepartmentUser)
-            .filter(DepartmentUser.department_id.in_(dept_ids))
+            self.db.query(LaboratoryUser)
+            .filter(LaboratoryUser.laboratory_id.in_(lab_ids))
             .first()
         )
 
@@ -86,13 +93,28 @@ class OrganizationRepository(BaseRepository):
         user_count = 0
 
         if dept_ids:
+            lab_count = (
+                self.db.query(func.count(DepartmentLaboratory.laboratory_id))
+                .filter(DepartmentLaboratory.department_id.in_(dept_ids))
+                .scalar()
+            )
+        if lab_count:
+            lab_ids = (
+                self.db.query(DepartmentLaboratory.laboratory_id)
+                .filter(DepartmentLaboratory.department_id.in_(dept_ids))
+                .all()
+            )
+
+            lab_ids = [l[0] for l in lab_ids]
+
             user_count = (
-                self.db.query(func.count(DepartmentUser.user_id))
-                .filter(DepartmentUser.department_id.in_(dept_ids))
+                self.db.query(func.count(LaboratoryUser.user_id))
+                .filter(LaboratoryUser.laboratory_id.in_(lab_ids))
                 .scalar()
             )
 
         return {
             "departments": dept_count or 0,
+            "laboratories": lab_count or 0,
             "users": user_count or 0
         }
