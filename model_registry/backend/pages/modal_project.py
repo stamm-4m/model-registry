@@ -35,12 +35,13 @@ def project_modal():
                         type="text",
                         placeholder="Optional external ID"
                     ),
+                    html.Small("Format: P0001, P0002, ...", className="text-muted"),
 
                 ])
             ], className="mb-4"),
 
 
-            # oranization/department/laboratory assignment
+            # organization/department/laboratory assignment
             dbc.Card([
                 dbc.CardBody([
 

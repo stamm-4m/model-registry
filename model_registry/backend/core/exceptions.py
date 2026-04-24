@@ -1,3 +1,9 @@
+class ProjectInUseException(Exception):
+    def __init__(self, message=None):
+        if message is None:
+            message = "Cannot delete project because it is in use."
+        super().__init__(message)
+        
 class OrganizationInUseException(Exception):
     def __init__(self, departments=0, users=0):
         self.departments = departments

@@ -7,6 +7,11 @@ from model_registry.backend.models.departament_laboratory import DepartmentLabor
 
 
 class DepartmentService:
+    def get_by_organization(self, organization_id):
+        repo = DepartmentRepository()
+        depts = repo.get_by_organization(organization_id)
+        repo.close()
+        return depts
 
     def create_department(self, name, organization_id):
         repo = DepartmentRepository()

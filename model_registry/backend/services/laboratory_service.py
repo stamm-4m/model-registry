@@ -5,6 +5,12 @@ from model_registry.backend.repositories.laboratory_repository import Laboratory
 
 class LaboratoryService:
 
+    def get_by_department(self, department_id):
+        repo = LaboratoryRepository()
+        labs = repo.get_by_department(department_id)
+        repo.close()
+        return labs
+
     def create_laboratory(self, name, location,  department_id):
         repo = LaboratoryRepository()
         lab = repo.create(name, location, department_id)

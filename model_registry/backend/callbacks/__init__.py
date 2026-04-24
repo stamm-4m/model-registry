@@ -5,6 +5,7 @@ from model_registry.backend.callbacks.callbacks_add_project import (
 )
 from model_registry.backend.callbacks.callbacks_delete_department import register_delete_department_modal_callbacks
 from model_registry.backend.callbacks.callbacks_delete_organization import register_delete_organization_modal_callbacks
+from model_registry.backend.callbacks.callbacks_delete_project import register_delete_project_modal_callbacks
 from model_registry.backend.callbacks.callbacks_delete_user import register_delete_user_modal_callbacks
 from model_registry.backend.callbacks.callbacks_details_model import register_details_model_callbacks
 from model_registry.backend.callbacks.callbacks_edit_model import (
@@ -21,6 +22,7 @@ from model_registry.backend.callbacks.callbacks_model_upload import (
     register_model_upload_callbacks,
 )
 from model_registry.backend.callbacks.callbacks_organization import register_organizations_table_callbacks
+from model_registry.backend.callbacks.callbacks_project import register_project_table_callbacks
 from model_registry.backend.callbacks.callbacks_sidebar import (
     register_sidebar_callbacks,
 )
@@ -53,3 +55,5 @@ def register_callbacks(app):
     register_laboratory_modal_callbacks(app)
     register_user_modal_role_callbacks(app)
     register_project_modal_callbacks(app)
+    register_project_table_callbacks(app)
+    register_delete_project_modal_callbacks(app)

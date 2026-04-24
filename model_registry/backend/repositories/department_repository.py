@@ -4,6 +4,13 @@ from model_registry.backend.models.department import Department
 from model_registry.backend.models.organization import Organization
 
 class DepartmentRepository(BaseRepository):
+    def get_by_organization(self, organization_id):
+            return (
+                self.db.query(Department)
+                .join(OrganizationDepartment, OrganizationDepartment.department_id == Department.id)
+                .filter(OrganizationDepartment.organization_id == organization_id)
+                .all()
+            )
     def get_with_organization(self, dept_id):
         result = (
             self.db.query(

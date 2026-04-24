@@ -2,7 +2,7 @@ from dash import dcc, html
 import dash_bootstrap_components as dbc
 
 from model_registry.backend.pages.add_experiments import experiment_modal
-from model_registry.backend.pages.add_projects import project_modal
+from model_registry.backend.pages.modal_project import project_modal
 from model_registry.backend.utils.utils_experiments import toast_confirm_delete_exp
 from model_registry.backend.utils.utils_projects import toast_confirm_delete_proj
 
