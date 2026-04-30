@@ -21,28 +21,28 @@ def build_table_users(users):
                     html.Td(user.email),
                     html.Td(user.created_at),
                     html.Td("Yes" if user.is_active else "No"),
-                    html.Td([
-                        dbc.Button(
-                            "Edit",
-                            id={"type": "btn-edit-user", "index": str(user.id)},
-                            size="sm",
-                            color="warning",
-                            className="me-2"
-                        ),
-                        dbc.Button(
-                            "Roles",
-                            id={"type": "btn-manage-roles", "index": str(user.id)},
-                            size="sm",
-                            color="info",
-                            className="me-2"
-                        ),
-                        dbc.Button(
-                            "Delete",
-                            id={"type": "btn-delete-user", "index": str(user.id)},
-                            size="sm",
-                            color="danger"
-                        )
-                    ])
+                    html.Td(
+                        dbc.ButtonGroup([
+                            dbc.Button(
+                                "Edit",
+                                id={"type": "btn-edit-user", "index": str(user.id)},
+                                size="sm",
+                                color="warning"
+                            ),
+                            dbc.Button(
+                                "Roles",
+                                id={"type": "btn-manage-roles", "index": str(user.id)},
+                                size="sm",
+                                color="info"
+                            ),
+                            dbc.Button(
+                                "Delete",
+                                id={"type": "btn-delete-user", "index": str(user.id)},
+                                size="sm",
+                                color="danger"
+                            )
+                        ], size="sm", className="w-100 justify-content-center")
+                    )
                 ]) for user, lab_name, dept_name in users
             ])
         ],

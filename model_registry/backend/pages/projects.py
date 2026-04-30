@@ -1,13 +1,20 @@
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 
-from model_registry.backend.pages.add_experiments import experiment_modal
+from model_registry.backend.pages.experiment_modal import experiment_modal
 from model_registry.backend.pages.modal_project import project_modal
 from model_registry.backend.utils.utils_experiments import toast_confirm_delete_exp
 from model_registry.backend.utils.utils_projects import toast_confirm_delete_proj
+from model_registry.backend.utils.utils_sidebar import get_user_role
 
 
-def projects_layout():
+def projects_layout(session_data=None):
+    role, _ = get_user_role(session_data)
+    if not role or "super_admin" not in role:
+        return dbc.Container([
+            html.H3("Access Denied", className="text-danger mt-4"),
+            html.P("You do not have permission to view this page.")
+        ])
     return dbc.Container([
 
         # 🔹 STORES

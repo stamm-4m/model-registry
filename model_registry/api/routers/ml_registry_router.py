@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, HTTPException
 
 from model_registry.api.models import user
@@ -10,8 +9,7 @@ from model_registry.api.models.project import Project
 router = APIRouter(prefix="", tags=["ML"])
 
 import logging
-from model_registry.api.core.constants.permissions import Permission as PERMISSIONS
-from model_registry.api.core.dependencies import require_permissions, require_permissions_projects
+from model_registry.api.core.dependencies import require_permission_resource
 from fastapi import Depends, HTTPException
 from model_registry.api.models.user import User
 from sqlalchemy.orm import Session
@@ -27,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 @router.get("/list_projects/")
 def list_projects(
-    user=Depends(require_permissions([PERMISSIONS.VIEW_MODEL])),
+    user=Depends(require_permission_resource("project:read", "Project")),
     db: Session = Depends(get_db)
 ):
     """
@@ -35,26 +33,30 @@ def list_projects(
     filtered by user's laboratory access.
     """
     try:
-        user_lab_ids = list(set(ur.laboratory_id for ur in user.roles if ur.laboratory_id))
+        logger.info(f"Listing projects for user '{user.email}' and User ID '{user.id}'")
+        # 1. Obtener laboratorios del usuario a través de LaboratoryUser
+        user_lab_ids = set(
+            lu.laboratory_id
+            for lu in user.laboratory_users
+            if lu.laboratory_id is not None
+        )
+
         if not user_lab_ids:
             logger.debug(f"User '{user.email}' has no laboratory access.")
-            return []  # No lab access
-        # get projects id
-        project_ids = (
-            db.query(LaboratoryProject.project_id)
-            .filter(LaboratoryProject.laboratory_id.in_(user_lab_ids))
-            .all()
-        )
+            return []
+
+        # 2. Buscar proyectos asociados a esos laboratorios
+        project_ids = db.query(LaboratoryProject.project_id).filter(
+            LaboratoryProject.laboratory_id.in_(user_lab_ids)
+        ).distinct().all()
         project_ids = [p[0] for p in project_ids]
+
         if not project_ids:
             logger.debug(f"User '{user.email}' has no access to any projects.")
-            return []  # No projects for user's labs
-        # Get info db by projects
-        projects_db = (
-            db.query(Project)
-            .filter(Project.id.in_(project_ids))
-            .all()
-        )
+            return []
+
+        # 3. Traer los proyectos
+        projects_db = db.query(Project).filter(Project.id.in_(project_ids)).all()
         projects = []
         for project in projects_db:
             info = load_project_info(project.project_id)
@@ -65,6 +67,7 @@ def list_projects(
                 "name": info.get("project_name", project.name),
                 "description": info.get("description", project.description),
                 "create_at": info.get("create_at", project.created_at),
+                # Puedes agregar aquí organización, departamento, laboratorio si lo necesitas
             })
         return projects
     except Exception as e:
@@ -73,7 +76,7 @@ def list_projects(
 @router.get("/{project_id}/project_info/")
 def get_project_info(
     project_id: str,
-    user=Depends(require_permissions_projects([PERMISSIONS.VIEW_MODEL])),
+    user=Depends(require_permission_resource("project:read", "Project")),
 ):
     """Get information about project
 
@@ -96,7 +99,7 @@ def get_project_info(
 @router.get("/{project_id}/db_config/")
 def get_db_config(
     project_id: str,
-    user=Depends(require_permissions_projects([PERMISSIONS.VIEW_MODEL]))
+    user=Depends(require_permission_resource("project:read", "Project")),
 ):
     info = load_project_info(project_id)
     return info.get("db_config", {})
@@ -104,7 +107,7 @@ def get_db_config(
 @router.get("/{project_id}/references/")
 def get_references(
     project_id: str,
-    user=Depends(require_permissions_projects([PERMISSIONS.VIEW_MODEL]))
+    user=Depends(require_permission_resource("project:read", "Project")),
 ):
     info = load_project_info(project_id)
     return info.get("references", [])
@@ -112,7 +115,7 @@ def get_references(
 @router.get("/{project_id}/variables/")
 def get_variables(
     project_id: str,
-    user=Depends(require_permissions_projects([PERMISSIONS.VIEW_MODEL]))
+    user=Depends(require_permission_resource("project:read", "Project")),
 ):
     info = load_project_info(project_id)
     return info.get("variables", [])
@@ -123,7 +126,7 @@ def get_variables(
 def list_models_endpoint(
     project_id: str,
     request: Request,
-    user=Depends(require_permissions_projects([PERMISSIONS.VIEW_MODEL])),
+    user=Depends(require_permission_resource("models:read", "Model")),
 ):
     """
     List all models in a project with both model_ID and human-readable name.
@@ -148,7 +151,7 @@ def get_model_metadata(
     project_id: str, 
     model_id: str, 
     request: Request,
-    user=Depends(require_permissions_projects([PERMISSIONS.VIEW_MODEL]))
+    user=Depends(require_permission_resource("models:read", "Model"))
     ):
     """Return model metadata using model ID."""
     try:
@@ -168,7 +171,7 @@ def get_model_metadata(
 def list_models_full(
     project_id: str,
     request: Request,
-    user=Depends(require_permissions_projects([PERMISSIONS.VIEW_MODEL]))
+    user=Depends(require_permission_resource("models:read", "Model"))
 ):
     """List all models in a project with full metadata, but only for models with status "online".
 
@@ -197,7 +200,7 @@ def update_model(
     model_id: str, 
     payload: dict, 
     request: Request,
-    user=Depends(require_permissions_projects([PERMISSIONS.EDIT_MODEL]))
+    user=Depends(require_permission_resource("models:edit", "Model"))
     ):
     try:
         registry = request.app.state.registry
@@ -214,7 +217,7 @@ def predict(
     model_id: str,
     request: PredictionRequest,
     req: Request,
-    user=Depends(require_permissions_projects([PERMISSIONS.USAGE_MODEL]))
+    user=Depends(require_permission_resource("models:deploy", "Model"))
 ):
     """
     Predict using a model identified by its ID.

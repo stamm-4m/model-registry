@@ -1,6 +1,6 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html
-from model_registry.backend.utils.utils_sidebar import get_user_role
+from model_registry.backend.utils.utils_sidebar import get_user_role, get_user_permissions
 import logging
 
 logger = logging.getLogger(__name__)
@@ -9,34 +9,34 @@ def sidebar(session_data = None):
     if not session_data or not session_data.get("authenticated"):
         role, username = None, None
         is_authenticated = False
+        permissions = set()
     else:
         role, username = get_user_role(session_data)
+        permissions = get_user_permissions(session_data)
         is_authenticated = True
 
-    is_admin = role and role[0] == "admin"
-    # add nvigation items based on user role
-    # Admin users see all links, regular users see only home and models, unauthenticated users see only help
+    is_super_admin = role and "super_admin" in role
+    # Protege rutas según permisos
     nav_items = [
-            html.H4(f"Welcome, {username}",style={"color": "white"}) if is_authenticated else None,
-            html.Hr(),
-            dbc.NavLink(
-                html.Span([html.Span("ML Soft Sensors", className="nav-text")], className="nav-item-content"),
-                href="/",
-                className="sidebar-link",
-                active="exact",
-            ),
-            dbc.NavLink(
-                html.Span([html.Span("Dynamic Models", className="nav-text")], className="nav-item-content"),
-                href="/dynamic-models",
-                className="sidebar-link",
-                active="exact",
-            ),
-            html.Hr(),
-            dbc.NavLink("Help", href="/help", className="sidebar-link", active="exact"),
-            
-        ]   
-    # Admin users get an extra link to the admin page    
-    if is_admin:
+        html.H4(f"Welcome, {username}",style={"color": "white"}) if is_authenticated else None,
+        html.Hr(),
+        dbc.NavLink(
+            html.Span([html.Span("ML Soft Sensors", className="nav-text")], className="nav-item-content"),
+            href="/",
+            className="sidebar-link",
+            active="exact",
+        ),
+        dbc.NavLink(
+            html.Span([html.Span("Dynamic Models", className="nav-text")], className="nav-item-content"),
+            href="/dynamic-models",
+            className="sidebar-link",
+            active="exact",
+        ),
+        html.Hr(),
+        dbc.NavLink("Help", href="/help", className="sidebar-link", active="exact"),
+    ]
+    # Solo Super Admin ve opciones de Admin
+    if is_super_admin:
         nav_items.extend([
             dbc.NavLink(
                 html.Span(
@@ -68,7 +68,6 @@ def sidebar(session_data = None):
         )
 
     return html.Div([
-        
         dbc.Button(
             "☰",
             id="toggle-sidebar",

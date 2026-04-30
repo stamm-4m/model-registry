@@ -16,3 +16,8 @@ class Project(Base):
         "LaboratoryProject",
         back_populates="project"
     )
+    #experiments = relationship(
+    #    "Experiment",
+    #    back_populates="project",
+    #    cascade="all, delete-orphan"
+    #)

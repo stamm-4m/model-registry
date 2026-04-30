@@ -29,7 +29,7 @@ def login(
     db: Session = Depends(get_db)
 ):
     try:
-        access_token, refresh_token = login_user(db, form_data.username, form_data.password)
+        access_token, refresh_token = login_user(db, form_data.username, form_data.password, include_permissions=True)
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
@@ -45,7 +45,7 @@ def login_json(
     db: Session = Depends(get_db)
 ):
     try:
-        access_token, refresh_token = login_user(db, user.email, user.password)
+        access_token, refresh_token = login_user(db, user.email, user.password, include_permissions=True)
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
@@ -56,9 +56,23 @@ def login_json(
 
 @router.get("/me")
 def get_me(user = Depends(get_current_user)):
+    # Extrae roles, permisos y recursos del usuario
+    roles = [ur.role.name for ur in user.roles]
+    permissions = []
+    resources = []
+    for ur in user.roles:
+        for rp in ur.role.permissions:
+            perm_name = rp.permission.name
+            res_name = rp.resource.name if hasattr(rp.resource, 'name') else None
+            permissions.append(perm_name)
+            if res_name:
+                resources.append(res_name)
     return {
         "email": user.email,
-        "id": str(user.id)
+        "id": str(user.id),
+        "roles": roles,
+        "permissions": permissions,
+        "resources": resources
     }
 @router.post("/refresh")
 def refresh_token(refresh_token: str, db: Session = Depends(get_db)):

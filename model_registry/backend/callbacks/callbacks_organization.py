@@ -65,7 +65,6 @@ def register_organizations_table_callbacks(app):
     def load_users(_):
         service = UserService()
         rows = service.get_all_users()
-
         if not rows:
             return "No users found."
         logger.debug(f"Loaded users for table: {rows}")

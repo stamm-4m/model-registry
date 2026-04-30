@@ -4,6 +4,7 @@ from model_registry.backend.callbacks.callbacks_add_project import (
     register_add_project_callbacks,
 )
 from model_registry.backend.callbacks.callbacks_delete_department import register_delete_department_modal_callbacks
+from model_registry.backend.callbacks.callbacks_delete_experiment import register_delete_experiment_modal_callbacks
 from model_registry.backend.callbacks.callbacks_delete_organization import register_delete_organization_modal_callbacks
 from model_registry.backend.callbacks.callbacks_delete_project import register_delete_project_modal_callbacks
 from model_registry.backend.callbacks.callbacks_delete_user import register_delete_user_modal_callbacks
@@ -14,6 +15,7 @@ from model_registry.backend.callbacks.callbacks_edit_model import (
 from model_registry.backend.callbacks.callbacks_help import register_help_callbacks
 from model_registry.backend.callbacks.callbacks_home import register_home_callbacks
 from model_registry.backend.callbacks.callbacks_modal_departament import register_department_modal_callbacks
+from model_registry.backend.callbacks.callbacks_modal_experiment import register_experiment_modal_callbacks
 from model_registry.backend.callbacks.callbacks_modal_laboratory import register_laboratory_modal_callbacks
 from model_registry.backend.callbacks.callbacks_modal_project import register_project_modal_callbacks
 from model_registry.backend.callbacks.callbacks_modal_user import register_user_modal_callbacks
@@ -57,3 +59,5 @@ def register_callbacks(app):
     register_project_modal_callbacks(app)
     register_project_table_callbacks(app)
     register_delete_project_modal_callbacks(app)
+    register_experiment_modal_callbacks(app)
+    register_delete_experiment_modal_callbacks(app)

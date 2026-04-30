@@ -2,15 +2,17 @@ from model_registry.backend.repositories.user_repository import UserRepository
 from model_registry.backend.core.exceptions import UserHasRolesException, UserEmailAlreadyExistsException
 from model_registry.backend.models.users import User
 from model_registry.backend.models.laboratory_user import LaboratoryUser
+from model_registry.backend.repositories.role_repository import RoleRepository
 from model_registry.backend.utils.security import hash_password
 from sqlalchemy.exc import IntegrityError
 
-
+import logging
+logger = logging.getLogger(__name__)
 import uuid
 
 
 class UserService:
-
+        
     def __init__(self):
         self.user_repo = UserRepository()
         self.db = self.user_repo.db  
@@ -58,7 +60,10 @@ class UserService:
         return user
 
     def get_all_users(self):
-        users = self.user_repo.get_all()
+        """
+        Returns a list of (User, laboratory_name, department_name) tuples.
+        """
+        users = self.user_repo.get_all_users_with_department_and_laboratory()
         self.user_repo.close()
         return users
 
@@ -136,6 +141,7 @@ class UserService:
     def get_lab_id_by_user_id(self, user_id):
         user_id = uuid.UUID(user_id)
         lab_id = self.user_repo.get_lab_id_by_user_id(user_id)
+        self.user_repo.close()
         return lab_id
     
     def get_dept_id_by_user_id(self, user_id):
@@ -148,9 +154,21 @@ class UserService:
         roles = self.user_repo.get_all_roles_by_user_id(user_id)
         return roles
     
-    def assign_roles_to_user(self, user_id, role_ids, laboratory_id=None):
-        
-        self.user_repo.delete_roles_by_user(user_id)
+    def assign_user_roles(self, user_id, role_ids):
+        """Asigna solo los roles seleccionados al usuario (roles generales)."""
+        self.user_repo.assign_user_roles(user_id, role_ids)
 
-        for role_id in role_ids:
-            self.user_repo.create_add_role_to_user(user_id, role_id, laboratory_id)
+    def assign_user_model_roles(self, user_id, role_ids, model_id):
+        """Asigna solo los roles seleccionados para un modelo específico."""
+        self.user_repo.assign_user_model_roles(user_id, role_ids, model_id)
+
+    def get_all_users_with_department_and_laboratory(self):
+        users = self.user_repo.get_all_users_with_department_and_laboratory()
+        self.user_repo.close()
+        return users
+    def assign_user_model_permissions(self, user_id, role_ids, permission_ids, model_id):
+        """
+        Asigna permisos sobre un modelo específico, usando los roles generales del usuario como base.
+        """
+        self.user_repo.assign_user_model_permissions(user_id, role_ids, permission_ids, model_id)
+    

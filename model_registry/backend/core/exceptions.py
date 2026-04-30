@@ -1,3 +1,9 @@
+class ExperimentInUseException(Exception):
+    def __init__(self, message=None):
+        if message is None:
+            message = "Cannot delete experiment because it is in use."
+        super().__init__(message)
+        
 class ProjectInUseException(Exception):
     def __init__(self, message=None):
         if message is None:

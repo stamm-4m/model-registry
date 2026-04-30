@@ -10,9 +10,16 @@ from model_registry.backend.utils.utils_department import toast_confirm_delete_d
 from model_registry.backend.utils.utils_laboratory import toast_confirm_delete_lab
 from model_registry.backend.utils.utils_organization import toast_confirm_delete
 from model_registry.backend.utils.utils_users import toast_confirm_delete_user
+from model_registry.backend.utils.utils_sidebar import get_user_role
 
 
-def organizations_layout():
+def organizations_layout(session_data=None):
+    role, _ = get_user_role(session_data)
+    if not role or "super_admin" not in role:
+        return dbc.Container([
+            html.H3("Access Denied", className="text-danger mt-4"),
+            html.P("You do not have permission to view this page.")
+        ])
     return dbc.Container([
 
         # STORES

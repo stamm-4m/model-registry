@@ -67,12 +67,12 @@ def get_current_user(
     user.permissions = token_permissions
     user.roles_names = token_roles
 
-    # get role assignments for labs
+    # get role assignments for resources
     user.role_assignments = [
         {
             "role": ur.role.name,
-            "lab": ur.laboratory.name,
-            "lab_id": ur.laboratory.id
+            "resource_type": ur.resource_type,
+            "real_resource_id": ur.real_resource_id
         }
         for ur in user.roles
     ]

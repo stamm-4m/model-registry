@@ -64,13 +64,13 @@ def register_sidebar_callbacks(app):
             return dynamic_models_layout()
         
         elif pathname == "/projects":
-            return projects_layout()
+            return projects_layout(session_data)
         
         elif pathname == "/users":
             return users_layout()
         
         elif pathname == "/organizations":
-            return organizations_layout()
+            return organizations_layout(session_data)
         
         elif pathname.startswith("/edit-model"):
             parts = pathname.strip("/").split("/")

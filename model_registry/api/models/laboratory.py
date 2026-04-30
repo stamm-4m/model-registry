@@ -15,3 +15,7 @@ class Laboratory(Base):
         "LaboratoryProject",
         back_populates="laboratory"
     )
+    laboratory_users = relationship(
+        "LaboratoryUser",
+        back_populates="laboratory"
+    )

@@ -6,3 +6,5 @@ from .laboratory_project import LaboratoryProject
 from .project import Project
 from .permission import Permission
 from .role_permission import RolePermission
+from .resource import Resource
+from .laboratory_user import LaboratoryUser

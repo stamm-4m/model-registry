@@ -7,14 +7,16 @@ def build_table_experiments(experiments):
             html.Thead(html.Tr([
                 html.Th("Name"),
                 html.Th("Description"),
-                html.Th("Created At"),
+                html.Th("Start Time"),
+                html.Th("End Time"),
                 html.Th("Actions")
             ])),
             html.Tbody([
                 html.Tr([
                     html.Td(exp.name),
-                    html.Td(exp.description),
-                    html.Td(exp.created_at),
+                    html.Td(exp.description or "-"),
+                    html.Td(str(exp.start_time) if exp.start_time else "-"),
+                    html.Td(str(exp.end_time) if exp.end_time else "-"),
                     html.Td([
                         dbc.Button(
                             "Edit",

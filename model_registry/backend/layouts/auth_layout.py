@@ -18,13 +18,17 @@ def login_form():
                                             # Logo
                                             html.Div(
                                                 html.Img(
-                                                    src="/assets/logo.png",
+                                                    src="/assets/ml_repo_logo.png",
                                                     style={
-                                                        "maxWidth": "160px",
-                                                        "marginBottom": "25px",
+                                                        "maxWidth": "180px",
+                                                        "marginBottom": "30px",
+                                                        "boxShadow": "0 4px 24px rgba(0,0,0,0.10)",
+                                                        "borderRadius": "16px",
+                                                        "background": "#fff",
+                                                        "padding": "12px"
                                                     },
                                                 ),
-                                                className="text-center",
+                                                className="text-center mb-4",
                                             ),
 
                                             # Card Login

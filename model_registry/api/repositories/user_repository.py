@@ -9,18 +9,22 @@ import logging
 logger = logging.getLogger(__name__)
 
 def get_user_by_email(db: Session, email: str):
-    return (
-        db.query(User)
-        .options(
-            joinedload(User.roles)
-            .joinedload(UserRole.role)
-            .joinedload(Role.permissions),
-            joinedload(User.roles)
-            .joinedload(UserRole.laboratory)
+    try :
+        logger.debug(f"Fetching user by email: {email}")
+        return (
+            db.query(User)
+            .options(
+                joinedload(User.roles)
+                .joinedload(UserRole.role)
+                .joinedload(Role.permissions),
+                joinedload(User.roles)
+            )
+            .filter(User.email == email)
+            .first()
         )
-        .filter(User.email == email)
-        .first()
-    )
+    except Exception as e:
+        logger.error(f"Error occurred while fetching user by email: {email}, Error: {str(e)}")
+    return None
 
 def create_user(db: Session, email: str, password_hash: str, full_name: str):
     logger.debug(f"Creating user with email: {email} and hashed password: {password_hash}")
