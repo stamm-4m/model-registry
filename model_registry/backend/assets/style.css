@@ -1,14 +1,127 @@
-/* Barra lateral */
+/* ============================================================
+   Sidebar - professional redesign
+   ============================================================ */
 .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     width: 260px;
     height: 100vh;
-    background-color: #1e1e2f;
-    padding: 15px;
+    background: linear-gradient(180deg, #1e1e2f 0%, #161624 100%);
+    padding: 0;
     transition: margin-left 0.3s ease;
     z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.25);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.sidebar-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 18px 14px 14px 14px;
+}
+
+.sidebar-header {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.sidebar-logo-link {
+    display: inline-block;
+    padding: 6px 0 12px 0;
+}
+
+.sidebar-logo {
+    max-width: 160px;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    margin: 6px 0 4px 0;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    text-align: left;
+}
+
+.sidebar-user-avatar {
+    font-size: 28px;
+    color: #6ea8fe;
+}
+
+.sidebar-user-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sidebar-user-name {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-user-role {
+    color: #9aa0b3;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.sidebar-section-title {
+    color: #7d8499;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 14px 12px 6px 12px;
+    margin-top: 4px;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 8px;
+}
+
+.sidebar-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    color: #b8bcca;
+    transition: color 0.2s ease;
+}
+
+.sidebar-chevron {
+    margin-left: auto;
+    font-size: 12px;
+    color: #7d8499;
+}
+
+.sidebar-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 8px;
+    margin-top: 8px;
+}
+
+.sidebar-logout {
+    color: #ff8a8a !important;
+}
+
+.sidebar-logout:hover {
+    background-color: rgba(255, 100, 100, 0.12) !important;
+    color: #ff6b6b !important;
 }
 
 .sidebar.hidden {
@@ -22,15 +135,45 @@
 }
 
 .sidebar-link {
-    color: #ffffff;
-    display: block;
-    padding: 10px;
+    color: #d6d8e0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    margin: 2px 4px;
+    font-size: 14px;
+    font-weight: 500;
     text-decoration: none;
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .sidebar-link:hover {
-    background-color: #1a252f;
-    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.sidebar-link:hover .sidebar-icon {
+    color: #ffffff;
+}
+
+.sidebar-link.active {
+    color: #ffffff;
+    background-color: rgba(13, 110, 253, 0.18);
+    border-left: 3px solid #0d6efd;
+    font-weight: 600;
+}
+
+.sidebar-link.active .sidebar-icon {
+    color: #6ea8fe;
+}
+
+.sidebar-link-sub {
+    margin-left: 22px;
+    padding-left: 10px;
+    font-size: 13px;
 }
 
 /* Contenido principal */

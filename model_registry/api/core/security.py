@@ -72,6 +72,7 @@ def get_current_user(
         {
             "role": ur.role.name,
             "resource_type": ur.resource_type,
+            "permission_id": ur.permission_id,
             "real_resource_id": ur.real_resource_id
         }
         for ur in user.roles

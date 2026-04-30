@@ -51,8 +51,11 @@ def register_user_modal_role_callbacks(app):
 
         user = service.get_user(user_id)
         lab = service_lab.get_laboratory_by_user_id(user_id) 
-
-        return True, options, values, user.full_name, user.email, lab.name, user_id
+        if lab:
+            lab_name = lab.name
+        else:
+            lab_name = "No laboratory"
+        return True, options, values, user.full_name, user.email, lab_name, user_id
 
     @app.callback(
         Output("role-permissions-view", "children"),

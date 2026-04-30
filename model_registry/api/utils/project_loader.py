@@ -86,7 +86,14 @@ def load_project(project_id: str):
     models = {}
 
     if not os.path.exists(paths["CONFIG_DIR"]):
-        raise FileNotFoundError(f"No configs found for project_ID {project_id}")
+         # Empty / placeholder project (project_info.yaml exists but no configs
+        # or models yet). Don't crash the entire registry on startup -- just
+        # register it with an empty model set and log a warning.
+        logger.warning(
+            f"Project '{project_id}' has no configs/ directory yet -- "
+            "registering it with no models"
+        )
+        return {}
 
     for file in os.listdir(paths["CONFIG_DIR"]):
         if file.endswith(".yaml"):

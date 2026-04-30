@@ -16,3 +16,7 @@ class Project(Base):
     stamm_modules_id = Column(UUID(as_uuid=True), nullable=True)
     project_id = Column(Text, nullable=True)
     experiments = relationship("Experiment", back_populates="project")
+    laboratory_projects = relationship(
+        "LaboratoryProject",
+        back_populates="project"
+    )

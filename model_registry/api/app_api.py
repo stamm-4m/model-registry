@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import model_registry.api.models
 from model_registry.api.routers.ml_registry_router import router as ml_router
 from model_registry.api.routers.auth_router import router as auth_router
+from model_registry.api.routers.crud_router import router as crud_router
 from model_registry.backend.utils.logging_config import setup_logging
 from model_registry.api.core.registry import ModelRegistry
 
@@ -34,6 +35,7 @@ def startup_event():
 api.include_router(auth_router)
 # include ml router 
 api.include_router(ml_router)
+api.include_router(crud_router)  # /api/v1/<table>/ CRUD scaffold (Step 3)
 
 
 def main():

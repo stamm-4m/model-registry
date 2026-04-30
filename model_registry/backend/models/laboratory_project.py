@@ -1,6 +1,7 @@
 import uuid
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 
 from model_registry.api.core.database import Base
 
@@ -11,3 +12,6 @@ class LaboratoryProject(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     laboratory_id = Column(UUID(as_uuid=True), ForeignKey("laboratories.id"), primary_key=True)
     project_id = Column(UUID(as_uuid=True), ForeignKey("projects.id"), primary_key=True)
+
+    laboratory = relationship("Laboratory", back_populates="laboratory_projects")
+    project = relationship("Project", back_populates="laboratory_projects")

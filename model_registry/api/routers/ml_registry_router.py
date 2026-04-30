@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 @router.get("/list_projects/")
 def list_projects(
-    user=Depends(require_permission_resource("project:read", "Project")),
+    user=Depends(require_permission_resource("project:read", "Projects")),
     db: Session = Depends(get_db)
 ):
     """
@@ -34,7 +34,6 @@ def list_projects(
     """
     try:
         logger.info(f"Listing projects for user '{user.email}' and User ID '{user.id}'")
-        # 1. Obtener laboratorios del usuario a través de LaboratoryUser
         user_lab_ids = set(
             lu.laboratory_id
             for lu in user.laboratory_users
@@ -45,7 +44,7 @@ def list_projects(
             logger.debug(f"User '{user.email}' has no laboratory access.")
             return []
 
-        # 2. Buscar proyectos asociados a esos laboratorios
+        # get project IDs from laboratory_project table based on user's lab access
         project_ids = db.query(LaboratoryProject.project_id).filter(
             LaboratoryProject.laboratory_id.in_(user_lab_ids)
         ).distinct().all()
@@ -55,7 +54,7 @@ def list_projects(
             logger.debug(f"User '{user.email}' has no access to any projects.")
             return []
 
-        # 3. Traer los proyectos
+        # get projects based on project IDs
         projects_db = db.query(Project).filter(Project.id.in_(project_ids)).all()
         projects = []
         for project in projects_db:
@@ -67,7 +66,7 @@ def list_projects(
                 "name": info.get("project_name", project.name),
                 "description": info.get("description", project.description),
                 "create_at": info.get("create_at", project.created_at),
-                # Puedes agregar aquí organización, departamento, laboratorio si lo necesitas
+                
             })
         return projects
     except Exception as e:
@@ -76,7 +75,7 @@ def list_projects(
 @router.get("/{project_id}/project_info/")
 def get_project_info(
     project_id: str,
-    user=Depends(require_permission_resource("project:read", "Project")),
+    user=Depends(require_permission_resource("project:read", "Projects")),
 ):
     """Get information about project
 
@@ -99,7 +98,7 @@ def get_project_info(
 @router.get("/{project_id}/db_config/")
 def get_db_config(
     project_id: str,
-    user=Depends(require_permission_resource("project:read", "Project")),
+    user=Depends(require_permission_resource("project:read", "Projects")),
 ):
     info = load_project_info(project_id)
     return info.get("db_config", {})
@@ -107,7 +106,7 @@ def get_db_config(
 @router.get("/{project_id}/references/")
 def get_references(
     project_id: str,
-    user=Depends(require_permission_resource("project:read", "Project")),
+    user=Depends(require_permission_resource("project:read", "Projects")),
 ):
     info = load_project_info(project_id)
     return info.get("references", [])
@@ -115,7 +114,7 @@ def get_references(
 @router.get("/{project_id}/variables/")
 def get_variables(
     project_id: str,
-    user=Depends(require_permission_resource("project:read", "Project")),
+    user=Depends(require_permission_resource("project:read", "Projects")),
 ):
     info = load_project_info(project_id)
     return info.get("variables", [])
@@ -126,7 +125,7 @@ def get_variables(
 def list_models_endpoint(
     project_id: str,
     request: Request,
-    user=Depends(require_permission_resource("models:read", "Model")),
+    user=Depends(require_permission_resource("models:read", "Models")),
 ):
     """
     List all models in a project with both model_ID and human-readable name.
@@ -151,7 +150,7 @@ def get_model_metadata(
     project_id: str, 
     model_id: str, 
     request: Request,
-    user=Depends(require_permission_resource("models:read", "Model"))
+    user=Depends(require_permission_resource("models:read", "Models"))
     ):
     """Return model metadata using model ID."""
     try:
@@ -171,7 +170,7 @@ def get_model_metadata(
 def list_models_full(
     project_id: str,
     request: Request,
-    user=Depends(require_permission_resource("models:read", "Model"))
+    user=Depends(require_permission_resource("models:read", "Models"))
 ):
     """List all models in a project with full metadata, but only for models with status "online".
 
@@ -200,7 +199,7 @@ def update_model(
     model_id: str, 
     payload: dict, 
     request: Request,
-    user=Depends(require_permission_resource("models:edit", "Model"))
+    user=Depends(require_permission_resource("models:edit", "Models"))
     ):
     try:
         registry = request.app.state.registry
@@ -217,7 +216,7 @@ def predict(
     model_id: str,
     request: PredictionRequest,
     req: Request,
-    user=Depends(require_permission_resource("models:deploy", "Model"))
+    user=Depends(require_permission_resource("models:deploy", "Models"))
 ):
     """
     Predict using a model identified by its ID.
