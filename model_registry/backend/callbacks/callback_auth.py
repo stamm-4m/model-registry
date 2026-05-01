@@ -15,25 +15,17 @@ def register_auth_callbacks(app):
         Output("app-root", "children"),
         Output("user-session", "data"),
         Input("url", "pathname"),
-        Input({"type": "logout-button", "index": ALL}, "n_clicks"),
-        Input("user-session", "data"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def display_main_page(pathname, logout_clicks, session_data):
-        logger.debug(f"URL changed to {pathname} with session {session_data} and logout clicks {logout_clicks}")
+    def display_main_page(pathname, session_data):
+        logger.debug(f"URL changed to {pathname} with session {session_data}")
         ctx = dash.callback_context
 
         if not ctx.triggered:
-            #raise dash.exceptions.PreventUpdate
             if not session_data or not session_data.get("authenticated"):
                 return login_form(), {}
             return main_layout(session_data), session_data
-
-        trigger = ctx.triggered_id
-
-        if isinstance(trigger, dict) and trigger.get("type") == "logout-button":
-            print(">> Logout ejecutado")
-            return login_form(), {}
 
         # Si no está autenticado
         if not session_data or not session_data.get("authenticated"):
@@ -41,6 +33,21 @@ def register_auth_callbacks(app):
 
         # Navegación normal, permanece en layout principal
         return main_layout(session_data), session_data
+
+    # ---- Logout dedicated callback ----
+    @app.callback(
+        Output("app-root", "children", allow_duplicate=True),
+        Output("user-session", "data", allow_duplicate=True),
+        Output("url", "pathname", allow_duplicate=True),
+        Input({"type": "logout-button", "index": ALL}, "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def handle_logout(logout_clicks):
+        # Ignorar disparos cuando el botón aún no se ha clickeado
+        if not logout_clicks or not any(c for c in logout_clicks if c):
+            raise dash.exceptions.PreventUpdate
+        logger.debug(">> Logout ejecutado")
+        return login_form(), {}, "/"
 
     @app.callback(
         Output("user-session", "data",allow_duplicate=True),

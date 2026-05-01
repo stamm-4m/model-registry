@@ -1,431 +1,465 @@
 import logging
 
 import dash_bootstrap_components as dbc
-import requests
 from dash import dcc, html
 
-from model_registry.backend.config.settings import settings
+from model_registry.backend.services.model_service import get_model_metadata
 from model_registry.backend.utils.utils_edit_model import (
     get_value_from_list_of_dicts,
     normalize_date,
-    normalize_features
+    normalize_features,
 )
-from model_registry.backend.utils.utils_details_model import (
-    package_row
-)
+from model_registry.backend.utils.utils_details_model import package_row
 
 logger = logging.getLogger(__name__)
 
-def details_model_layout(project_id, model_id):
-    response = requests.get(
-        f"{settings.API_BASE_URL}{project_id}/metadata/{model_id}"
-    )
-    model = response.json()
-    language_data = model.get("model_description", {}).get("language", [])
-    language_name = get_value_from_list_of_dicts(language_data, "name")
-    language_version = get_value_from_list_of_dicts(language_data, "version")
-    packages = model.get("model_description", {}).get("packages", [])
-    features = model.get("inputs", {}).get("features", [])
-    features= normalize_features(features)
-    outputs = model.get("outputs",{}).get("information",[])
-    outputs = normalize_features(outputs)
 
-    value_validation=str(
-    model.get("training_information", {}).get("validation", ""))
-
+# ---------------------------------------------------------------------------
+# Small UI helpers (presentational only)
+# ---------------------------------------------------------------------------
+def _info_item(label, value, *, multiline=False, mono=False):
+    """Compact label + value block used across the page."""
+    val_classes = "details-value"
+    if multiline:
+        val_classes += " details-value-multiline"
+    if mono:
+        val_classes += " details-value-mono"
+    display_value = value if value not in (None, "") else html.Span("—", className="text-muted fst-italic")
     return html.Div(
-        [   
-            dcc.Store(id="features-store-details", data=features),
-            dcc.Store(
-                id="outputs-store-details",
-                data=outputs if outputs else []
+        [
+            html.Div(label, className="details-label"),
+            html.Div(display_value, className=val_classes),
+        ],
+        className="details-item",
+    )
+
+
+def _section_card(title, icon, body, subtitle=None):
+    """A consistent card wrapper for each metadata section."""
+    return dbc.Card(
+        [
+            dbc.CardHeader(
+                html.Div(
+                    [
+                        html.I(className=f"bi {icon} me-2 text-primary"),
+                        html.Span(title, className="details-section-title"),
+                        html.Small(subtitle, className="text-muted ms-3") if subtitle else None,
+                    ],
+                    className="d-flex align-items-center",
+                ),
+                className="bg-white border-0 pt-3 pb-2",
             ),
-            dcc.Download(id="download-model-file"),
-            html.H3(
-                f"Details Model: {model['model_identification'].get('ID', '')}",
-                className="text-center my-4"
+            dbc.CardBody(body),
+        ],
+        className="shadow-sm border-0 mb-4 details-card",
+    )
+
+
+def _status_badge(status):
+    status = (status or "offline").lower()
+    color_map = {
+        "online": "success",
+        "offline": "secondary",
+        "deprecated": "warning",
+        "error": "danger",
+    }
+    color = color_map.get(status, "secondary")
+    icon = {
+        "online": "bi-check-circle-fill",
+        "offline": "bi-pause-circle",
+        "deprecated": "bi-exclamation-triangle-fill",
+        "error": "bi-x-circle-fill",
+    }.get(status, "bi-circle")
+    return dbc.Badge(
+        [html.I(className=f"bi {icon} me-1"), status.capitalize()],
+        color=color,
+        className="px-3 py-2 details-status-badge",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Layout
+# ---------------------------------------------------------------------------
+def details_model_layout(project_id, model_id, session_data=None):
+    model, _ = get_model_metadata(project_id, model_id, session_data)
+    if model is None:
+        logger.error("Could not fetch metadata for %s/%s", project_id, model_id)
+        return html.Div(
+            dbc.Alert(
+                "Could not load model details. Please make sure you are logged in "
+                "and have permission to view this model.",
+                color="danger",
             ),
-            dbc.Card(
-                dbc.CardBody(
-                    dbc.Container([
-                        dbc.Row([
-                            dbc.Col([
-                                html.H4("Model Identification", className="mb-4"),
-                                    html.Div([
-                                        dbc.Label("Model ID", className="fw-semibold"),
-                                        html.Div(model["model_identification"].get("ID", ""),className="fw-bold text-muted")
-                                    ],className="mb-3"),
-                                    html.Div([
-                                        dbc.Label("Model UUID", className="fw-semibold"),
-                                        html.Div(model["model_identification"].get("UUID", ""),className="fw-bold text-muted")
-                                    ],className="mb-3"),
-                                    html.Div([
-                                        dbc.Label(
-                                            "Model DOI",className="fw-semibold",),
-                                        html.Div(children=model["model_identification"].get("doi", ""),className="fw-bold text-muted")
-                                    ],className="mb-3"),
-                                    html.Div([
-                                        dbc.Label("Model Name",className="fw-semibold",),
-                                        html.Div(children=model["model_identification"].get("name", ""),className="fw-bold text-muted")
-                                    ],className="mb-3"),
-                                    html.Div([
-                                        dbc.Label("Model Version",className="fw-semibold",),
-                                        html.Div(children=model["model_identification"].get("version", ""),className="fw-bold text-muted")
-                                    ],className="mb-3"),
-                            ],md=6,),
+            className="p-4",
+        )
 
-                            dbc.Col([
-                                html.H4("Creation", className="mb-4"),
-                                html.Div([
-                                    dbc.Label(
-                                        "Creation Date",
-                                        className="fw-semibold"
-                                    ),
-                                    html.Div(children=normalize_date(model["model_identification"].get("creation_date", "")),className="fw-bold text-muted")
-                                ],className="mb-3"),
-                                html.Div([
-                                    dbc.Label(
-                                        "Author",
-                                        className="fw-semibold"
-                                    ),
-                                    html.Div(children=model["model_identification"].get("author", ""),className="fw-bold text-muted",style={"height": "50px"}),
-                                ], className="mb-3"),
-                                html.Div([
-                                        dbc.Label("Status", className="fw-semibold"),
-                                        html.Div(model["model_identification"].get("status", "offline"),className="fw-bold text-muted")
-                                    ],className="mb-3"),
+    # -------- Extract data ---------------------------------------------------
+    identification = model.get("model_identification", {}) or {}
+    description = model.get("model_description", {}) or {}
+    config_files = description.get("config_files", {}) or {}
+    input_time_interval = description.get("input_time_interval", {}) or {}
+    time_interval = input_time_interval.get("time_interval", {}) or {}
+    aggregation = input_time_interval.get("aggregation", {}) or {}
 
-                                html.Div([
-                                        dbc.Label("Status Description",className="fw-semibold"),
-                                        html.Div(model["model_identification"].get("status_description", ""),className="fw-bold text-muted",
-                                            style={"height": "100px"},
-                                        ),
-                                    ],className="mb-3"), 
-                            ],md=6,),
-                        ],className="mb-4",),
-                    
-                        dbc.Row([
-                            html.H4("Model Description", className="mb-4"),
-                            dbc.Col([
-                                html.Div([
-                                    dbc.Label("Learner",className="fw-semibold"),
-                                    html.Div(children=model["model_description"].get("learner", ""),className="fw-bold text-muted")
-                                ],className="mb-3"),
-                                html.Div([
-                                    dbc.Label(
-                                        "Model Type",
-                                        className="fw-semibold"
-                                    ),
-                                    html.Div(children=model["model_description"].get("model_type", ""),className="fw-bold text-muted")
-                                ],className="mb-3"),
-                                html.Div([
-                                    dbc.Label("Model Name",className="fw-semibold"),
-                                    html.Div(children=model["model_description"].get("model_name", ""),className="fw-bold text-muted")
-                                ],className="mb-3"),
-                                
-                                
-                                html.Div([
-                                    dbc.Label(
-                                        "Model Description",
-                                        className="fw-semibold"
-                                    ),
-                                    html.Div(children=model["model_description"].get("description", ""),className="fw-bold text-muted",
-                                        style={"height": "150px"},
-                                    ),
-                                ], className="mb-3"),
-                                html.Div([
-                                    dbc.Label(
-                                        "Language",
-                                        className="fw-semibold"
-                                    ),
-                                    html.Div(children=language_name,className="fw-bold text-muted")
-                                ], className="mb-3"),
-                                html.Div([
-                                    dbc.Label(
-                                        "Language Version",
-                                        className="fw-semibold"
-                                    ),
-                                    html.Div(children=language_version,className="fw-bold text-muted")
-                                ], className="mb-3"),
-                                
-                                html.Div(
-                                [
-                                    html.H5("Packages", className="mt-4"),
-                                    html.Div(
-                                        id="packages-container",
-                                        children=[
-                                            package_row(
-                                                i,
-                                                p.get("package", ""),
-                                                p.get("version", "-"),
-                                            )
-                                            for i, p in enumerate(packages)
-                                        ]
-                                        or [package_row(0)],
-                                    )
-                                    
-                                ]), 
+    language_data = description.get("language", []) or []
+    language_name = get_value_from_list_of_dicts(language_data, "name") or ""
+    language_version = get_value_from_list_of_dicts(language_data, "version") or ""
 
-                            ],md=6,),
+    packages = description.get("packages", []) or []
 
-                            dbc.Col([
-                                html.Div([
-                                    dbc.Label(
-                                        "Model File",
-                                        className="fw-semibold"
-                                    ),
-                                    html.Div(
-                                        children=model["model_description"]["config_files"].get("model_file", ""),
-                                        className="fw-bold text-muted"
-                                    )
-                                ],className="mb-3",),
-                                html.Div([
-                                    dbc.Label(
-                                        "Configuration server",
-                                        className="fw-semibold"
-                                    ),
-                                    html.Div(
-                                        children=model["model_description"]["config_files"].get("server", ""),
-                                        className="fw-bold text-muted"
-                                    )
-                                ], className="mb-3"),
-                                html.Div([
-                                    dbc.Label(
-                                        "Configuration Port",
-                                        className="fw-semibold"
-                                    ),
-                                    html.Div(
-                                        children=model["model_description"]["config_files"].get("port", ""),
-                                        className="fw-bold text-muted"
-                                    )
-                                ], className="mb-3"),
-                                html.Div([
-                                    dbc.Label(
-                                        "Configuration REST API",
-                                        className="fw-semibold"
-                                    ),
-                                    html.Div(
-                                        children=model["model_description"]["config_files"].get("rest_api", ""),
-                                        className="fw-bold text-muted"
-                                    )
-                                ], className="mb-3"),
-                                html.Div([
-                                    html.H5("Input time interval", className="mt-4"),
-                                    html.Div([
-                                        dbc.Label(
-                                            "Input time interval value",
-                                            className="fw-semibold"
-                                        ),
-                                        html.Div(
-                                            children=model["model_description"].get("input_time_interval", {}).get("time_interval", {}).get("value", ""),
-                                            className="fw-bold text-muted"
-                                        ),
-                                    ], className="mb-3"),
-                                    html.Div([
-                                        dbc.Label(
-                                            "Input time interval units",
-                                            className="fw-semibold"
-                                        ),
-                                        html.Div(children=model["model_description"].get("input_time_interval", {}).get("time_interval", {}).get("unit", ""),
-                                                 className="fw-bold text-muted"),
-                                    ], className="mb-3"),
-                                    html.Div([
-                                        dbc.Label(
-                                            "Input time interval description",
-                                            className="fw-semibold"
-                                        ),
-                                        html.Div(
-                                            children=model["model_description"].get("input_time_interval", {}).get("description", ""),
-                                            className="fw-bold text-muted"),
-                                    ], className="mb-3"),
-                                    html.H5("Aggregation", className="mt-4"),
-                                    html.Div([
-                                        dbc.Label(
-                                            "Input time interval aggregation",
-                                            className="fw-semibold"
-                                        ),
-                                        html.Div(
-                                            children=model["model_description"].get("input_time_interval", {}).get("aggregation", {}).get("method", ""),
-                                            className="fw-bold text-muted"
-                                        )
-                                    ], className="mb-3"),
-                                    html.Div([
-                                        dbc.Label(
-                                            "Input time interval aggregation description",
-                                            className="fw-semibold"
-                                        ),
-                                        html.Div(
-                                            children=model["model_description"].get("input_time_interval", {}).get("aggregation", {}).get("description", ""),
-                                            className="fw-bold text-muted"
-                                        )
-                                    ], className="mb-3"),
+    features = normalize_features(model.get("inputs", {}).get("features", []) or [])
+    outputs = normalize_features(model.get("outputs", {}).get("information", []) or [])
 
-                                ])
+    training = model.get("training_information", {}) or {}
+    hyperparameters = training.get("hyperparameters", {}) or {}
+    value_validation = str(training.get("validation", "") or "")
 
-                            ],md=6,),
-                        ],className="mb-4",),    
+    model_name = identification.get("name") or model_id
+    model_version = identification.get("version", "")
+    status = identification.get("status", "offline")
 
-                        dbc.Row([
-                            html.H4("Training information", className="mb-4"),
-                            dbc.Col([
-                                html.Div([
-                                    html.H5("Hyperparameters", className="mt-4"),
-                                    html.Div([
-                                        dbc.Label(
-                                            "Number of trees",
-                                            className="fw-semibold"
-                                        ),
-                                        html.Div(
-                                            children=model.get("training_information", {}).get("hyperparameters", {}).get("number_of_trees", ""),
-                                            className="fw-bold text-muted"
-                                        )
-                                    ], className="mb-3"),
-                                    html.Div([
-                                        dbc.Label(
-                                            "Maximum depth",
-                                            className="fw-semibold"
-                                        ),
-                                        html.Div(
-                                            children=model.get("training_information", {}).get("hyperparameters", {}).get("max_tree_depth", ""),
-                                            className="fw-bold text-muted"
-                                        )
-                                    ], className="mb-3"),
-                                    html.Div([
-                                        dbc.Label(
-                                            "Minimum number of instances per leaf",
-                                            className="fw-semibold"
-                                        ),
-                                        html.Div(
-                                            children=model.get("training_information", {}).get("hyperparameters", {}).get("min_number_instances_per_leaf", ""),
-                                        )
-                                    ], className="mb-3"),
-                                    html.Div([
-                                        dbc.Label(
-                                            "Input committees",
-                                            className="fw-semibold"
-                                        ),
-                                        html.Div(
-                                            children=model.get("training_information", {}).get("hyperparameters", {}).get("committees", ""),
-                                        )
-                                    ], className="mb-3"),
-                                    html.Div([
-                                        dbc.Label(
-                                            "Input instance based correction",
-                                            className="fw-semibold"
-                                        ),
-                                        html.Div(
-                                            children=model.get("training_information", {}).get("hyperparameters", {}).get("instance_based_corrections", ""),
-                                            className="fw-bold text-muted"
-                                        )
-                                    ], className="mb-3"),
-                                ])
-                            ],md=6,),
-
-                            dbc.Col([
-                                html.Div([
-                                    dbc.Label(
-                                        "Number of Instances",
-                                        className="fw-semibold"
-                                    ),
-                                    html.Div(
-                                        children=model.get("training_information", {}).get("number_of_instances", ""),
-                                        className="fw-bold text-muted"
-                                    )
-                                ], className="mb-3"),
-                                html.Div([
-                                    dbc.Label(
-                                        "Validation",
-                                        className="fw-semibold"
-                                    ),
-                                    html.Div(
-                                        children=value_validation,
-                                        className="fw-bold text-muted"
-                                    )
-                                ], className="mb-3"),
-                                html.Div([
-                                    dbc.Label(
-                                        "Training experiments ID",
-                                        className="fw-semibold"
-                                    ),
-                                    html.Div(
-                                        children=model.get("training_information", {}).get("experiments_ID", ""),
-                                        className="fw-bold text-muted"
-                                    )
-                                ], className="mb-3"),
-                            ],md=6,),
-                                    
-                        ],className="mb-4",),
-
-                        dbc.Row([
-                            dbc.Col([
-                                html.Div([
-                                    html.H4("Inputs", className="mb-4"),
-                                    dbc.Accordion(
-                                        id="features-accordion-details",
-                                        always_open=True
-                                    ),                                    
-                                ])
-
-                            ],md=12),
-                            
-                        ],className="mb-4",),
-
-                        dbc.Row([
-                            dbc.Col([
-                                html.Div([
-                                    html.H4("Outputs", className="mb-4"),
-                                    dbc.Accordion(
-                                        id="outputs-accordion-details",
-                                        always_open=True
-                                    )
-                                ]),
-
-                            ],md=12),
-                        ],className="mb-4",),
-
-
-                    ])
-                )
-            ),
+    # -------- Hero / page header --------------------------------------------
+    hero = dbc.Card(
+        dbc.CardBody(
             dbc.Row(
+                [
+                    dbc.Col(
                         [
-                            dbc.Col(
-                                dbc.Button(
-                                    "← Back to list",
-                                    id="back-to-list",
-                                    color="secondary",
-                                    outline=True,
-                                    className="me-2",
-                                ),
-                                width="auto",
+                            html.Div(
+                                [
+                                    html.I(className="bi bi-cpu-fill text-primary me-2"),
+                                    html.Span("Model Details", className="text-muted small text-uppercase fw-semibold letter-spaced"),
+                                ],
+                                className="mb-2",
                             ),
-
-                            dbc.Col(
-                                dbc.Button(
-                                    [
-                                        html.I(className="bi bi-download me-2"),
-                                        "Download model"
-                                    ],
-                                    id="download-model",
-                                    color="primary",
-                                ),
-                                width="auto",
+                            html.H2(model_name, className="details-hero-title mb-1"),
+                            html.Div(
+                                [
+                                    html.Span(
+                                        [html.I(className="bi bi-folder2-open me-1"), f"Project: {project_id}"],
+                                        className="me-3 text-muted small",
+                                    ),
+                                    html.Span(
+                                        [html.I(className="bi bi-hash me-1"), f"ID: {identification.get('ID', model_id)}"],
+                                        className="me-3 text-muted small",
+                                    ),
+                                    html.Span(
+                                        [html.I(className="bi bi-tag me-1"), f"v{model_version}" if model_version else "—"],
+                                        className="me-3 text-muted small",
+                                    ),
+                                ],
+                                className="mb-2 d-flex flex-wrap",
                             ),
-
-
-                            dbc.Col(
-                                html.Div(
-                                    id="download-feedback",
-                                    className="ms-3 fw-semibold",
-                                ),
+                            html.Div(
+                                [
+                                    _status_badge(status),
+                                    dbc.Badge(
+                                        [html.I(className="bi bi-code-slash me-1"), f"{language_name} {language_version}".strip() or "—"],
+                                        color="light",
+                                        text_color="dark",
+                                        className="ms-2 px-3 py-2 border",
+                                    ),
+                                    dbc.Badge(
+                                        [html.I(className="bi bi-diagram-3 me-1"), description.get("learner") or description.get("model_type") or "—"],
+                                        color="light",
+                                        text_color="dark",
+                                        className="ms-2 px-3 py-2 border",
+                                    ),
+                                ],
+                                className="d-flex flex-wrap align-items-center",
                             ),
                         ],
-                        className="align-items-center mt-4",
+                        md=8,
                     ),
-            dcc.Store(id="edit-model-info", data={
-                "project_id": project_id,
-                "model_id": model_id
-            })
+                    dbc.Col(
+                        html.Div(
+                            [
+                                html.Div("Created", className="text-muted small text-uppercase fw-semibold"),
+                                html.Div(
+                                    normalize_date(identification.get("creation_date", "")) or "—",
+                                    className="fw-semibold mb-2",
+                                ),
+                                html.Div("Author", className="text-muted small text-uppercase fw-semibold"),
+                                html.Div(identification.get("author", "") or "—", className="fw-semibold"),
+                            ],
+                            className="text-md-end",
+                        ),
+                        md=4,
+                        className="d-flex align-items-center justify-content-md-end",
+                    ),
+                ],
+                className="g-3",
+            )
+        ),
+        className="shadow-sm border-0 mb-4 details-hero",
+    )
 
-    ])
+    # -------- Identification card -------------------------------------------
+    identification_body = dbc.Row(
+        [
+            dbc.Col(
+                [
+                    _info_item("Model ID", identification.get("ID", "")),
+                    _info_item("Model UUID", identification.get("UUID", ""), mono=True),
+                    _info_item("DOI", identification.get("doi", "")),
+                ],
+                md=6,
+            ),
+            dbc.Col(
+                [
+                    _info_item("Name", identification.get("name", "")),
+                    _info_item("Version", identification.get("version", "")),
+                    _info_item(
+                        "Status description",
+                        identification.get("status_description", ""),
+                        multiline=True,
+                    ),
+                ],
+                md=6,
+            ),
+        ],
+        className="g-3",
+    )
+
+    # -------- Description card ----------------------------------------------
+    description_body = html.Div(
+        [
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            _info_item("Learner", description.get("learner", "")),
+                            _info_item("Model type", description.get("model_type", "")),
+                            _info_item("Model name", description.get("model_name", "")),
+                            _info_item("Language", language_name),
+                            _info_item("Language version", language_version),
+                        ],
+                        md=6,
+                    ),
+                    dbc.Col(
+                        [
+                            _info_item(
+                                "Description",
+                                description.get("description", ""),
+                                multiline=True,
+                            ),
+                        ],
+                        md=6,
+                    ),
+                ],
+                className="g-3",
+            ),
+            html.Hr(className="my-4"),
+            html.Div(
+                [
+                    html.H6(
+                        [html.I(className="bi bi-box-seam me-2 text-primary"), "Packages"],
+                        className="details-subsection-title mb-3",
+                    ),
+                    html.Div(
+                        id="packages-container",
+                        children=[
+                            package_row(i, p.get("package", ""), p.get("version", "-"))
+                            for i, p in enumerate(packages)
+                        ]
+                        or [package_row(0)],
+                    ),
+                ]
+            ),
+        ]
+    )
+
+    # -------- Configuration & deployment ------------------------------------
+    config_body = html.Div(
+        [
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            _info_item("Model file", config_files.get("model_file", ""), mono=True),
+                            _info_item("Server", config_files.get("server", "")),
+                        ],
+                        md=6,
+                    ),
+                    dbc.Col(
+                        [
+                            _info_item("Port", config_files.get("port", "")),
+                            _info_item("REST API", config_files.get("rest_api", ""), mono=True),
+                        ],
+                        md=6,
+                    ),
+                ],
+                className="g-3",
+            ),
+            html.Hr(className="my-4"),
+            html.H6(
+                [html.I(className="bi bi-clock-history me-2 text-primary"), "Input time interval"],
+                className="details-subsection-title mb-3",
+            ),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            _info_item("Value", time_interval.get("value", "")),
+                            _info_item("Units", time_interval.get("unit", "")),
+                        ],
+                        md=6,
+                    ),
+                    dbc.Col(
+                        [
+                            _info_item(
+                                "Description",
+                                input_time_interval.get("description", ""),
+                                multiline=True,
+                            ),
+                        ],
+                        md=6,
+                    ),
+                ],
+                className="g-3",
+            ),
+            html.Hr(className="my-4"),
+            html.H6(
+                [html.I(className="bi bi-bar-chart-steps me-2 text-primary"), "Aggregation"],
+                className="details-subsection-title mb-3",
+            ),
+            dbc.Row(
+                [
+                    dbc.Col(_info_item("Method", aggregation.get("method", "")), md=6),
+                    dbc.Col(
+                        _info_item(
+                            "Description",
+                            aggregation.get("description", ""),
+                            multiline=True,
+                        ),
+                        md=6,
+                    ),
+                ],
+                className="g-3",
+            ),
+        ]
+    )
+
+    # -------- Training information ------------------------------------------
+    training_body = html.Div(
+        [
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            html.H6(
+                                [html.I(className="bi bi-sliders me-2 text-primary"), "Hyperparameters"],
+                                className="details-subsection-title mb-3",
+                            ),
+                            _info_item("Number of trees", hyperparameters.get("number_of_trees", "")),
+                            _info_item("Max tree depth", hyperparameters.get("max_tree_depth", "")),
+                            _info_item(
+                                "Min instances per leaf",
+                                hyperparameters.get("min_number_instances_per_leaf", ""),
+                            ),
+                            _info_item("Committees", hyperparameters.get("committees", "")),
+                            _info_item(
+                                "Instance-based corrections",
+                                hyperparameters.get("instance_based_corrections", ""),
+                            ),
+                        ],
+                        md=6,
+                    ),
+                    dbc.Col(
+                        [
+                            html.H6(
+                                [html.I(className="bi bi-clipboard-data me-2 text-primary"), "Dataset & validation"],
+                                className="details-subsection-title mb-3",
+                            ),
+                            _info_item("Number of instances", training.get("number_of_instances", "")),
+                            _info_item("Validation", value_validation),
+                            _info_item("Training experiments ID", training.get("experiments_ID", "")),
+                        ],
+                        md=6,
+                    ),
+                ],
+                className="g-3",
+            ),
+        ]
+    )
+
+    # -------- Inputs / outputs ----------------------------------------------
+    inputs_body = html.Div(
+        [
+            html.P(
+                f"{len(features)} feature(s) used as input.",
+                className="text-muted small mb-3",
+            ),
+            dbc.Accordion(id="features-accordion-details", always_open=True),
+        ]
+    )
+
+    outputs_body = html.Div(
+        [
+            html.P(
+                f"{len(outputs)} output(s) produced by the model.",
+                className="text-muted small mb-3",
+            ),
+            dbc.Accordion(id="outputs-accordion-details", always_open=True),
+        ]
+    )
+
+    # -------- Action bar ----------------------------------------------------
+    action_bar = dbc.Card(
+        dbc.CardBody(
+            dbc.Row(
+                [
+                    dbc.Col(
+                        dbc.Button(
+                            [html.I(className="bi bi-arrow-left me-1"), "Back to list"],
+                            id="back-to-list",
+                            color="secondary",
+                            outline=True,
+                        ),
+                        width="auto",
+                    ),
+                    dbc.Col(
+                        dbc.Button(
+                            [html.I(className="bi bi-download me-1"), "Download model"],
+                            id="download-model",
+                            color="primary",
+                        ),
+                        width="auto",
+                    ),
+                    dbc.Col(
+                        html.Div(id="download-feedback", className="ms-3 fw-semibold"),
+                    ),
+                ],
+                className="align-items-center g-2",
+            )
+        ),
+        className="shadow-sm border-0 details-action-bar",
+    )
+
+    # -------- Compose page --------------------------------------------------
+    return dbc.Container(
+        [
+            dcc.Store(id="features-store-details", data=features),
+            dcc.Store(id="outputs-store-details", data=outputs if outputs else []),
+            dcc.Download(id="download-model-file"),
+            dcc.Store(
+                id="edit-model-info",
+                data={"project_id": project_id, "model_id": model_id},
+            ),
+            hero,
+            _section_card("Identification", "bi-fingerprint", identification_body),
+            _section_card("Model Description", "bi-card-text", description_body),
+            _section_card(
+                "Configuration & Deployment",
+                "bi-gear-wide-connected",
+                config_body,
+            ),
+            _section_card("Training Information", "bi-mortarboard", training_body),
+            _section_card("Inputs", "bi-input-cursor-text", inputs_body, subtitle=f"{len(features)} feature(s)"),
+            _section_card("Outputs", "bi-arrow-bar-right", outputs_body, subtitle=f"{len(outputs)} output(s)"),
+            action_bar,
+        ],
+        fluid=True,
+        className="details-page p-4",
+    )
 

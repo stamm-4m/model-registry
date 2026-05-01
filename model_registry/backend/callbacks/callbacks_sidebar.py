@@ -21,6 +21,7 @@ from model_registry.backend.pages.upload_model_ibisba import (
     add_upload_model_ibisba_layout,
 )
 from model_registry.backend.services.project_api_service import list_projects
+from model_registry.backend.utils.utils_sidebar import get_user_permissions
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +42,8 @@ def register_sidebar_callbacks(app):
             projects_options, session_data = list_projects(session_data)
             if projects_options is None:
                 return login_form()
-            return home_layout(projects_options)
+            permissions = get_user_permissions(session_data)
+            return home_layout(projects_options, permissions=permissions)
         
         if pathname.startswith("/model-upload-ibisba"):
             parts = pathname.strip("/").split("/")
@@ -88,7 +90,7 @@ def register_sidebar_callbacks(app):
             if len(parts) != 3:
                 return not_found_layout()
             _, project_id, model_id = parts
-            return details_model_layout(project_id, model_id)
+            return details_model_layout(project_id, model_id, session_data)
         
         elif pathname == "/help":
             return help_layout()

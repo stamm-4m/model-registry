@@ -132,7 +132,7 @@ def sidebar(session_data=None):
     # ---------- Footer (logout) ----------
     footer = html.Div(
         [
-            dbc.NavLink(
+            dbc.Button(
                 html.Span(
                     [
                         html.I(className="bi bi-box-arrow-right sidebar-icon"),
@@ -142,7 +142,7 @@ def sidebar(session_data=None):
                 ),
                 id={"type": "logout-button", "index": 0},
                 className="sidebar-link sidebar-logout",
-                href="",
+                color="link",
                 n_clicks=0,
             )
         ]

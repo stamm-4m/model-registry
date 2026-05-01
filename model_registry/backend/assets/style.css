@@ -243,3 +243,154 @@
     vertical-align: middle;
     cursor: pointer;
 }
+
+/* ============================================================
+   Home page - professional layout
+   ============================================================ */
+.home-page {
+    background-color: #f5f7fb;
+    min-height: 100vh;
+}
+
+.home-page .page-title {
+    color: #1f2a44;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+}
+
+.home-page .home-card {
+    border-radius: 12px !important;
+    background-color: #ffffff;
+}
+
+.home-page .card-section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2a44;
+    letter-spacing: 0.2px;
+}
+
+.home-page .form-label {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.home-page .project-dropdown .Select-control,
+.home-page .project-dropdown .Select-menu-outer {
+    border-radius: 8px;
+}
+
+.home-page .btn-primary {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.home-page .card-header {
+    border-bottom: 1px solid #eef0f5 !important;
+}
+
+.home-page .ag-theme-alpine,
+.home-page .ag-theme-alpine .ag-root-wrapper {
+    border-radius: 8px;
+}
+
+.home-page .ag-header {
+    background-color: #f9fafc;
+    font-weight: 600;
+}
+
+
+/* ============================================================
+   Model Details page
+   ============================================================ */
+.details-page {
+    background-color: #f5f7fb;
+    min-height: 100vh;
+}
+
+.details-hero {
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+}
+
+.details-hero-title {
+    color: #1f2a44;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+.letter-spaced {
+    letter-spacing: 1px;
+}
+
+.details-card {
+    border-radius: 12px !important;
+    background-color: #ffffff;
+}
+
+.details-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2a44;
+}
+
+.details-subsection-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a5070;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.details-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f2f7;
+}
+.details-item:last-child {
+    border-bottom: none;
+}
+
+.details-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #7d8499;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 2px;
+}
+
+.details-value {
+    font-size: 14px;
+    color: #1f2a44;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.details-value-multiline {
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+.details-value-mono {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
+    font-size: 13px;
+    background: #f7f8fc;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.details-status-badge {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.details-action-bar {
+    border-radius: 12px !important;
+    background-color: #ffffff;
+    margin-bottom: 24px;
+}
+
+.details-card .card-header {
+    border-bottom: 1px solid #eef0f5 !important;
+}
