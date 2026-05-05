@@ -7,7 +7,7 @@ from dash.exceptions import PreventUpdate
 
 from model_registry.backend.config.settings import settings
 from model_registry.backend.services.model_service import list_models
-from model_registry.backend.services.project_api_service import list_projects
+from model_registry.backend.services.project_service import list_projects
 from model_registry.backend.utils.utils_home import delete_model_from_registry
 
 logger = logging.getLogger(__name__)
@@ -30,8 +30,7 @@ def register_home_callbacks(app):
         else:
             try:
                 projects_response, session_data = list_projects(session_data)
-                projects_response.raise_for_status()
-                projects = [p["project_ID"] for p in projects_response.json()]
+                projects = [p["project_ID"] for p in projects_response]
             except Exception as e:
                 print(f"Error fetching projects: {e}")
                 return [],[]

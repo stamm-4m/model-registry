@@ -41,15 +41,16 @@ def register_user_modal_callbacks(app):
         Output("user-dept-dropdown", "options"),
         Input("btn-open-user-modal", "n_clicks"),
         Input({"type": "btn-edit-dept", "index": ALL}, "n_clicks"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def load_departments_dropdown(n, n_list):
+    def load_departments_dropdown(n, n_list, session_data):
         service = DepartmentService()
-        departments = service.get_department_all()
+        departments, _ = service.get_all_departments(session_data)
         logger.debug(f"Loaded departments for dropdown: {departments}")
         return [
             {"label": dept.name, "value": str(dept.id)}
-            for dept, _ in departments
+            for dept in departments
         ]
 
     @app.callback(
@@ -70,9 +71,10 @@ def register_user_modal_callbacks(app):
         State("user-dept-dropdown", "value"),
         State("user-lab-dropdown", "value"),
         State("user-edit-id", "data"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def save_user(n, name, email, password, dept_id, lab_id, user_id):
+    def save_user(n, name, email, password, dept_id, lab_id, user_id, session_data):
 
         if not n:
             raise PreventUpdate
@@ -89,10 +91,10 @@ def register_user_modal_callbacks(app):
         try:
             if user_id:
                 logger.debug(f"Editing user with ID: {user_id}")
-                service.update_user(user_id, name, email, password, lab_id)
+                service.update_user(session_data, user_id, name, email, password, lab_id)
             else:
                 logger.debug("Creating new user")
-                service.create_user(name, email, password, lab_id)
+                service.create_user(session_data, name, email, password, lab_id)
 
             logger.debug(f"Saved user: {name}, email: {email}")
 
@@ -125,9 +127,10 @@ def register_user_modal_callbacks(app):
         Output("user-dept-dropdown", "value", allow_duplicate=True),
         Output("user-edit-id", "data"),
         Input({"type": "btn-edit-user", "index": ALL}, "n_clicks"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def open_edit_user(n_clicks_list):
+    def open_edit_user(n_clicks_list, session_data):
         ctx = dash.callback_context
 
         if not ctx.triggered:
@@ -139,9 +142,10 @@ def register_user_modal_callbacks(app):
         user_id = ctx.triggered_id["index"]
 
         service = UserService()
-        user = service.get_user(user_id)
+        user, _ = service.get_user(session_data, user_id)
+        if user is None:
+            raise PreventUpdate
         logger.debug(f"Editing user with ID: {user_id}, name: {user.full_name}, email: {user.email}")
-        lab_id = service.get_lab_id_by_user_id(user_id)
-        dept_id = service.get_dept_id_by_user_id(user_id)
+        dept_id, _ = service.get_dept_id_by_user_id(session_data, user_id)
 
-        return True, user.full_name, user.email, str(dept_id), user_id
+        return True, user.full_name, user.email, str(dept_id) if dept_id else None, user_id

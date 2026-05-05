@@ -1,4 +1,4 @@
-from dash import Output, Input, html
+from dash import Output, Input, html, State, ALL
 import dash_bootstrap_components as dbc
 
 
@@ -19,38 +19,40 @@ def register_organizations_table_callbacks(app):
     # Callback load organizations and departments
     @app.callback(
         Output("organizations-table", "children"),
-        Input("org-refresh-trigger", "data")
+        Input("org-refresh-trigger", "data"),
+        State("user-session", "data"),
     )
-    def load_organizations(refresh_data):
+    def load_organizations(refresh_data, session_data):
         service = OrganizationService()
-        organizations = service.get_all_organizations()
+        organizations, _ = service.get_all_organizations(session_data)
+        logger.debug(f"Loaded organizations for table: {organizations}")
 
         if not organizations:
             return html.Div("No organizations found.")
-
-        
         return build_table(organizations)
     
     @app.callback(
         Output("departments-table", "children"),
-        Input("dept-refresh-trigger", "data")
+        Input("dept-refresh-trigger", "data"),
+        State("user-session", "data"),
     )
-    def load_departments(_):
+    def load_departments(refresh_data, session_data):
         service = DepartmentService()
-        rows = service.get_department_all()
-
-        if not rows:
+        departments, _ = service.get_all_departments_with_org(session_data)
+        logger.debug(f"Loaded departments for table: {departments}")
+        if not departments:
             return "No departments found."
-
-        return build_table_departments(rows)
+        return build_table_departments(departments)
     
     @app.callback(
         Output("laboratories-table", "children"),
-        Input("lab-refresh-trigger", "data")
+        Input("lab-refresh-trigger", "data"),
+        State("user-session", "data"),
     )
-    def load_laboratories(_):
+    def load_laboratories(refresh_data, session_data):
         service = LaboratoryService()
-        rows = service.get_laboratory_all()
+        rows, _ = service.get_laboratory_all_with_dept(session_data)
+        logger.debug(f"Loaded laboratories for table: {rows}")
 
         if not rows:
             return "No laboratories found."
@@ -60,12 +62,13 @@ def register_organizations_table_callbacks(app):
 
     @app.callback(
         Output("users-table", "children"),
-        Input("user-refresh-trigger", "data")
+        Input("user-refresh-trigger", "data"),
+        State("user-session", "data"),
     )
-    def load_users(_):
+    def load_users(refresh_data, session_data):
         service = UserService()
-        rows = service.get_all_users()
+        rows, _ = service.get_all_users_with_department_and_laboratory(session_data)
+        logger.debug(f"Loaded users for table: {rows}")
         if not rows:
             return "No users found."
-        logger.debug(f"Loaded users for table: {rows}")
         return build_table_users(rows)

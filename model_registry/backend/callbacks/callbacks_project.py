@@ -1,4 +1,4 @@
-from dash import Output, Input, html
+from dash import Output, Input, State, html
 import dash_bootstrap_components as dbc
 
 
@@ -15,11 +15,12 @@ def register_project_table_callbacks(app):
     # Callback load projects 
     @app.callback(
         Output("projects-table", "children"),
-        Input("proj-refresh-trigger", "data")
+        Input("proj-refresh-trigger", "data"),
+        State("user-session", "data"),
     )
-    def load_projects(refresh_data):
+    def load_projects(refresh_data, session_data):
         service = ProjectService()
-        projects = service.get_all_projects()
+        projects, _ = service.get_all_projects(session_data)
 
         if not projects:
             return html.Div("No projects found.")
@@ -28,12 +29,13 @@ def register_project_table_callbacks(app):
     # Callback load experiments
     @app.callback(
         Output("experiments-table", "children"),
-        Input("exp-refresh-trigger", "data")
+        Input("exp-refresh-trigger", "data"),
+        State("user-session", "data"),
     )
-    def load_experiments(refresh_data):
+    def load_experiments(refresh_data, session_data):
 
         service = ExperimentService()
-        experiments = service.get_all_experiments()
+        experiments, _ = service.get_all_experiments(session_data)
 
         if not experiments:
             return html.Div("No experiments found.")

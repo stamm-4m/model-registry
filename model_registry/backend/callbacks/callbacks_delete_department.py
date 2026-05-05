@@ -34,17 +34,16 @@ def register_delete_department_modal_callbacks(app):
         Output("dept-toast", "icon", allow_duplicate=True),
         Input("btn-confirm-delete", "n_clicks"),
         State("dept-delete-id", "data"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def confirm_delete_dept(n_clicks, dept_id):
+    def confirm_delete_dept(n_clicks, dept_id, session_data):
         if not n_clicks or not dept_id:
             raise PreventUpdate
 
         service = DepartmentService()
-
         try:
-            service.delete_department(dept_id)
-
+            service.delete_department(session_data, dept_id)
             return (
                 False,              # cerrar modal
                 n_clicks,           # refresh tabla
@@ -52,14 +51,13 @@ def register_delete_department_modal_callbacks(app):
                 "Department deleted successfully",
                 "success"
             )
-        
         except DepartmentInUseException as e:
             return (
                 False,
                 dash.no_update,
                 True,
                 str(e),
-                "warning"
+                "danger"
             )
 
         except Exception as e:

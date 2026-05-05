@@ -24,9 +24,10 @@ def register_user_modal_role_callbacks(app):
         Output("roles-user-laboratory", "children"),
         Output("roles-user-id", "data"),
         Input({"type": "btn-manage-roles", "index": ALL}, "n_clicks"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def open_roles_modal(n_clicks_list):
+    def open_roles_modal(n_clicks_list, session_data):
         ctx = dash.callback_context
 
         if not ctx.triggered:
@@ -43,14 +44,14 @@ def register_user_modal_role_callbacks(app):
         service_role = RoleService()
         service_lab = LaboratoryService()
         roles = service_role.get_all_roles()
-        user_roles = service.get_all_roles_by_user_id(user_id)
+        user_roles, _ = service.get_all_roles_by_user_id(session_data, user_id)
 
         options = [{"label": r.name, "value": str(r.id)} for r in roles]
         # Solo roles generales (resource_type is None)
         values = [str(r.role_id) for r in user_roles if getattr(r, 'permission_id', None) is None]
 
-        user = service.get_user(user_id)
-        lab = service_lab.get_laboratory_by_user_id(user_id) 
+        user, _ = service.get_user(session_data, user_id)
+        lab, _ = service_lab.get_laboratory_by_user_id(session_data, user_id) 
         if lab:
             lab_name = lab.name
         else:
@@ -85,12 +86,13 @@ def register_user_modal_role_callbacks(app):
     @app.callback(
         Output("user-projects-dropdown", "options"),
         Input("roles-user-id", "data"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def load_projects(user_id):
+    def load_projects(user_id, session_data):
         # You can filter projects by user if needed, here we load all
         service = ProjectService()
-        projects = service.get_all_projects()
+        projects, _ = service.get_all_projects(session_data)
         return [{"label": p.name, "value": str(p.id)} for p in projects]
 
     # Callback to load models (soft sensors) for the selected project
@@ -113,9 +115,10 @@ def register_user_modal_role_callbacks(app):
         Output("user-models-permissions-checklist", "value"),
         Input("user-models-dropdown", "value"),
         State("roles-user-id", "data"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def load_model_roles(model_id, user_id):
+    def load_model_roles(model_id, user_id, session_data):
         if not model_id or not user_id:
             return [], []
         role_service = RoleService()
@@ -138,7 +141,7 @@ def register_user_modal_role_callbacks(app):
         # Get roles already assigned to this user for this model, then translate
         # them back to permission IDs so they can be pre-checked in the UI.
         
-        user_roles = user_service.get_all_roles_by_user_id(user_id)
+        user_roles, _ = user_service.get_all_roles_by_user_id(session_data, user_id)
         logger.debug(f"[callback] user_roles crudos: {[(ur.user_id, ur.role_id, ur.permission_id, ur.real_resource_id) for ur in user_roles]}")
         
         permission_ids = [
@@ -170,16 +173,17 @@ def register_user_modal_role_callbacks(app):
         State("roles-user-id", "data"),
         State("user-models-dropdown", "value"),
         State("user-models-permissions-checklist", "value"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def save_roles_and_model_roles(n_clicks, role_ids, user_id, model_id, model_permission_ids):
+    def save_roles_and_model_roles(n_clicks, role_ids, user_id, model_id, model_permission_ids, session_data):
         if not n_clicks:
             raise PreventUpdate
         service = UserService()
         # Asignar solo los roles seleccionados (generales)
         selected_role_ids = [str(r) for r in (role_ids or [])]
         logging.info(f"Assigning roles {selected_role_ids} to user {user_id}")
-        service.assign_user_roles(user_id, selected_role_ids)
+        service.assign_user_roles(session_data, user_id, selected_role_ids)
 
         # Save model-specific roles only if a model is selected
         if model_id:
@@ -189,7 +193,7 @@ def register_user_modal_role_callbacks(app):
                 f"to user {user_id} for model {model_id}"
             )
             # Asignar permisos sobre el modelo usando los roles generales del usuario
-            service.assign_user_model_permissions(user_id,selected_role_ids, valid_model_permission_ids, model_id)
+            service.assign_user_model_permissions(session_data, user_id, selected_role_ids, valid_model_permission_ids, model_id)
 
         # Close modal and show success toast
         return False, True, "Roles updated successfully!", "Success", "success"

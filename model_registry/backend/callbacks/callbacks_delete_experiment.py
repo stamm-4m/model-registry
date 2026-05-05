@@ -31,14 +31,15 @@ def register_delete_experiment_modal_callbacks(app):
         Output("exp-toast", "icon", allow_duplicate=True),
         Input("btn-confirm-delete", "n_clicks"),
         State("exp-delete-id", "data"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def confirm_delete_exp(n_clicks, exp_id):
+    def confirm_delete_exp(n_clicks, exp_id, session_data):
         if not n_clicks or not exp_id:
             raise PreventUpdate
         service = ExperimentService()
         try:
-            service.delete_experiment(exp_id)
+            service.delete_experiment(session_data, exp_id)
             return (
                 False,              # cerrar modal
                 n_clicks,           # refresh tabla

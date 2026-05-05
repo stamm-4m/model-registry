@@ -35,11 +35,12 @@ def register_experiment_modal_callbacks(app):
         Output("exp-project-dropdown", "options"),
         Input("btn-open-exp-modal", "n_clicks"),
         Input({"type": "btn-edit-exp", "index": ALL}, "n_clicks"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def load_projects_dropdown(n, n_list):
+    def load_projects_dropdown(n, n_list, session_data):
         service = ProjectService()
-        projects = service.get_all_projects()
+        projects, _ = service.get_all_projects(session_data)
         logger.debug(f"Loaded projects for dropdown: {projects}")
         return [
             {"label": proj.name, "value": str(proj.id)}
@@ -68,9 +69,10 @@ def register_experiment_modal_callbacks(app):
         State("exp-start-time-input", "value"),
         State("exp-end-time-input", "value"),
         State("exp-edit-id", "data"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def save_experiment(n, name, project_id, description, initial_conditions, set_points, start_time, end_time, exp_id):
+    def save_experiment(n, name, project_id, description, initial_conditions, set_points, start_time, end_time, exp_id, session_data):
         if not n:
             raise PreventUpdate
         if not name or not project_id:
@@ -92,6 +94,7 @@ def register_experiment_modal_callbacks(app):
             if exp_id:
                 logger.debug(f"Editing experiment with ID: {exp_id}")
                 service.update_experiment(
+                    session_data,
                     exp_id,
                     name=name,
                     project_id=project_id,
@@ -106,6 +109,7 @@ def register_experiment_modal_callbacks(app):
             else:
                 logger.debug("Creating new experiment")
                 service.add_experiment(
+                    session_data,
                     name=name,
                     project_id=project_id,
                     description=description,
@@ -133,9 +137,10 @@ def register_experiment_modal_callbacks(app):
         Output("exp-end-time-input", "value", allow_duplicate=True),
         Output("exp-edit-id", "data"),
         Input({"type": "btn-edit-exp", "index": ALL}, "n_clicks"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def open_edit_experiment(n_clicks_list):
+    def open_edit_experiment(n_clicks_list, session_data):
         ctx = dash.callback_context
         if not ctx.triggered:
             raise PreventUpdate
@@ -143,11 +148,13 @@ def register_experiment_modal_callbacks(app):
             raise PreventUpdate
         exp_id = ctx.triggered_id["index"]
         service = ExperimentService()
-        exp = service.get_experiment_by_id(exp_id)
+        exp, _ = service.get_experiment_by_id(session_data, exp_id)
+        if exp is None:
+            raise PreventUpdate
         import json
         ic = json.dumps(exp.initial_conditions) if exp.initial_conditions else ""
         sp = json.dumps(exp.set_points) if exp.set_points else ""
         st = str(exp.start_time) if exp.start_time else ""
         et = str(exp.end_time) if exp.end_time else ""
         logger.debug(f"Editing experiment with ID: {exp_id}, name: {exp.name}, project_id: {exp.project_id}")
-        return True, exp.name, str(exp.project_id), exp.description or "", ic, sp, st, et, str(exp_id)
+        return True, exp.name, str(exp.project_id) if exp.project_id else None, exp.description or "", ic, sp, st, et, str(exp_id)

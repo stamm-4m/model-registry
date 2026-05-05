@@ -9,7 +9,7 @@ ACTION_PERMISSIONS = {
     "xai":         "models:read",    # Explainability
     "details":     "models:read",    # Details
     "edit":        "models:edit",    # Edit
-    "delete":      "models:delete",  # Delete
+    "delete":      "models:edit",  # Delete
 }
 
 

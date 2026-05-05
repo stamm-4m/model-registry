@@ -35,16 +35,17 @@ def register_delete_project_modal_callbacks(app):
         Output("proj-toast", "icon", allow_duplicate=True),
         Input("btn-confirm-delete_project", "n_clicks"),
         State("proj-delete-id", "data"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def confirm_delete_project(n_clicks, proj_id):
+    def confirm_delete_project(n_clicks, proj_id, session_data):
         if not n_clicks or not proj_id:
             raise PreventUpdate
 
         service = ProjectService()
 
         try:
-            service.delete_project(proj_id)
+            service.delete_project(session_data, proj_id)
 
             return (
                 False,              # cerrar modal

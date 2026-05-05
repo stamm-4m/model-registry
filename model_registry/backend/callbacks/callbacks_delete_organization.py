@@ -34,16 +34,17 @@ def register_delete_organization_modal_callbacks(app):
         Output("org-toast", "icon", allow_duplicate=True),
         Input("btn-confirm-delete", "n_clicks"),
         State("org-delete-id", "data"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def confirm_delete(n_clicks, org_id):
+    def confirm_delete(n_clicks, org_id, session_data):
         if not n_clicks or not org_id:
             raise PreventUpdate
 
         service = OrganizationService()
 
         try:
-            service.delete_organization(org_id)
+            service.delete_organization(session_data, org_id)
 
             return (
                 False,              # cerrar modal

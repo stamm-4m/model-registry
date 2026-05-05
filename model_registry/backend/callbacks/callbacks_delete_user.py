@@ -39,9 +39,10 @@ def register_delete_user_modal_callbacks(app):
         Output("user-toast", "icon", allow_duplicate=True),
         Input("btn-confirm-delete-user", "n_clicks"),  
         State("user-delete-id", "data"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def confirm_delete_user(n_clicks, user_id):
+    def confirm_delete_user(n_clicks, user_id, session_data):
 
         if not n_clicks or not user_id:
             raise PreventUpdate
@@ -49,7 +50,7 @@ def register_delete_user_modal_callbacks(app):
         service = UserService()
 
         try:
-            service.delete_user(user_id)
+            service.delete_user(session_data, user_id)
 
             return (
                 False,              # cerrar modal

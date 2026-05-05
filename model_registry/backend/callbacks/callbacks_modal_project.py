@@ -65,13 +65,14 @@ def register_project_modal_callbacks(app):
     @app.callback(
         Output("proj-org-dropdown", "options"),
         Input("project-modal", "is_open"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def load_organizations(is_open):
+    def load_organizations(is_open, session_data):
         if not is_open:
             raise PreventUpdate
         service = OrganizationService()
-        orgs = service.get_all_organizations()
+        orgs, _ = service.get_all_organizations(session_data)
         options = [{"label": o.name, "value": str(o.id)} for o in orgs]
         return options
 
@@ -85,15 +86,15 @@ def register_project_modal_callbacks(app):
         Input("proj-org-dropdown", "value"),
         Input("proj-edit-id", "data"),
         State("proj-dept-dropdown", "value"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def load_departments(org_id, edit_id, current_dept):
+    def load_departments(org_id, edit_id, current_dept, session_data):
         if not org_id:
             return [], True, None, None, [], True
         service = DepartmentService()
-        depts = service.get_by_organization(org_id)
+        depts, _ = service.get_departments_by_organization(session_data, org_id)
         options = [{"label": d.name, "value": str(d.id)} for d in depts]
-        # If editing, keep the current value
         return options, False, current_dept, None, [], True
     
     @app.callback(
@@ -103,13 +104,14 @@ def register_project_modal_callbacks(app):
         Input("proj-dept-dropdown", "value"),
         Input("proj-edit-id", "data"),
         State("proj-lab-dropdown", "value"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def load_labs(dept_id, edit_id, current_lab):
+    def load_labs(dept_id, edit_id, current_lab, session_data):
         if not dept_id:
             return [], True, None
         service = LaboratoryService()
-        labs = service.get_by_department(dept_id)
+        labs, _ = service.get_by_department(session_data, dept_id)
         options = [{"label": l.name, "value": str(l.id)} for l in labs]
         # If editing, keep the current value
         return options, False, current_lab
@@ -133,9 +135,10 @@ def register_project_modal_callbacks(app):
         State("proj-external-id", "value"),
         State("proj-lab-dropdown", "value"),
         State("proj-edit-id", "data"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def save_project(n, name, description, external_id, lab_id, proj_id):
+    def save_project(n, name, description, external_id, lab_id, proj_id, session_data):
         if not n:
             raise PreventUpdate
         if not name or not lab_id:
@@ -147,6 +150,7 @@ def register_project_modal_callbacks(app):
             if proj_id:
                 logger.debug(f"Editing project {proj_id}")
                 service.update_project(
+                    session_data,
                     project_id=proj_id,
                     name=name,
                     description=description,
@@ -154,18 +158,22 @@ def register_project_modal_callbacks(app):
                 )
                 # Update lab assignment if lab_id is provided
                 if lab_id:
-                    service.update_project_lab(proj_id, lab_id)
+                    service.update_project_lab(session_data, proj_id, lab_id)
                 toast_msg = "Project updated successfully."
                 toast_header = "Success"
                 toast_icon = "success"
             else:
                 logger.debug("Creating project")
-                project = service.create_project(
+                project, session_data = service.create_project(
+                    session_data,
                     name=name,
                     description=description,
                     project_id=external_id
                 )
+                if project is None or project.id is None:
+                    raise Exception("Project creation failed (API returned no payload).")
                 service.assign_project_to_lab(
+                    session_data,
                     project.id,
                     UUID(lab_id)
                 )
@@ -193,9 +201,10 @@ def register_project_modal_callbacks(app):
         Output("proj-lab-dropdown", "value", allow_duplicate=True),
         Output("proj-edit-id", "data"),
         Input({"type": "btn-edit-proj", "index": ALL}, "n_clicks"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def open_edit_project(n_clicks_list):
+    def open_edit_project(n_clicks_list, session_data):
 
         ctx = dash.callback_context
 
@@ -209,7 +218,15 @@ def register_project_modal_callbacks(app):
 
         service = ProjectService()
 
-        project, lab, dept, org = service.get_full_project(proj_id)
+        full, _ = service.get_full_project(session_data, proj_id)
+
+        if full is None:
+            raise PreventUpdate
+
+        project = full.project
+        lab = full.laboratory
+        dept = full.department
+        org = full.organization
 
         logger.debug(f"Editing project {project.name}")
 
@@ -218,9 +235,9 @@ def register_project_modal_callbacks(app):
             project.name,
             project.description,
             project.project_id,
-            str(org.id),
-            str(dept.id),
-            str(lab.id),
+            str(org.id) if org and org.id else None,
+            str(dept.id) if dept and dept.id else None,
+            str(lab.id) if lab and lab.id else None,
             str(proj_id)
         )
 

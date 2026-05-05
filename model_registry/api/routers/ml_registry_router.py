@@ -257,6 +257,3 @@ def predict(
     # Otherwise -> run Python prediction
     logger.info(f"Running prediction for project '{project_id}', model '{model}' using Python model.")
     return ModelPredictor(model, input_scaler, output_scaler, outputs).predict(request)
-
-
-

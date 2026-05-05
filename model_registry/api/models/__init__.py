@@ -9,6 +9,10 @@ from .project import Project
 from .permission import Permission
 from .role_permission import RolePermission
 from .refresh_token import RefreshToken
+from .organization import Organization
+from .department import Department
+from .organization_department import OrganizationDepartment
+from .department_laboratory import DepartmentLaboratory
 
 # FermOps domain models added 2026-04-30 (Step 3).
 from .alert_rule import AlertRule
@@ -34,13 +38,15 @@ from .annotation import Annotation
 from .alert import Alert
 from .equipment_component import EquipmentComponent
 from .experiment_equipment import ExperimentEquipment
-
+from .department_laboratory import DepartmentLaboratory
 
 __all__ = [
     # auth + organization
     "User", "Role", "UserRole",
     "Laboratory", "LaboratoryProject", "LaboratoryUser", "Project",
     "Permission", "RolePermission", "RefreshToken",
+    "Organization", "Department", "DepartmentLaboratory",
+    "OrganizationDepartment", "DepartmentLaboratory",
     # FermOps domain (Step 3)
     "AlertRule", "DriftDetector",
     "PhaseNote", "PhaseOverride",

@@ -20,7 +20,7 @@ from model_registry.backend.pages.not_found import not_found_layout
 from model_registry.backend.pages.upload_model_ibisba import (
     add_upload_model_ibisba_layout,
 )
-from model_registry.backend.services.project_api_service import list_projects
+from model_registry.backend.services.project_service import list_projects
 from model_registry.backend.utils.utils_sidebar import get_user_permissions
 
 logger = logging.getLogger(__name__)
