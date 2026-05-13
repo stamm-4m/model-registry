@@ -18,45 +18,23 @@ from fastapi import APIRouter
 
 from model_registry.api.scaffold import register_crud
 from model_registry.api import models as M
+from model_registry.api.core.constants.permissions import PermissionManager
 
 
 router = APIRouter(prefix="/api/v1")
 
-# Permission tuples for the v1 scaffold. Tighten per-table later.
-READ = [
-    "organization:read",
-    "departments:read",
-    "laboratory:read",
-    "laboratories:read",
-    "project:read",
-    "experiments:read",
-    "models:read",
-    "users:read",
-    "roles:read",
-    "permissions:read",
-    "department_laboratory:read",
-    "organizations_departments:read",
-    "laboratory_project:read",
-    "laboratory_user:read",
-    "user_role:read",
-]
-WRITE = [
-    "organization:write", "organization:edit",
-    "departments:write", "departments:edit",
-    "laboratory:write", "laboratory:edit",
-    "laboratories:write", "laboratories:edit",
-    "project:write", "project:edit",
-    "experiments:write", "experiments:edit",
-    "models:write", "models:edit", "models:deploy",
-    "users:write", "users:edit",
-    "roles:write", "roles:edit",
-    "permissions:write", "permissions:edit",
-    "department_laboratory:write", "department_laboratory:edit",
-    "organizations_departments:write", "organizations_departments:edit",
-    "laboratory_project:write", "laboratory_project:edit",
-    "laboratory_user:write", "laboratory_user:edit",
-    "user_role:write", "user_role:edit",
-]
+
+# Permission sets for CRUD operations. These are broad and can be tightened
+def get_read_perms():
+    # Can be customized to get read permissions based on your naming convention
+    return [p.name for p in PermissionManager.all() if ":read" in p.name]
+
+def get_write_perms():
+    # Can be customized to get write permissions based on your naming convention
+    return [p.name for p in PermissionManager.all() if any(s in p.name for s in (":write", ":edit", ":deploy"))]
+
+READ = get_read_perms()
+WRITE = get_write_perms()
 
 # Map of (path_prefix -> SQLAlchemy model). The prefix matches the
 # table name, so the URL reads `/api/v1/<table>/...`.

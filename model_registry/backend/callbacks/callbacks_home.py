@@ -186,17 +186,4 @@ def register_home_callbacks(app):
         logger.debug(f"Close project modal clicked {n_clicks} times with modal open={is_open}")
         return not is_open
     
-    @app.callback(
-        Output("url","pathname", allow_duplicate=True),
-        Input("add-project", "n_clicks"),
-        prevent_initial_call=True,
-    )
-    def update_add_project(n_clicks):
-        logger.debug(f"Add project clicked {n_clicks} times")
-        if not n_clicks:
-            raise PreventUpdate
-        logger.debug(f"Add project clicked {n_clicks} times")
-        return "/add-project"
-    
-
 

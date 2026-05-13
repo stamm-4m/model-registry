@@ -2,6 +2,7 @@ import dash_bootstrap_components as dbc
 from dash import dcc, html
 
 from model_registry.backend.components.models_grid import get_models_grid
+from model_registry.backend.pages.modal_project import project_modal
 
 
 def home_layout(projects_options=None, permissions=None):
@@ -91,7 +92,7 @@ def home_layout(projects_options=None, permissions=None):
                                     html.I(className="bi bi-plus-lg me-1"),
                                     "Add Project",
                                 ],
-                                id="add-project",
+                                id="btn-open-proj-modal",
                                 color="primary",
                                 className="w-100",
                             ),
@@ -105,7 +106,8 @@ def home_layout(projects_options=None, permissions=None):
         ),
         className="mb-4 shadow-sm border-0 home-card",
     )
-
+    # MODAL
+    project_modal(),
     # ---- Models card ----
     models_card = dbc.Card(
         [
@@ -202,6 +204,8 @@ def home_layout(projects_options=None, permissions=None):
         children=[
             page_header,
             project_card,
+            # Modal para agregar proyecto
+            project_modal(),
             models_card,
             confirm_delete,
             dcc.Store(id="model-to-delete"),
