@@ -63,12 +63,33 @@ def register_organizations_table_callbacks(app):
     @app.callback(
         Output("users-table", "children"),
         Input("user-refresh-trigger", "data"),
+        Input("user-role-filter", "value"),
+        Input("user-search-input", "value"),
         State("user-session", "data"),
     )
-    def load_users(refresh_data, session_data):
+    def load_users(refresh_data, role_filter, search_query, session_data):
         service = UserService()
-        rows, _ = service.get_all_users_with_department_and_laboratory(session_data)
+        rows, _ = service.get_all_users_full(session_data)
         logger.debug(f"Loaded users for table: {rows}")
         if not rows:
             return "No users found."
+
+        # Filter by role (case-insensitive). "__all__" or empty = no filter.
+        if role_filter and role_filter != "__all__":
+            rf = role_filter.lower()
+            rows = [
+                row for row in rows
+                if any(rn.lower() == rf for rn in (row[3] or []))
+            ]
+
+        # Filter by free-text search (name or email).
+        if search_query:
+            q = search_query.strip().lower()
+            if q:
+                rows = [
+                    row for row in rows
+                    if q in ((row[0].full_name or "").lower())
+                    or q in ((row[0].email or "").lower())
+                ]
+
         return build_table_users(rows)

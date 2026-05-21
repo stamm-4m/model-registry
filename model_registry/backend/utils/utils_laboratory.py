@@ -1,43 +1,39 @@
 from dash import html
 import dash_bootstrap_components as dbc
 
+_DASH = "\u2014"
+
+
 def build_table_laboratories(laboratories):
-    return dbc.Table(
-        [
-            html.Thead(html.Tr([
-                html.Th("Name"),
-                html.Th("Department"),
-                html.Th("Location"),
-                html.Th("Actions")
-            ])),
-            html.Tbody([
-                html.Tr([
-                    html.Td(lab.name),
-                    html.Td(dept_name),  #
-                    html.Td(lab.location),
-                    html.Td([
-                        dbc.Button(
-                            "Edit",
-                            id={"type": "btn-edit-lab", "index": str(lab.id)},
-                            size="sm",
-                            color="warning",
-                            className="me-2"
-                        ),
-                        dbc.Button(
-                            "Delete",
-                            id={"type": "btn-delete-lab", "index": str(lab.id)},
-                            size="sm",
-                            color="danger"
-                        )
-                    ])
-                ]) for lab, dept_name in laboratories
-            ])
-        ],
-        bordered=True,
-        hover=True,
-        responsive=True,
-        striped=True
-    )
+    """FermOps-style card list for laboratories."""
+    rows = [
+        html.Div([
+            html.Div([
+                html.Div(lab.name, className="tree-name"),
+                html.Div(f"Department: {dept_name or _DASH}", className="tree-sub"),
+                html.Div(
+                    lab.location or "",
+                    className="tree-meta",
+                ),
+            ], className="tree-info"),
+            html.Div([
+                html.Button(
+                    "Edit",
+                    id={"type": "btn-edit-lab", "index": str(lab.id)},
+                    className="tree-btn",
+                    n_clicks=0,
+                ),
+                html.Button(
+                    "Delete",
+                    id={"type": "btn-delete-lab", "index": str(lab.id)},
+                    className="tree-btn danger",
+                    n_clicks=0,
+                ),
+            ], className="tree-actions"),
+        ], className="tree-row")
+        for lab, dept_name in laboratories
+    ]
+    return html.Div(rows)
 
 def toast_confirm_delete_lab():
     return html.Div([

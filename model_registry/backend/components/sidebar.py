@@ -97,7 +97,7 @@ def sidebar(session_data=None):
                     ],
                     className="nav-item-content",
                 ),
-                href="#",
+                href="/admin",
                 className="sidebar-link",
                 id="admin-toggle",
             )
@@ -106,17 +106,24 @@ def sidebar(session_data=None):
             dbc.Collapse(
                 [
                     _nav_link(
-                        "Organization & People",
+                        "Organizations / Departments / Labs",
                         "/organizations",
                         icon="bi-people-fill",
                         link_id="organization-link",
                         indent=True,
                     ),
                     _nav_link(
-                        "Projects",
+                        "Projects & Experiments",
                         "/projects",
                         icon="bi-folder-fill",
                         link_id="project-link",
+                        indent=True,
+                    ),
+                    _nav_link(
+                        "Users",
+                        "/users",
+                        icon="bi-person-badge-fill",
+                        link_id="users-link",
                         indent=True,
                     ),
                 ],

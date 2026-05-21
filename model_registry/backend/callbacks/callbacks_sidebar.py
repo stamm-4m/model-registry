@@ -4,6 +4,7 @@ from dash import Input, Output, State
 
 from model_registry.backend.layouts.auth_layout import login_form
 from model_registry.backend.pages.add_project import add_project_layout
+from model_registry.backend.pages.admin import admin_layout
 from model_registry.backend.pages.details_model import details_model_layout
 from model_registry.backend.pages.edit_model import edit_model_layout
 from model_registry.backend.pages.help import help_layout
@@ -67,9 +68,12 @@ def register_sidebar_callbacks(app):
         
         elif pathname == "/projects":
             return projects_layout(session_data)
-        
+
+        elif pathname == "/admin":
+            return admin_layout(session_data)
+
         elif pathname == "/users":
-            return users_layout()
+            return users_layout(session_data)
         
         elif pathname == "/organizations":
             return organizations_layout(session_data)
@@ -120,7 +124,7 @@ def register_sidebar_callbacks(app):
         ctx = dash.callback_context
         trigger = ctx.triggered_id
 
-        admin_routes = ["/organizations", "/departments", "/users"]
+        admin_routes = ["/admin", "/organizations", "/departments", "/users", "/projects"]
         # Si la ruta es una de las rutas admin, abrir el menú
         if pathname in admin_routes:
             return True

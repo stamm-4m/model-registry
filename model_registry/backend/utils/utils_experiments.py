@@ -1,45 +1,48 @@
 from dash import html
 import dash_bootstrap_components as dbc
 
+_DASH = "\u2014"
+
+
+def _fmt_dt(value):
+    if not value:
+        return _DASH
+    try:
+        return value.strftime("%Y-%m-%d %H:%M")
+    except AttributeError:
+        return str(value)[:16]
+
+
 def build_table_experiments(experiments):
-    return dbc.Table(
-        [
-            html.Thead(html.Tr([
-                html.Th("Name"),
-                html.Th("Description"),
-                html.Th("Start Time"),
-                html.Th("End Time"),
-                html.Th("Actions")
-            ])),
-            html.Tbody([
-                html.Tr([
-                    html.Td(exp.name),
-                    html.Td(exp.description or "-"),
-                    html.Td(str(exp.start_time) if exp.start_time else "-"),
-                    html.Td(str(exp.end_time) if exp.end_time else "-"),
-                    html.Td([
-                        dbc.Button(
-                            "Edit",
-                            id={"type": "btn-edit-exp", "index": str(exp.id)},
-                            size="sm",
-                            color="warning",
-                            className="me-2"
-                        ),
-                        dbc.Button(
-                            "Delete",
-                            id={"type": "btn-delete-exp", "index": str(exp.id)},
-                            size="sm",
-                            color="danger"
-                        )
-                    ])
-                ]) for exp in experiments
-            ])
-        ],
-        bordered=True,
-        hover=True,
-        responsive=True,
-        striped=True
-    )
+    """FermOps-style card list for experiments."""
+    rows = [
+        html.Div([
+            html.Div([
+                html.Div(exp.name, className="tree-name"),
+                html.Div(exp.description or _DASH, className="tree-sub"),
+                html.Div(
+                    f"Start: {_fmt_dt(exp.start_time)} \u2022 End: {_fmt_dt(exp.end_time)}",
+                    className="tree-meta",
+                ),
+            ], className="tree-info"),
+            html.Div([
+                html.Button(
+                    "Edit",
+                    id={"type": "btn-edit-exp", "index": str(exp.id)},
+                    className="tree-btn",
+                    n_clicks=0,
+                ),
+                html.Button(
+                    "Delete",
+                    id={"type": "btn-delete-exp", "index": str(exp.id)},
+                    className="tree-btn danger",
+                    n_clicks=0,
+                ),
+            ], className="tree-actions"),
+        ], className="tree-row")
+        for exp in experiments
+    ]
+    return html.Div(rows)
 
 def toast_confirm_delete_exp():
     return html.Div([

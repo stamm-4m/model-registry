@@ -8,123 +8,126 @@ from model_registry.backend.utils.utils_projects import toast_confirm_delete_pro
 from model_registry.backend.utils.utils_sidebar import get_user_role
 
 
+def _tree_column(title, btn_label, btn_id, btn_color, table_div_id, toast):
+    """FermOps-style column with header, scrollable body and an add bar."""
+    return html.Div(
+        [
+            html.Div(
+                [
+                    html.Span(title, className="tree-col-title"),
+                ],
+                className="tree-col-head",
+            ),
+            html.Div(
+                [
+                    toast,
+                    html.Div(id=table_div_id),
+                ],
+                className="tree-col-body",
+            ),
+            html.Div(
+                dbc.Button(
+                    btn_label,
+                    id=btn_id,
+                    color=btn_color,
+                    size="sm",
+                ),
+                className="tree-col-add",
+            ),
+        ],
+        className="tree-col",
+    )
+
+
 def projects_layout(session_data=None):
     role, _ = get_user_role(session_data)
     if not role or "super_admin" not in role:
-        return dbc.Container([
-            html.H3("Access Denied", className="text-danger mt-4"),
-            html.P("You do not have permission to view this page.")
-        ])
-    return dbc.Container([
-
-        # 🔹 STORES
-        dcc.Store(id="proj-edit-id"),
-        dcc.Store(id="proj-delete-id"),
-        dcc.Store(id="proj-refresh-trigger"),
-        dcc.Store(id="exp-edit-id"),
-        dcc.Store(id="exp-delete-id"),
-        dcc.Store(id="exp-refresh-trigger"),
-
-        # 🔝 HEADER
-        dbc.Row([
-            dbc.Col([
-                html.H2("Projects & Experiments", className="fw-bold mb-1"),
-                html.P(
-                    "Manage projects and experiments across your organization",
-                    className="text-muted"
-                )
-            ])
-        ], className="mb-4 mt-3"),
-
-        # 🔹 TABS
-        dbc.Tabs(
-
+        return dbc.Container(
             [
-                # =========================
-                # 📁 PROJECTS TAB
-                # =========================
-                dbc.Tab(
-                    label="Projects",
-                    tab_id="tab-proj",
-                    children=[
-
-                        dbc.Card([
-                            dbc.CardBody([
-
-                                # 🔹 ACTION BAR
-                                dbc.Row([
-                                    dbc.Col([
-                                        html.H5("Projects", className="mb-0")
-                                    ], width=6),
-
-                                    dbc.Col([
-                                        dbc.Button(
-                                            "+ New Project",
-                                            id="btn-open-proj-modal",
-                                            color="primary"
-                                        )
-                                    ], width=6, className="text-end")
-                                ], className="mb-3"),
-
-                                toast_confirm_delete_proj(),
-
-                                # 🔹 TABLE
-                                html.Div(id="projects-table")
-
-                            ])
-                        ], className="shadow-sm border-0"),
-
-                        # MODAL
-                        project_modal()
-
-                    ]
-                ),
-
-                # =========================
-                # 🧪 EXPERIMENTS TAB
-                # =========================
-                dbc.Tab(
-                    label="Experiments",
-                    tab_id="tab-exp",
-                    children=[
-
-                        dbc.Card([
-                            dbc.CardBody([
-
-                                # 🔹 ACTION BAR
-                                dbc.Row([
-                                    dbc.Col([
-                                        html.H5("Experiments", className="mb-0")
-                                    ], width=6),
-
-                                    dbc.Col([
-                                        dbc.Button(
-                                            "+ New Experiment",
-                                            id="btn-open-exp-modal",
-                                            color="success"
-                                        )
-                                    ], width=6, className="text-end")
-                                ], className="mb-3"),
-
-                                toast_confirm_delete_exp(),
-
-                                # 🔹 TABLE
-                                html.Div(id="experiments-table")
-
-                            ])
-                        ], className="shadow-sm border-0"),
-
-                        # MODAL
-                        experiment_modal()
-
-                    ]
-                ),
-
-            ],
-
-            id="tabs-projects",
-            active_tab="tab-proj",
-            className="nav-pills nav-fill",
+                html.H3("Access Denied", className="text-danger mt-4"),
+                html.P("You do not have permission to view this page."),
+            ]
         )
 
-    ], fluid=True)
+    header = html.Div(
+        [
+            html.Div(
+                [
+                    html.H2(
+                        [
+                            dcc.Link(
+                                "Admin",
+                                href="/admin",
+                                style={"color": "var(--ink-faint)"},
+                            ),
+                            html.Span(
+                                " / ",
+                                style={"color": "var(--ink-faint)"},
+                            ),
+                            "Projects / Experiments",
+                        ]
+                    ),
+                    html.Div(
+                        "Manage projects and their experiments.",
+                        className="page-sub",
+                    ),
+                ]
+            ),
+            html.Div(
+                [
+                    dcc.Link(
+                        "\u2190 Back to Admin",
+                        href="/admin",
+                        className="btn btn-outline-secondary btn-sm",
+                    ),
+                ],
+                className="page-actions",
+            ),
+        ],
+        className="page-title-row",
+    )
+
+    projects_col = _tree_column(
+        title="Projects",
+        btn_label="+ New Project",
+        btn_id="btn-open-proj-modal",
+        btn_color="primary",
+        table_div_id="projects-table",
+        toast=toast_confirm_delete_proj(),
+    )
+    experiments_col = _tree_column(
+        title="Experiments",
+        btn_label="+ New Experiment",
+        btn_id="btn-open-exp-modal",
+        btn_color="success",
+        table_div_id="experiments-table",
+        toast=toast_confirm_delete_exp(),
+    )
+
+    return dbc.Container(
+        [
+            # Stores (kept verbatim so existing callbacks keep firing)
+            dcc.Store(id="proj-edit-id"),
+            dcc.Store(id="proj-delete-id"),
+            dcc.Store(id="proj-refresh-trigger"),
+            dcc.Store(id="exp-edit-id"),
+            dcc.Store(id="exp-delete-id"),
+            dcc.Store(id="exp-refresh-trigger"),
+
+            header,
+
+            dbc.Row(
+                [
+                    dbc.Col(projects_col, xs=12, md=6),
+                    dbc.Col(experiments_col, xs=12, md=6),
+                ],
+                className="g-3",
+            ),
+
+            # Modals (unchanged, in their own files)
+            project_modal(),
+            experiment_modal(),
+        ],
+        fluid=True,
+        style={"padding": "20px 28px"},
+    )

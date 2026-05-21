@@ -1,173 +1,279 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html
-from model_registry.backend.components.footer import build_footer
 
 
 def login_form():
+    """
+    Two-pane sign-in screen styled after FermOps Admin.
+
+    IMPORTANT: All component IDs are preserved so the existing
+    callbacks in ``callbacks/callback_auth.py`` keep working without
+    modification:
+
+      * ``url-login``        – dcc.Location used after login
+      * ``login-username``   – username input
+      * ``login-password``   – password input
+      * ``toggle-password``  – show/hide password toggle
+      * ``remember-me``      – remember-me checkbox
+      * ``login-button``     – submit button
+      * ``login-message``    – error feedback container
+    """
+
     return html.Div(
         [
             dcc.Location(id="url-login", refresh=True),
+
             html.Div(
                 [
-                    dbc.Container(
+                    # ── Brand pane (left) ────────────────────────────────
+                    html.Div(
                         [
-                            dbc.Row(
+                            html.Div(
                                 [
-                                    dbc.Col(
+                                    html.Img(
+                                        src="/assets/ml_repo_logo.png",
+                                        className="login-logo-img",
+                                    ),
+                                    html.Div(
                                         [
-                                            # Logo
                                             html.Div(
-                                                html.Img(
-                                                    src="/assets/ml_repo_logo.png",
-                                                    style={
-                                                        "maxWidth": "180px",
-                                                        "marginBottom": "30px",
-                                                        "boxShadow": "0 4px 24px rgba(0,0,0,0.10)",
-                                                        "borderRadius": "16px",
-                                                        "background": "#fff",
-                                                        "padding": "12px"
-                                                    },
-                                                ),
-                                                className="text-center mb-4",
-                                            ),
-
-                                            # Card Login
-                                            dbc.Card(
                                                 [
-                                                    dbc.CardHeader(
-                                                        html.H4(
-                                                            "Sign In",
-                                                            className="text-center",
-                                                        )
+                                                    html.Span(
+                                                        "Model ",
+                                                        className="brand-ferm",
                                                     ),
-                                                    dbc.CardBody(
-                                                        [
-                                                            # Username
-                                                            html.Div(
-                                                                [
-                                                                    dbc.Label("Username"),
-                                                                    dbc.InputGroup(
-                                                                        [
-                                                                            dbc.InputGroupText(
-                                                                                html.I(
-                                                                                    className="bi bi-person-fill"
-                                                                                )
-                                                                            ),
-                                                                            dbc.Input(
-                                                                                id="login-username",
-                                                                                placeholder="Enter your username",
-                                                                                type="text",
-                                                                            ),
-                                                                        ]
-                                                                    ),
-                                                                ],
-                                                                className="mb-3",
-                                                            ),
-
-                                                            # Password
-                                                            html.Div(
-                                                                [
-                                                                    dbc.Label("Password"),
-                                                                    dbc.InputGroup(
-                                                                        [
-                                                                            dbc.InputGroupText(
-                                                                                html.I(
-                                                                                    className="bi bi-lock-fill"
-                                                                                )
-                                                                            ),
-                                                                            dbc.Input(
-                                                                                id="login-password",
-                                                                                placeholder="Enter your password",
-                                                                                type="password",
-                                                                            ),
-                                                                            dbc.Button(
-                                                                                html.I(
-                                                                                    className="bi bi-eye-fill"
-                                                                                ),
-                                                                                id="toggle-password",
-                                                                                color="light",
-                                                                                n_clicks=0,
-                                                                                className="border",
-                                                                            ),
-                                                                        ]
-                                                                    ),
-                                                                ],
-                                                                className="mb-3",
-                                                            ),
-
-                                                            # Remember + Register
-                                                            html.Div(
-                                                                [
-                                                                    dbc.Checkbox(
-                                                                        id="remember-me",
-                                                                        className="me-2",
-                                                                    ),
-                                                                    dbc.Label(
-                                                                        "Remember me",
-                                                                        className="me-auto",
-                                                                    ),
-                                                                    html.A(
-                                                                        "Register",
-                                                                        href="/register",
-                                                                        className="ms-auto text-primary",
-                                                                    ),
-                                                                ],
-                                                                className="d-flex justify-content-between align-items-center mb-3",
-                                                            ),
-
-                                                            # Button
-                                                            dbc.Button(
-                                                                "Sign In",
-                                                                id="login-button",
-                                                                color="primary",
-                                                                className="w-100",
-                                                            ),
-
-                                                            # Message
-                                                            html.Div(
-                                                                id="login-message",
-                                                                className="text-danger mt-3",
-                                                                style={
-                                                                    "minHeight": "2em"
-                                                                },
-                                                            ),
-                                                        ]
+                                                    html.Span(
+                                                        "Registry",
+                                                        className="brand-ops",
                                                     ),
                                                 ],
-                                                className="shadow p-4",
-                                                style={"borderRadius": "1rem"},
+                                                className="login-product",
+                                            ),
+                                            html.Div(
+                                                "ML model lifecycle · a STAMM module",
+                                                className="login-tag",
                                             ),
                                         ],
-                                        width=12,
-                                        md=6,
-                                        lg=4,
-                                    )
+                                        className="login-brand-text",
+                                    ),
                                 ],
-                                justify="center",
-                                align="center",
-                                className="flex-grow-1",
-                            )
+                                className="login-brand-top",
+                            ),
+
+                            html.Div(
+                                [
+                                    html.Br(),
+                                    html.H2(
+                                        [
+                                            "Register, version and deploy ",
+                                            html.Em("bioprocess ML models"),
+                                        ]
+                                    ),
+                                    html.P(
+                                        "Centralised registry for soft, dynamic "
+                                        "and hybrid models — track metadata, "
+                                        "lineage and deployments across your labs."
+                                    ),
+                                    html.Ul(
+                                        [
+                                            html.Li(
+                                                "Project · experiment · model hierarchy"
+                                            ),
+                                            html.Li(
+                                                "Versioned model artifacts with FAIR metadata"
+                                            ),
+                                            html.Li(
+                                                "Python & R model serving out of the box"
+                                            ),
+                                            html.Li(
+                                                "Role-based access for labs and partners"
+                                            ),
+                                        ],
+                                        className="login-feature-list",
+                                    ),
+                                ],
+                                className="login-pitch",
+                            ),
+
+                            html.Div(
+                                [
+                                    html.Div(
+                                        [
+                                            html.Span("Created by the "),
+                                            html.Strong("Mathematics Cell"),
+                                            html.Span(" at"),
+                                        ],
+                                        style={
+                                            "fontSize": "11px",
+                                            "opacity": 0.85,
+                                            "marginBottom": "8px",
+                                        },
+                                    ),
+                                    html.Div(
+                                        [
+                                            html.A(
+                                                html.Img(
+                                                    src="/assets/inrae.webp",
+                                                    className="login-credit-logo login-credit-inrae",
+                                                ),
+                                                href="https://www.inrae.fr/",
+                                                target="_blank",
+                                                title="INRAE",
+                                            ),
+                                            html.A(
+                                                html.Img(
+                                                    src="/assets/tbi.png",
+                                                    className="login-credit-logo login-credit-tbi",
+                                                ),
+                                                href="https://www.toulouse-biotechnology-institute.fr/",
+                                                target="_blank",
+                                                title="Toulouse Biotechnology Institute",
+                                            ),
+                                        ],
+                                        style={
+                                            "display": "flex",
+                                            "gap": "12px",
+                                            "alignItems": "center",
+                                            "marginBottom": "12px",
+                                            "flexWrap": "wrap",
+                                        },
+                                    ),
+                                    html.Div(
+                                        [
+                                            html.Span("STAMM Framework · open source"),
+                                            html.Br(),
+                                            html.Span("Model Registry · MR"),
+                                        ]
+                                    ),
+                                ],
+                                className="login-credits",
+                            ),
                         ],
-                        fluid=True,
+                        className="login-brand-pane",
                     ),
 
-                    # footer
-                    build_footer(
-                        logos=[
-                            {"src": "/assets/inrae.webp", "href": "https://inrae.com", "height": "80px"},
-                            {"src": "/assets/bioind4-dark.png", "href": "https://www.bioindustry4.eu/", "height": "100px"},
-                            {"src": "/assets/tbi.png", "href": "https://www.toulouse-biotechnology-institute.fr/", "height": "100px"},
-                            {"src": "/assets/logo_transparent_background_dark.png", "href": "https://stamm.inrae.fr/", "height": "100px"},
-                            {"src": "/assets/ibisba.png", "href": "https://ibisba.eu/", "height": "80px"},
+                    # ── Form pane (right) ────────────────────────────────
+                    html.Div(
+                        [
+                            html.H1("Sign in"),
+                            html.Div(
+                                "Welcome back. Enter your credentials to continue.",
+                                className="login-sub",
+                            ),
+
+                            # Username
+                            html.Div(
+                                [
+                                    html.Label("Username"),
+                                    dcc.Input(
+                                        id="login-username",
+                                        type="text",
+                                        value="",
+                                        placeholder="your.username",
+                                        className="login-input",
+                                    ),
+                                ],
+                                className="login-field",
+                            ),
+
+                            # Password (with show/hide toggle)
+                            html.Div(
+                                [
+                                    html.Label("Password"),
+                                    html.Div(
+                                        [
+                                            dcc.Input(
+                                                id="login-password",
+                                                type="password",
+                                                value="",
+                                                placeholder="••••••••",
+                                                className="login-input",
+                                            ),
+                                            html.Button(
+                                                html.I(className="bi bi-eye-fill"),
+                                                id="toggle-password",
+                                                n_clicks=0,
+                                                type="button",
+                                                className="login-eye-btn",
+                                            ),
+                                        ],
+                                        className="login-input-wrap",
+                                    ),
+                                ],
+                                className="login-field",
+                            ),
+
+                            # Remember me + register link
+                            html.Div(
+                                [
+                                    html.Label(
+                                        [
+                                            dbc.Checkbox(
+                                                id="remember-me",
+                                                className="login-checkbox",
+                                            ),
+                                            html.Span(
+                                                "Keep me signed in",
+                                                className="login-keep-text",
+                                            ),
+                                        ],
+                                        className="login-keep-label",
+                                    ),
+                                    html.A(
+                                        "Register",
+                                        href="/register",
+                                        className="login-link",
+                                    ),
+                                ],
+                                className="login-row",
+                            ),
+
+                            # Submit
+                            html.Button(
+                                "Sign in →",
+                                id="login-button",
+                                n_clicks=0,
+                                className="login-submit",
+                            ),
+
+                            # Error / status message
+                            html.Div(
+                                id="login-message",
+                                className="login-error",
+                                style={"minHeight": "16px"},
+                            ),
+
+                            html.Div(
+                                [
+                                    html.Span("Need access? "),
+                                    html.Span(
+                                        "Contact your lab admin →",
+                                        className="login-request",
+                                    ),
+                                    html.Div(
+                                        [
+                                            "By signing in, you agree to your "
+                                            "institution's data-use policy and "
+                                            "STAMM's open-source terms.",
+                                            html.Br(),
+                                            "Model artifacts and metadata remain "
+                                            "on your facility's infrastructure.",
+                                        ],
+                                        className="login-legal",
+                                    ),
+                                    html.Div(
+                                        "© 2026 MR - Model Registry. All rights reserved.",
+                                        className="login-copyright",
+                                    ),
+                                ],
+                                className="login-footer",
+                            ),
                         ],
-                        text="© 2026 MR - Model Registry. All rights reserved.",
+                        className="login-form-pane",
                     ),
                 ],
-                style={
-                    "minHeight": "100vh",
-                    "display": "flex",
-                    "flexDirection": "column",
-                },
+                className="login-stage",
             ),
-        ]
+        ],
+        className="login-page",
     )

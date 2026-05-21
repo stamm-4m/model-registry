@@ -12,7 +12,7 @@ from .laboratories_api_client import (
     LaboratoriesApiClient,
     LaboratoryUserApiClient,
 )
-from .users_api_client import UsersApiClient, UserRolesApiClient
+from .users_api_client import UsersApiClient, UserRolesApiClient, RolesApiClient
 from .experiments_api_client import ExperimentsApiClient
 
 __all__ = [
@@ -26,5 +26,6 @@ __all__ = [
     "LaboratoryUserApiClient",
     "UsersApiClient",
     "UserRolesApiClient",
+    "RolesApiClient",
     "ExperimentsApiClient",
 ]

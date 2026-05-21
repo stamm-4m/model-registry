@@ -373,7 +373,30 @@ def details_model_layout(project_id, model_id, session_data=None):
                             ),
                             _info_item("Number of instances", training.get("number_of_instances", "")),
                             _info_item("Validation", value_validation),
-                            _info_item("Training experiments ID", training.get("experiments_ID", "")),
+                            html.Div(
+                            [
+                                html.Div(
+                                    "Training experiments ID",
+                                    className="details-label",
+                                ),
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            exp_id,
+                                            className="training-id-box",
+                                        )
+                                        for exp_id in (
+                                            training.get("experiments_ID", [])
+                                            if isinstance(training.get("experiments_ID", []), list)
+                                            else [training.get("experiments_ID", "")]
+                                        )
+                                        if exp_id
+                                    ],
+                                    className="training-id-container",
+                                ),
+                            ],
+                            className="details-item",
+                        )
                         ],
                         md=6,
                     ),

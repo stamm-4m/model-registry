@@ -22,6 +22,7 @@ from model_registry.backend.services.api_clients import (
     DepartmentsApiClient,
     LaboratoriesApiClient,
     LaboratoryUserApiClient,
+    RolesApiClient,
     UserRolesApiClient,
     UsersApiClient,
 )
@@ -53,6 +54,7 @@ class UserService:
         lab_client: Optional[LaboratoriesApiClient] = None,
         dept_client: Optional[DepartmentsApiClient] = None,
         dept_lab_client: Optional[DepartmentLaboratoryApiClient] = None,
+        roles_client: Optional[RolesApiClient] = None,
     ):
         self.client = client or UsersApiClient()
         self.lab_user_client = lab_user_client or LaboratoryUserApiClient()
@@ -60,6 +62,7 @@ class UserService:
         self.lab_client = lab_client or LaboratoriesApiClient()
         self.dept_client = dept_client or DepartmentsApiClient()
         self.dept_lab_client = dept_lab_client or DepartmentLaboratoryApiClient()
+        self.roles_client = roles_client or RolesApiClient()
 
     # ------------------------------------------------------------------
     # CRUD
@@ -131,6 +134,63 @@ class UserService:
             dept_name = dept_id_to_name.get(dept_id) if dept_id else None
             result.append((user, lab_name, dept_name))
         return result, session_data
+
+    def get_all_users_full(
+        self, session_data: _SessionData
+    ) -> Tuple[
+        List[Tuple[UserDTO, Optional[str], Optional[str], List[str]]],
+        Optional[_SessionData],
+    ]:
+        """Return ``[(UserDTO, lab_name, dept_name, [role_names]), ...]``.
+
+        Fetches user_role + roles in addition to lab/dept so the admin UI
+        can display role pills without N+1 calls.
+        """
+        base, session_data = self.get_all_users_with_department_and_laboratory(
+            session_data
+        )
+        if not base:
+            return [], session_data
+
+        user_roles, session_data = self.user_role_client.list(session_data)
+        user_roles = user_roles or []
+        roles, session_data = self.roles_client.list(session_data)
+        roles = roles or []
+        role_id_to_name: Dict[str, str] = {
+            str(r.get("id")): (r.get("name") or "") for r in roles if r.get("id")
+        }
+
+        user_to_role_names: Dict[str, List[str]] = {}
+        for link in user_roles:
+            # Skip per-resource permission rows; only general role assignments
+            # are surfaced as pills (matching the legacy roles modal).
+            if link.get("permission_id") is not None:
+                continue
+            if link.get("real_resource_id") is not None:
+                continue
+            uid = str(link.get("user_id") or "")
+            rid = str(link.get("role_id") or "")
+            if not uid or not rid:
+                continue
+            name = role_id_to_name.get(rid)
+            if not name:
+                continue
+            user_to_role_names.setdefault(uid, []).append(name)
+
+        enriched: List[
+            Tuple[UserDTO, Optional[str], Optional[str], List[str]]
+        ] = []
+        for user, lab_name, dept_name in base:
+            names = sorted(set(user_to_role_names.get(str(user.id), [])))
+            enriched.append((user, lab_name, dept_name, names))
+        return enriched, session_data
+
+    def get_all_roles(
+        self, session_data: _SessionData
+    ) -> Tuple[List[Dict[str, Any]], Optional[_SessionData]]:
+        """Catalogue of roles (used for the Filter-by-role select)."""
+        roles, session_data = self.roles_client.list(session_data)
+        return roles or [], session_data
 
     def create_user(
         self,

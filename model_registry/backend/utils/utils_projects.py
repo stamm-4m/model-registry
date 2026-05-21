@@ -24,54 +24,59 @@ def create_project_structure(project_id: str, project_name: str, description: st
     with open(yaml_path, 'w', encoding='utf-8') as f:
         yaml.dump(project_info, f, allow_unicode=True, sort_keys=False)
 
+_DASH = "\u2014"
+
+
+def _fmt_date(value):
+    if not value:
+        return ""
+    try:
+        return value.strftime("%Y-%m-%d")
+    except AttributeError:
+        return str(value)[:10]
+
+
 def build_table_projects(projects):
-    """
-    Build a Dash Bootstrap Components table for displaying projects.
+    """FermOps-style card list for projects.
 
-    Args:
-        projects (list): List of project objects.
-
-    Returns:
-        dbc.Table: A Dash Bootstrap Components table.
+    Edit/Delete IDs preserved so existing callbacks keep working.
     """
-    return dbc.Table(
-        [
-            html.Thead(html.Tr([
-                html.Th("Name"),
-                html.Th("Project ID"),
-                html.Th("Description"),
-                html.Th("Created At"),
-                html.Th("Actions")
-            ])),
-            html.Tbody([
-                html.Tr([
-                    html.Td(proj.name),
-                    html.Td(proj.project_id),
-                    html.Td(proj.description),
-                    html.Td(proj.created_at),
-                    html.Td([
-                        dbc.Button(
-                            "Edit",
-                            id={"type": "btn-edit-proj", "index": str(proj.id)},
-                            size="sm",
-                            color="warning",
-                            className="me-2"
-                        ),
-                        dbc.Button(
-                            "Delete",
-                            id={"type": "btn-delete-proj", "index": str(proj.id)},
-                            size="sm",
-                            color="danger"
-                        )
-                    ])
-                ]) for proj in projects
-            ])
-        ],
-        bordered=True,
-        hover=True,
-        responsive=True,
-        striped=True
-    )
+    rows = [
+        html.Div([
+            html.Div([
+                html.Div(proj.name, className="tree-name"),
+                html.Div(
+                    f"ID: {proj.project_id or _DASH}",
+                    className="tree-sub",
+                ),
+                html.Div(
+                    proj.description or "",
+                    className="tree-sub",
+                    style={"whiteSpace": "normal", "marginTop": "2px"},
+                ),
+                html.Div(
+                    f"Created {_fmt_date(proj.created_at)}" if proj.created_at else "",
+                    className="tree-meta",
+                ),
+            ], className="tree-info"),
+            html.Div([
+                html.Button(
+                    "Edit",
+                    id={"type": "btn-edit-proj", "index": str(proj.id)},
+                    className="tree-btn",
+                    n_clicks=0,
+                ),
+                html.Button(
+                    "Delete",
+                    id={"type": "btn-delete-proj", "index": str(proj.id)},
+                    className="tree-btn danger",
+                    n_clicks=0,
+                ),
+            ], className="tree-actions"),
+        ], className="tree-row")
+        for proj in projects
+    ]
+    return html.Div(rows)
 
 def toast_confirm_delete_proj():
     return html.Div([
