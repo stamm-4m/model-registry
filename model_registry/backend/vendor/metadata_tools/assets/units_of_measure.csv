@@ -1,0 +1,97 @@
+﻿metric_type,source_unit,target_unit,formula,description
+temperature,kelvin,celsius,INPUT -273.15,Kelvin to Celsius
+temperature,kelvin,fahrenheit,(INPUT - 273.15)*(9/5)+32,Kelvin to Fahrenheit
+temperature,celcius,kelvin,INPUT +273.15,Celsius to Kelvin
+temperature,celsius,fahrenheit,(INPUT *9/5) +32,Celsius to Fahrenheit
+temperature,fahrenheit,kelvin,(INPUT - 32)*(5/9)+273.15,Fahrenheit to Kelvin
+temperature,fahrenheit,celsius,(INPUT -32)*5/9,Fahrenheit to Celsius
+pressure,bar,pascal,INPUT * 100000,Bar to Pascal
+pressure,bar,pound per square inch,INPUT * 14.504,Bar to Pound Per Square Inch
+pressure,bar,standard atmosphere,INPUT / 1.013,Bar to Standard Atmosphere
+pressure,bar,torr,INPUT * 750.1,Bar to Torr
+pressure,pascal,bar,INPUT / 100000,Pascal to Bar
+pressure,pascal,pound per square inch,INPUT / 6895,Pascal to Pound Per Square Inch
+pressure,pascal,standard atmosphere,INPUT / 101300,Pascal to Standard Atmosphere
+pressure,pascal,torr,INPUT / 133.3,Pascal to Torr
+pressure,pound per square inch,bar,INPUT / 14.504,Pound Per Square Inch to Bar
+pressure,pound per square inch,pascal,INPUT * 6895,Pound Per Square Inch to Pascal
+pressure,pound per square inch,standard atmosphere,INPUT / 14.696,Pound Per Square Inch to Standard Atmosphere
+pressure,pound per square inch,torr,INPUT * 51.715,Pound Per Square Inch to Torr
+pressure,standard atmosphere,bar,INPUT *1.013,Standard Atmosphere to Bar
+pressure,standard atmosphere,pascal,INPUT * 101300,Standard Atmosphere to Pascal
+pressure,standard atmosphere,pound per square inch,INPUT * 14.696,Standard Atmosphere to Pound Per Square Inch
+pressure,standard atmosphere,torr,INPUT * 760,Standard Atmosphere to Torr
+pressure,torr,bar,INPUT / 750.1,Torr to Bar
+pressure,torr,pascal,INPUT *133.3,Torr to Pascal
+pressure,torr,pound per square inch,INPUT / 51.715,Torr to Pound Per Square Inch
+pressure,torr,standard atmosphere,INPUT / 760,Torr to Standard Atmosphere
+speed,miles per hour,foot per second,INPUT * 1.467,Miles Per Hour to Foot Per Second
+speed,miles per hour,meter per second,INPUT / 2.237,Miles Per Hour to Meter Per Second
+speed,miles per hour,kilometer per second,INPUT *1.609,Miles Per Hour to Kilometer Per Second
+speed,miles per hour,knot,INPUT /1.151,Miles Per Hour to Knot
+speed,foot per second,mile per hour,INPUT / 1.467,Foot Per Second to Mile Per Hour
+speed,foot per second,meter per second,INPUT / 3.281,Foot Per Second to Meter Per Second
+speed,foot per second,kilometer per second,INPUT * 1.097,Foot Per Second to Kilometer Per Second
+speed,foot per second,knot,INPUT / 1.688,Foot Per Second to Knot
+speed,meter per second,mile per hour,INPUT * 2.237,Meter Per Second to Mile Per Hour
+speed,meter per second,foot per second,INPUT * 3.281,Meter Per Second to Foot Per Second
+speed,meter per second,kilometer per second,INPUT *3.6,Meter Per Second to Kilometer Per Second
+speed,meter per second,knot,INPUT *1.944,Meter Per Second to Knot
+speed,kilometer per second,mile per hour,INPUT / 1.609,Kilometer Per Second to Mile Per Hour
+speed,kilometer per second,foot per second,INPUT / 1.097,Kilometer Per Second to Foot Per Second
+speed,kilometer per second,meter per second,INPUT / 3.6,Kilometer Per Second to Meter Per Second
+speed,kilometer per second,knot,INPUT / 1.852,Kilometer Per Second to Knot
+speed,knot,mile per hour,INPUT * 1.151,Knot to Mile Per Hour
+speed,knot,foot per second,INPUT * 1.688,Knot to Foot Per Second
+speed,knot,meter per second,INPUT / 1.944,Knot to Meter Per Second
+speed,knot,kilometer per second,INPUT * 1.852,Knot to Kilometer Per Second
+length,kilometer,meter,INPUT *1000,Kilometer to Meter
+length,kilometer,centimeter,INPUT * 100000,Kilometer to Centimeter
+length,kilometer,millimeter,INPUT * 1000000,Kilometer to Millimeter
+length,kilometer,micrometer,INPUT * 1000000000,Kilometer to Micrometer
+length,kilometer,nanometer,INPUT * 1000000000000,Kilometer to Nanometer
+length,kilometer,mile,INPUT / 1.609,Kilometer to Mile
+length,kilometer,yard,INPUT * 1094,Kilometer to Yard
+length,kilometer,foot,INPUT * 3281,Kilometer to Foot
+length,kilometer,inch,INPUT * 39370,Kilometer to Inch
+length,kilometer,nautical mile,INPUT / 1.852,Kilometer to Nautical Mile
+length,meter,kilometer,INPUT / 1000,Meter to Kilometer
+length,meter,centimeter,INPUT *100,Meter to Centimeter
+length,meter,millimeter,INPUT * 1000,Meter to Millimeter
+length,meter,micrometer,INPUT * 1000000,Meter to Micrometer
+length,meter,nanometer,INPUT * 1000000000,Meter to Nanometer
+length,meter,mile,INPUT / 1609,Meter to Mile
+length,meter,yard,INPUT / 1.094,Meter to Yard
+length,meter,foot,INPUT *3.281,Meter to Foot
+length,meter,inch,INPUT *39.37,Meter to Inch
+length,meter,nautical mile,INPUT / 1852,Meter to Nautical Mile
+length,centimeter,kilometer,INPUT / 100000,Centimeter to Kilometer
+length,centimeter,meter,INPUT / 100,Centimeter to Meter
+length,centimeter,millimeter,INPUT *10,Centimeter to Millimeter
+length,centimeter,micrometer,INPUT * 10000,Centimeter to Micrometer
+length,centimeter,nanometer,INPUT * 10000000,Centimeter to Nanometer
+length,centimeter,mile,INPUT / 160900,Centimeter to Mile
+length,centimeter,yard,INPUT / 91.44,Centimeter to Yard
+length,centimeter,foot,INPUT / 30.48,Centimeter to Foot
+length,centimeter,inch,INPUT / 2.54,Centimeter to Inch
+length,centimeter,nautical mile,INPUT / 185200,Centimeter to Nautical Mile
+length,millimeter,kilometer,INPUT / 1000000,Millimeter to Kilometer
+length,millimeter,meter,INPUT / 1000,Millimeter to Meter
+length,millimeter,centimeter,INPUT / 10,Millimeter to Centimeter
+length,millimeter,micrometer,INPUT * 1000,Millimeter to Micrometer
+length,millimeter,nanometer,INPUT * 1000000,Millimeter to Nanometer
+length,millimeter,mile,INPUT /  1609000,Millimeter to Mile
+length,millimeter,yard,INPUT / 914.4,Millimeter to Yard
+length,millimeter,foot,INPUT / 304.8,Millimeter to Foot
+length,millimeter,inch,INPUT / 25.4,Millimeter to Inch
+length,millimeter,nautical mile,INPUT / 1852000,Millimeter to Nautical Mile
+length,micrometer,kilometer,INPUT / 1000000000,Micrometer to Kilometer
+length,micrometer,meter,INPUT / 1000000,Micrometer to Meter
+length,micrometer,centimeter,INPUT / 10000,Micrometer to Centimeter
+length,micrometer,millimeter,INPUT / 1000,Micrometer to Millimeter
+length,micrometer,nanometer,INPUT * 1000,Micrometer to Nanometer
+length,micrometer,mile,INPUT / 1609000000,Micrometer to Mile
+length,micrometer,yard,INPUT / 914400,Micrometer to Yard
+length,micrometer,foot,INPUT / 304800,Micrometer to Foot
+length,micrometer,inch,INPUT / 25400,Micrometer to Inch
+length,micrometer,nautical mile,INPUT / 1852000000,Micrometer to Nautical Mile
