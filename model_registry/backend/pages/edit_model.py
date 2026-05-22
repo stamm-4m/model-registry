@@ -4,6 +4,7 @@ import dash_bootstrap_components as dbc
 import requests
 from dash import dcc, html
 
+from model_registry.backend.services.model_service import get_model_metadata
 from model_registry.backend.config.settings import settings
 from model_registry.backend.utils.utils_edit_model import (
     get_value_from_list_of_dicts,
@@ -14,11 +15,19 @@ from model_registry.backend.utils.utils_edit_model import (
 
 logger = logging.getLogger(__name__)
 
-def edit_model_layout(project_id, model_id):
-    response = requests.get(
-        f"{settings.API_BASE_URL}{project_id}/metadata/{model_id}"
-    )
-    model = response.json()
+def edit_model_layout(project_id, model_id, session_data=None):
+    model, _ = get_model_metadata(project_id, model_id, session_data)
+    if model is None:
+        logger.error("Could not fetch metadata for %s/%s", project_id, model_id)
+        return html.Div(
+            dbc.Alert(
+                "Could not load model details. Please make sure you are logged in "
+                "and have permission to view this model.",
+                color="danger",
+            ),
+            className="p-4",
+        )
+
     language_data = model.get("model_description", {}).get("language", [])
     language_name = get_value_from_list_of_dicts(language_data, "name")
     language_version = get_value_from_list_of_dicts(language_data, "version")

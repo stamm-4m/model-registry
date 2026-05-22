@@ -5,7 +5,7 @@ import colorlog
 
 
 def setup_logging(
-    level: str = "DEBUG",
+    level: str = "INFO",
     log_file: str = "app.log",
     max_bytes: int = 5_000_000,
     backup_count: int = 3,

@@ -84,7 +84,7 @@ def register_sidebar_callbacks(app):
                 return not_found_layout()
             _, project_id, model_id = parts
 
-            return edit_model_layout(project_id, model_id)
+            return edit_model_layout(project_id, model_id, session_data)
         
         elif pathname == "/add-project":
             return add_project_layout()

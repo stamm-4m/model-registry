@@ -78,6 +78,18 @@ _TABLES = [
     ("alerts",                 M.Alert),
     ("equipment_components",   M.EquipmentComponent),
     ("experiments_equipments", M.ExperimentEquipment),
+
+    # --- FermOps streaming + soft-sensor demo
+    ("soft_sensors",           M.SoftSensor),
+    ("project_soft_sensors",   M.ProjectSoftSensor),
+    ("streaming_jobs",         M.StreamingJob),
+
+    # --- Model registry + federated learning (proposal 2026-05-22)
+    ("models",                    M.Model),
+    ("project_models",            M.ProjectModel),
+    ("federations",               M.Federation),
+    ("federation_participants",   M.FederationParticipant),
+    ("model_contributions",       M.ModelContribution),
 ]
 
 for prefix, model in _TABLES:

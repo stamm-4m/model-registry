@@ -36,6 +36,8 @@ from model_registry.api.core.dependencies import require_permission_resource
 from model_registry.api.models.sensor_reading import SensorReading
 from model_registry.api.models.actuator_state import ActuatorState
 from model_registry.api.models.prediction import Prediction
+from model_registry.api.models.alert import Alert
+from model_registry.api.models.run import Run
 
 
 router = APIRouter(prefix="/api/v1/runs", tags=["Run timeseries"])
@@ -108,7 +110,7 @@ def get_sensor_readings(
                         description=f"max rows (default {DEFAULT_LIMIT}, "
                                     f"max {MAX_LIMIT})"),
     db: Session = Depends(get_db),
-    user=Depends(require_permission_resource("model:view", "Models")),
+    user=Depends(require_permission_resource("models:read", "Models")),
 ):
     """Return ``sensor_readings`` rows for this run, ordered by time ASC.
 
@@ -129,7 +131,7 @@ def get_actuator_states(
                         description=f"max rows (default {DEFAULT_LIMIT}, "
                                     f"max {MAX_LIMIT})"),
     db: Session = Depends(get_db),
-    user=Depends(require_permission_resource("model:view", "Models")),
+    user=Depends(require_permission_resource("models:read", "Models")),
 ):
     """Return ``actuator_states`` rows for this run, ordered by time ASC."""
     return _query(ActuatorState, db, _parse_run_id(run_id),
@@ -147,8 +149,68 @@ def get_predictions(
                         description=f"max rows (default {DEFAULT_LIMIT}, "
                                     f"max {MAX_LIMIT})"),
     db: Session = Depends(get_db),
-    user=Depends(require_permission_resource("model:view", "Models")),
+    user=Depends(require_permission_resource("models:read", "Models")),
 ):
     """Return ``predictions`` rows for this run, ordered by time ASC."""
     return _query(Prediction, db, _parse_run_id(run_id),
                   _parse_since(since), limit)
+
+
+# ---------------------------------------------------------- reset
+
+@router.delete("/{run_id}/reset",
+               summary="Delete every time-series row for one run",
+               response_model=Dict[str, Any])
+def reset_run(
+    run_id: str,
+    db: Session = Depends(get_db),
+    user=Depends(require_permission_resource("models:edit", "Models")),
+):
+    """Wipe sensor_readings + actuator_states + predictions for this run.
+
+    Use case: between live demos. Lets the operator re-stream the same
+    run from scratch without dropping into psql. Bulk-deletes via SQL so
+    a single transaction does it indexed by run_id — the CRUD scaffold's
+    per-row DELETE would be far too slow.
+
+    Returns the number of rows deleted from each table. Does NOT delete
+    the run itself (``runs`` row) or the ``streaming_jobs`` heartbeat;
+    those are managed by the streamer.
+    """
+    rid = _parse_run_id(run_id)
+
+    # Counts before delete are convenient for the demo UI confirmation.
+    counts: Dict[str, int] = {}
+    for table_label, model in (
+        ("sensor_readings", SensorReading),
+        ("actuator_states", ActuatorState),
+        ("predictions",     Prediction),
+    ):
+        # Delete in one indexed SQL pass per table.
+        deleted = (
+            db.query(model)
+            .filter(model.run_id == rid)
+            .delete(synchronize_session=False)
+        )
+        counts[table_label] = deleted
+
+    # Also wipe alerts attached to this run's experiment. The alerts
+    # table doesn't carry run_id today (Carlos's schema is minimal); we
+    # join via runs -> experiments. This also clears alerts from any
+    # PRIOR runs of the same experiment, which is fine for a demo
+    # "reset everything" semantic.
+    run_row = db.query(Run).filter(Run.id == rid).first()
+    if run_row is not None and run_row.experiment_id is not None:
+        deleted_alerts = (
+            db.query(Alert)
+            .filter(Alert.experiment_id == run_row.experiment_id)
+            .delete(synchronize_session=False)
+        )
+        counts["alerts"] = deleted_alerts
+
+    db.commit()
+    return {
+        "run_id": run_id,
+        "deleted": counts,
+        "total": sum(counts.values()),
+    }

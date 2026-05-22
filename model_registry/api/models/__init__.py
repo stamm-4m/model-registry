@@ -38,7 +38,24 @@ from .annotation import Annotation
 from .alert import Alert
 from .equipment_component import EquipmentComponent
 from .experiment_equipment import ExperimentEquipment
+
+# Soft-sensor / model registry (proposal landing 2026-05-22).
+# Replaces the path-only soft_sensors table with structured rows.
+# Federated-learning lineage modelled via Federation +
+# FederationParticipant + ModelContribution.
+from .model import Model
+from .project_model import ProjectModel
+from .federation import Federation
+from .federation_participant import FederationParticipant
+from .model_contribution import ModelContribution
 from .department_laboratory import DepartmentLaboratory
+
+# FermOps streaming + soft-sensor demo models. Files were already present in
+# the develop tree but weren't registered here. Without these imports the
+# CRUD scaffold can't see the tables and `/api/v1/streaming_jobs/` returns 404.
+from .soft_sensor import SoftSensor
+from .project_soft_sensor import ProjectSoftSensor
+from .streaming_job import StreamingJob
 
 __all__ = [
     # auth + organization
@@ -58,4 +75,9 @@ __all__ = [
     "Run", "Experiment", "Prediction",
     "Annotation", "Alert",
     "EquipmentComponent", "ExperimentEquipment",
+    # Streaming + soft-sensor demo (FermOps streamer)
+    "SoftSensor", "ProjectSoftSensor", "StreamingJob",
+    # Model registry + federated learning (proposal 2026-05-22)
+    "Model", "ProjectModel",
+    "Federation", "FederationParticipant", "ModelContribution",
 ]
