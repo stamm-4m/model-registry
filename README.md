@@ -125,14 +125,21 @@ The easiest way to run the Model Registry locally is using Docker Compose.
 
 ## Setup
 
-Clone the repository with submodules:
+Clone the repository:
 
 ```bash
-git clone --recurse-submodules https://gitlab.com/stamm-4m/model-registry.git
+git clone https://gitlab.com/stamm-4m/model-registry.git
 cd model-registry
-git submodule update --init --recursive
 docker compose up --build
 ```
+
+*Vendorized metadata_tools module
+
+The metadata_tools code is included directly in this repository under:
+
+-model_registry/backend/vendor/metadata_tools
+
+The project no longer uses Git submodules for this dependency. If the upstream faridom:seek project is updated, the files inside the vendor/metadata_tools directory must also be manually updated to keep the local version synchronized.
 
 Open the following URLs in your browser:
 
