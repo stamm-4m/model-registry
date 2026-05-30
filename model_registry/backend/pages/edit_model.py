@@ -129,10 +129,10 @@ def edit_model_layout(project_id, model_id, session_data=None):
                                         dbc.RadioItems(
                                             id="edit_status",
                                             options=[
-                                                {"label": "Online", "value": "online"},
-                                                {"label": "Offline", "value": "offline"},
+                                                {"label": "Online", "value": True},
+                                                {"label": "Offline", "value": False},
                                             ],
-                                            value=model["model_identification"].get("status", "offline"),
+                                            value=model["model_identification"].get("status", False),
                                             inline=True,
                                         ),
                                     ],className="mb-3"),

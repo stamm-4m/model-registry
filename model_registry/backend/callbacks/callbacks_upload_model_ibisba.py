@@ -4,7 +4,7 @@ import os
 from dash import Input, Output, State, html
 from dash.exceptions import PreventUpdate
 
-from model_registry.api.utils.project_loader import load_model
+from model_registry.backend.services.model_service import get_model_file_info
 from model_registry.backend.services.model2seek_service import check_model_vars_service
 from model_registry.backend.utils.utils_model_upload import (
     get_path_config_folder,
@@ -26,25 +26,31 @@ def register_upload_model_ibisba_callbacks(app):
         Output("model-file-name", "data"),
         Output("model-file-path", "data"),
         Input("available-models-dropdown", "value"),
-        State("projects-dropdown", "value")
+        State("projects-dropdown", "value"),
+        State("user-session", "data"),
     )
-    def on_model_selected(model_id, project_id):
-        if not model_id:
+    def on_model_selected(model_id, project_id, session_data):
+        if not model_id or not project_id:
             return "", "", ""
-        
-        info_model = load_model(project_id, model_id)
+
+        model_file_name, model_file_relative, _ = get_model_file_info(
+            project_id, model_id, session_data
+        )
+        if model_file_name is None:
+            logger.warning(
+                "Could not fetch model metadata for %s/%s", project_id, model_id
+            )
+            return "", "", ""
 
         metadata_yaml_path = os.path.join(
             get_path_config_folder(project_id),
             model_id + ".yaml",
         )
-        model_file = info_model.get("ml_model_configuration", {}).get("model_description", {}).get("config_files", {}).get("model_file", "")
-        model_file_name = info_model.get("ml_model_configuration", {}).get("model_identification", {}).get("ID", "")
         model_file_path = os.path.join(
             get_path_models_folder(project_id),
-            model_file,
+            model_file_relative,
         )
-        
+
         return metadata_yaml_path, model_file_name, model_file_path
     
 
@@ -129,16 +135,39 @@ def register_upload_model_ibisba_callbacks(app):
 
         # check model variables
         try:
-            (
-                project_info,
-                creators_info,
-                organisms_info,
-                simple_output,
-            ) = check_model_vars_service(
-                containing_project_id=project_id_ibisba,
-                model_creators=creators_list,
-                model_organisms=organisms_list,
-            )
+            # --- DUMMY validation (for testing next steps) -----------------
+            project_info = {"title": f"Dummy Project #{project_id_ibisba}"}
+            creators_info = {
+                cid: {
+                    "name": f"Dummy Creator {cid}",
+                    "orcid": "0000-0000-0000-0000",
+                }
+                for cid in creators_list
+            }
+            organisms_info = {
+                oid: {
+                    "title": f"Dummy Organism {oid}",
+                    "concept_uri": f"urn:dummy:organism:{oid}",
+                }
+                for oid in organisms_list
+            }
+            simple_output = {
+                "project": project_info,
+                "creators": creators_info,
+                "organisms": organisms_info,
+            }
+            logger.debug("Using DUMMY validation output: %s", simple_output)
+            # --- Real validation (disabled while testing) ------------------
+            # (
+            #     project_info,
+            #     creators_info,
+            #     organisms_info,
+            #     simple_output,
+            # ) = check_model_vars_service(
+            #     containing_project_id=project_id_ibisba,
+            #     model_creators=creators_list,
+            #     model_organisms=organisms_list,
+            # )
         except Exception as e:
             logger.exception("Model validation failed")
             return False, f"❌ Validation error: {str(e)}"

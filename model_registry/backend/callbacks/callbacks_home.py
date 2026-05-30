@@ -47,11 +47,11 @@ def register_home_callbacks(app):
 
             for m in models_response:
                 row = {
-                    "model_name": m.get("model_name"),
-                    "authors": m.get("metadata", {}).get("author"),
-                    "creation_data": m.get("metadata", {}).get("creation_date"),
+                    "model_name": f"{m.get('model_name')} - {m.get('model_ID')}",
+                    "authors": m.get("metadata", {}).get("authors"),
+                    "creation_data": m.get("metadata", {}).get("created_at"),
                     "version": m.get("metadata", {}).get("version"),
-                    "status": m.get("metadata", {}).get("status", "offline"),
+                    "status": m.get("metadata", {}).get("status", False),
                     "project_id": pid,
                     "model_id": m.get("metadata", {}).get("ID"),
                     "actions": "edit"

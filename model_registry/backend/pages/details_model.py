@@ -56,6 +56,10 @@ def _section_card(title, icon, body, subtitle=None):
 
 
 def _status_badge(status):
+    if status is True:
+        status = "online"
+    else:
+        status = "offline"
     status = (status or "offline").lower()
     color_map = {
         "online": "success",
@@ -92,7 +96,6 @@ def details_model_layout(project_id, model_id, session_data=None):
             ),
             className="p-4",
         )
-
     # -------- Extract data ---------------------------------------------------
     identification = model.get("model_identification", {}) or {}
     description = model.get("model_description", {}) or {}
@@ -110,13 +113,16 @@ def details_model_layout(project_id, model_id, session_data=None):
     features = normalize_features(model.get("inputs", {}).get("features", []) or [])
     outputs = normalize_features(model.get("outputs", {}).get("information", []) or [])
 
+    input_scaler = model.get("inputs", {}).get("scaler") or ""
+    output_scaler = model.get("outputs", {}).get("scaler") or ""
+
     training = model.get("training_information", {}) or {}
     hyperparameters = training.get("hyperparameters", {}) or {}
     value_validation = str(training.get("validation", "") or "")
 
-    model_name = identification.get("name") or model_id
+    model_name = identification.get("ID") or model_id
     model_version = identification.get("version", "")
-    status = identification.get("status", "offline")
+    status = identification.get("status", False)
 
     # -------- Hero / page header --------------------------------------------
     hero = dbc.Card(
@@ -409,9 +415,10 @@ def details_model_layout(project_id, model_id, session_data=None):
     # -------- Inputs / outputs ----------------------------------------------
     inputs_body = html.Div(
         [
+            _info_item("Input scaler", input_scaler, mono=True),
             html.P(
                 f"{len(features)} feature(s) used as input.",
-                className="text-muted small mb-3",
+                className="text-muted small mb-3 mt-3",
             ),
             dbc.Accordion(id="features-accordion-details", always_open=True),
         ]
@@ -419,9 +426,10 @@ def details_model_layout(project_id, model_id, session_data=None):
 
     outputs_body = html.Div(
         [
+            _info_item("Output scaler", output_scaler, mono=True),
             html.P(
                 f"{len(outputs)} output(s) produced by the model.",
-                className="text-muted small mb-3",
+                className="text-muted small mb-3 mt-3",
             ),
             dbc.Accordion(id="outputs-accordion-details", always_open=True),
         ]

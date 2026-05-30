@@ -132,8 +132,7 @@ def list_models_endpoint(
     """
     try:
         registry = request.app.state.registry
-        models = registry.get_project(project_id)
-
+        models = registry.get_project(project_id)        
         return [
             {
                 "model_ID": model_id,

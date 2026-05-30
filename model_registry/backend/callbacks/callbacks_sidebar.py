@@ -51,7 +51,7 @@ def register_sidebar_callbacks(app):
             if len(parts) != 3:
                 return not_found_layout()
             _, project_id, model_id = parts
-            return add_upload_model_ibisba_layout(project_id, model_id)
+            return add_upload_model_ibisba_layout(project_id, model_id, session_data)
         
         elif pathname.startswith("/model-upload"):
             parts = pathname.strip("/").split("/")

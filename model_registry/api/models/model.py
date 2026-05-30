@@ -102,3 +102,23 @@ class Model(Base):
                            default=datetime.utcnow)
     created_by_user_id  = Column(UUID(as_uuid=True),
                                   ForeignKey("users.id"))
+
+    # --- Identification metadata mirrored from the YAML model files. ---
+    doi                  = Column(Text)
+    authors              = Column(Text)
+    learner              = Column(Text)
+    model_type           = Column(Text)
+    # The YAML files carry a free-form ``UUID`` field that is independent of
+    # the DB primary key; keep it as ``external_uuid`` so the round-trip
+    # YAML <-> DB stays lossless.
+    external_uuid        = Column(Text)
+    creation_date        = Column(Text)
+    status_description   = Column(Text)
+
+    # --- Rich descriptive blocks (raw YAML sub-trees). ---
+    language             = Column(JSONB, nullable=False, default=list)
+    packages             = Column(JSONB, nullable=False, default=list)
+    config_files         = Column(JSONB, nullable=False, default=dict)
+    input_time_interval  = Column(JSONB)
+    model_architecture   = Column(JSONB)
+    training_information = Column(JSONB, nullable=False, default=dict)

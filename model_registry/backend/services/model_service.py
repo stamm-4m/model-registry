@@ -39,6 +39,27 @@ def get_model_metadata(project_id, model_id, session_data):
     return None, session_data
 
 
+def get_model_file_info(project_id, model_id, session_data):
+    """Return ``(model_file_name, model_file_relative, session_data)`` for a model.
+
+    Wraps :func:`get_model_metadata` and extracts the file-related fields
+    needed by upload callbacks. ``(None, None, session_data)`` is returned when
+    the request fails or the user is not authorised.
+    """
+    metadata, session_data = get_model_metadata(project_id, model_id, session_data)
+    if not metadata:
+        return None, None, session_data
+
+    model_identification = metadata.get("model_identification") or {}
+    config_files = (
+        (metadata.get("model_description") or {}).get("config_files") or {}
+    )
+
+    model_file_name = model_identification.get("ID") or ""
+    model_file_relative = config_files.get("model_file") or ""
+    return model_file_name, model_file_relative, session_data
+
+
 def predict_dummy(X):
     # Placeholder for model inference
     return [0 for _ in range(len(X))]

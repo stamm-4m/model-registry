@@ -1,7 +1,7 @@
 window.dashAgGridComponentFunctions = window.dashAgGridComponentFunctions || {};
 
 window.dashAgGridComponentFunctions.StatusRenderer = function (props) {
-    return  props.value === "online" ? React.createElement("i", {className: "bi bi-check-circle-fill icon-column", title: "Online", alt: "Online"}) : React.createElement("i", {className: "bi bi-x-circle icon-column", title: "Offline", alt: "Offline"});
+    return  props.value === true ? React.createElement("i", {className: "bi bi-check-circle-fill icon-column", title: "Online", alt: "Online"}) : React.createElement("i", {className: "bi bi-x-circle icon-column", title: "Offline", alt: "Offline"});
 };
 
 window.dashAgGridComponentFunctions.EditIconRenderer = function () {

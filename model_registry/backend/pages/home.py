@@ -3,6 +3,7 @@ from dash import dcc, html
 
 from model_registry.backend.components.models_grid import get_models_grid
 from model_registry.backend.pages.modal_project import project_modal
+from model_registry.backend.utils.utils_projects import toast_confirm_delete_proj
 
 
 def home_layout(projects_options=None, permissions=None):
@@ -209,6 +210,8 @@ def home_layout(projects_options=None, permissions=None):
             models_card,
             confirm_delete,
             dcc.Store(id="model-to-delete"),
+            dcc.Store(id="proj-edit-id"),
             project_required_modal,
+            toast_confirm_delete_proj(),
         ],
     )
