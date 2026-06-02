@@ -60,8 +60,12 @@ def register_auth_callbacks(app):
     )
     def handle_login(n_clicks, username, password):
         logger.debug(f"Login attempt with username={username} and password={'*' * len(password) if password else None}")
+        # Do not validate or show messages until the user clicks Login.
+        if not n_clicks:
+            raise dash.exceptions.PreventUpdate
+
         if not username or not password:
-            return {}, login_form(), "Username or password none"
+            return {}, login_form(), "Username or password is required"
 
         username = username.strip()
         password = password.strip()
@@ -78,7 +82,7 @@ def register_auth_callbacks(app):
             }
             return session_data, main_layout(session_data), ""
         
-        return {}, login_form(), "Username o password incorrects"
+        return {}, login_form(), "Username or password is incorrect"
 
 
     @app.callback(
