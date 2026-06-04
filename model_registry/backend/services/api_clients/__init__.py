@@ -14,6 +14,7 @@ from .laboratories_api_client import (
 )
 from .users_api_client import UsersApiClient, UserRolesApiClient, RolesApiClient
 from .experiments_api_client import ExperimentsApiClient
+from .models_api_client import ModelsApiClient
 
 __all__ = [
     "BaseApiClient",
@@ -28,4 +29,5 @@ __all__ = [
     "UserRolesApiClient",
     "RolesApiClient",
     "ExperimentsApiClient",
+    "ModelsApiClient",
 ]

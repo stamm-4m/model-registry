@@ -5,7 +5,7 @@ import os
 from dash import ALL, Input, Output, State, ctx, html
 from dash.exceptions import PreventUpdate
 
-from model_registry.api.utils.project_loader import save_model
+from model_registry.backend.services.model_service import ModelService
 from model_registry.backend.utils.model_metadata_extractor import ModelMetadataExtractor
 from model_registry.backend.utils.utils_edit_model import (
     feature_item,
@@ -16,7 +16,6 @@ from model_registry.backend.utils.utils_edit_model import (
     package_row,
 )
 from model_registry.backend.utils.utils_model_upload import (
-    get_path_config_folder,
     get_path_models_folder,
 )
 
@@ -70,6 +69,9 @@ def register_model_upload_callbacks(app):
             extractor = ModelMetadataExtractor(filepath)
             metadata = extractor.extract()
             metadata["project_id"] = model_info["project_id"]
+            metadata["artifact_path"] = filepath
+            metadata["artifact_format"] = extension
+            metadata["artifact_size_bytes"] = len(decoded)
 
             logger.info(f"Extracted metadata: {metadata}")
 
@@ -206,7 +208,10 @@ def register_model_upload_callbacks(app):
         return [o for o in outputs if o["id"] != fid]
 
     @app.callback(
-        Output("url", "pathname", allow_duplicate=True),
+        Output("save-model-toast", "is_open"),
+        Output("save-model-toast", "children"),
+        Output("save-model-toast", "icon"),
+        Output("save-model-toast", "header"),
         Output("save-model-feedback", "children"),
         Input("save-ml-model-config", "n_clicks"),
 
@@ -276,6 +281,7 @@ def register_model_upload_callbacks(app):
         State({"type": "output-min", "fid": ALL}, "value"),
         State({"type": "output-max", "fid": ALL}, "value"),
         State({"type": "output-description", "fid": ALL}, "value"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
     def save_metadata(
@@ -290,6 +296,7 @@ def register_model_upload_callbacks(app):
         n_instances, validation, experiments_id,
         f_names, f_types, f_units, f_lags, f_scalings, f_mins, f_maxs, f_descs,
         o_names, o_units, o_horizons, o_scalings, o_mins, o_maxs, o_descs,
+        session_data,
     ):
         if not n_clicks or not model_info:
             raise PreventUpdate
@@ -342,77 +349,106 @@ def register_model_upload_callbacks(app):
             if o_names[i]
         ]
 
+        # Normalize values that must satisfy DB CHECK constraints.
+        _info = model_info or {}
+        _algorithm = (
+            learner or model_type or _info.get("algorithm") or "custom"
+        )
+        if _algorithm not in ModelMetadataExtractor.ALLOWED_ALGORITHMS:
+            _algorithm = "custom"
+        _status = status or _info.get("status") or "draft"
+        if _status not in ModelMetadataExtractor.ALLOWED_STATUS:
+            _status = "draft"
+
         payload = {
-            "ml_model_configuration": {
-                "model_identification": {
-                    "name": name,
-                    "version": version,
-                    "ID": model_id,
-                    "UUID": uuid,
-                    "doi": doi,
-                    "author": author,
-                    "creation_date": creation_date,
-                    "status": status,
-                    "status_description": status_desc,
-                    "project": "../project_info.yaml",
+            # ----- core identification -----
+            "slug": model_id,
+            "name": name or model_name or model_id,
+            "description": description,
+            "algorithm": _algorithm,
+            "status": _status,
+            "version": version or "1.0.0",
+
+            # ----- IO contract -----
+            "inputs": inputs,
+            "outputs": outputs,
+
+            # ----- artifact location (from upload step) -----
+            "artifact_path": (model_info or {}).get("artifact_path"),
+            "artifact_format": (model_info or {}).get("artifact_format"),
+            "artifact_size_bytes": (model_info or {}).get("artifact_size_bytes"),
+
+            # ----- identification mirror columns -----
+            "doi": doi,
+            "authors": author,
+            "learner": learner,
+            "model_type": model_type,
+            "external_uuid": uuid,
+            "creation_date": creation_date,
+            "status_description": status_desc,
+
+            # ----- rich descriptive blocks -----
+            "language": {
+                "name": language,
+                "version": language_version,
+            },
+            "packages": packages,
+            "config_files": {
+                "model_file": cfg_model_file,
+                "server": cfg_server,
+                "port": cfg_port,
+                "rest_api": cfg_rest,
+            },
+            "input_time_interval": {
+                "time_interval": {"value": ti_value, "unit": ti_units},
+                "aggregation": {"method": agg_value, "description": agg_desc},
+                "description": ti_desc,
+            },
+            "training_information": {
+                "number_of_instances": n_instances,
+                "hyperparameters": {
+                    "number_of_trees": n_trees,
+                    "max_tree_depth": max_depth,
+                    "min_number_instances_per_leaf": min_leaf,
+                    "committees": committees,
+                    "instance_based_correction": instance_corr,
                 },
-                "model_description": {
-                    "learner": learner,
-                    "model_type": model_type,
-                    "model_name": model_name,
-                    "description": description,
-                    "language": {
-                        "name": language,
-                        "version": language_version,
-                    },
-                    "config_files": {
-                        "model_file": cfg_model_file,
-                        "server": cfg_server,
-                        "port": cfg_port,
-                        "rest_api": cfg_rest,
-                    },
-                    "packages": packages,
-                    "input_time_interval": {
-                        "time_interval": {
-                            "value": ti_value,
-                            "unit": ti_units,
-                        },
-                        "aggregation": {
-                            "method": agg_value,
-                            "description": agg_desc,
-                        },
-                        "description": ti_desc,
-                    },
-                },
-                "training_information": {
-                    "number_of_instances": n_instances,
-                    "hyperparameters": {
-                        "number_of_trees": n_trees,
-                        "max_tree_depth": max_depth,
-                        "min_number_instances_per_leaf": min_leaf,
-                        "committees": committees,
-                        "instance_based_correction": instance_corr,
-                    },
-                    "validation": validation,
-                    "experiments_ID": experiments_id,
-                },
-                "inputs": {"features": inputs},
-                "outputs": {"information": outputs},
-            }
+                "validation": validation,
+                "experiments_ID": experiments_id,
+            },
         }
 
         # =======================
-        # SAVE YAML
+        # PERSIST IN POSTGRES
         # =======================
-        logger.info(f"model_info : {model_info}") 
-        yaml_path = os.path.join(
-            get_path_config_folder(model_info["project_id"]),
-            model_id + ".yaml",
+        logger.info(f"model_info : {model_info}")
+        result, _ = ModelService().create_model_for_project(
+            session_data, model_info["project_id"], payload
         )
-        save_model(model_info["project_id"], model_id, payload)
-        
-        return "/home", html.Div([
-            html.P("Configuration saved successfully."),
-            html.P(f"YAML file path: {yaml_path}")
-        ])
 
+        if result is None:
+            return (
+                True,
+                "Error: could not save model to the database.",
+                "danger",
+                "Error",
+                "",
+            )
+
+        return (
+            True,
+            f"Model saved successfully. ID: {result.get('id')}",
+            "success",
+            "Notification",
+            "",
+        )
+
+    @app.callback(
+        Output("url", "pathname", allow_duplicate=True),
+        Input("back-to-list-upload", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def go_back_to_list_upload(n_clicks):
+        if not n_clicks:
+            raise PreventUpdate
+        return "/home"

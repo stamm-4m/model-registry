@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def get_user_role(session_data):
-    logger.debug(f"Getting user role from session data: {session_data}")
+    logger.debug(f"Getting user role from session data: session_data")
     if not session_data or "access_token" not in session_data:
         return None, None
     try:

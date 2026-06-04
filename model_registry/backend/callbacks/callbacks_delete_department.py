@@ -32,7 +32,8 @@ def register_delete_department_modal_callbacks(app):
         Output("dept-toast", "is_open", allow_duplicate=True),
         Output("dept-toast", "children", allow_duplicate=True),
         Output("dept-toast", "icon", allow_duplicate=True),
-        Input("btn-confirm-delete", "n_clicks"),
+        Output("user-session", "data", allow_duplicate=True),
+        Input("btn-confirm-delete-dept", "n_clicks"),
         State("dept-delete-id", "data"),
         State("user-session", "data"),
         prevent_initial_call=True
@@ -43,13 +44,14 @@ def register_delete_department_modal_callbacks(app):
 
         service = DepartmentService()
         try:
-            service.delete_department(session_data, dept_id)
+            _, session_data = service.delete_department(session_data, dept_id)
             return (
                 False,              # cerrar modal
                 n_clicks,           # refresh tabla
                 True,               # mostrar toast
                 "Department deleted successfully",
-                "success"
+                "success",
+                session_data,
             )
         except DepartmentInUseException as e:
             return (
@@ -57,7 +59,8 @@ def register_delete_department_modal_callbacks(app):
                 dash.no_update,
                 True,
                 str(e),
-                "danger"
+                "danger",
+                session_data,
             )
 
         except Exception as e:
@@ -66,12 +69,13 @@ def register_delete_department_modal_callbacks(app):
                 dash.no_update,
                 True,
                 f"Error deleting organization: {str(e)}",
-                "danger"
+                "danger",
+                session_data,
             )
     
     @app.callback(
         Output("delete-dept-modal", "is_open", allow_duplicate=True),
-        Input("btn-cancel-delete", "n_clicks"),
+        Input("btn-cancel-delete-dept", "n_clicks"),
         prevent_initial_call=True
     )
     def cancel_delete(n):

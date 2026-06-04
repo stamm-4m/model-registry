@@ -29,7 +29,7 @@ def get_models_grid(permissions=None):
     base_columns = [
         {"headerName": "Model", "field": "model_name", "width": 100},
         {"headerName": "Author", "field": "authors", "width": 100},
-        {"headerName": "Creation Date", "field": "creation_data", "width": 100},
+        {"headerName": "Created on", "field": "creation_data", "width": 100},
         {"headerName": "Version", "field": "version", "width": 60},
     ]
 

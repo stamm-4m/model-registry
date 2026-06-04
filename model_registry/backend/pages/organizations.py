@@ -163,16 +163,13 @@ def organizations_layout(session_data=None):
 
     return dbc.Container(
         [
-            # Stores (kept verbatim so callbacks continue to fire).
+            # Page-local stores
             dcc.Store(id="org-edit-id"),
             dcc.Store(id="org-delete-id"),
-            dcc.Store(id="org-refresh-trigger"),
             dcc.Store(id="dept-edit-id"),
             dcc.Store(id="dept-delete-id"),
-            dcc.Store(id="dept-refresh-trigger"),
             dcc.Store(id="lab-edit-id"),
             dcc.Store(id="lab-delete-id"),
-            dcc.Store(id="lab-refresh-trigger"),
 
             header,
             columns,

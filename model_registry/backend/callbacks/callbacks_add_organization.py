@@ -38,7 +38,8 @@ def register_add_organization_modal_callbacks(app):
     @app.callback(
         Output("org-name-input", "value"),
         Output("org-location-input", "value"),
-        Output("org-refresh-trigger", "data"),
+        Output("org-refresh-trigger", "data", allow_duplicate=True),
+        Output("user-session", "data", allow_duplicate=True),
         Input("btn-save-org", "n_clicks"),
         State("org-name-input", "value"),
         State("org-location-input", "value"),
@@ -60,18 +61,19 @@ def register_add_organization_modal_callbacks(app):
 
         if org_id:  # Edit existing organization
             logger.debug(f"Editing organization with ID: {org_id}")
-            service.update_organization(session_data, org_id, name=name, location=location)
+            _, session_data = service.update_organization(session_data, org_id, name=name, location=location)
         else:  # Create new organization
             logger.debug("Creating new organization")
-            service.create_organization(session_data, name, location)
+            _, session_data = service.create_organization(session_data, name, location)
 
-        return "", "", True
+        return "", "", True, session_data
     
     @app.callback(
         Output("organization-modal", "is_open", allow_duplicate=True),
         Output("org-name-input", "value", allow_duplicate=True),
         Output("org-location-input", "value", allow_duplicate=True),
         Output("org-edit-id", "data"),
+        Output("user-session", "data", allow_duplicate=True),
         Input({"type": "btn-edit-org", "index": ALL}, "n_clicks"),
         State("user-session", "data"),
         prevent_initial_call=True
@@ -88,11 +90,11 @@ def register_add_organization_modal_callbacks(app):
 
         org_id = ctx.triggered_id["index"]
         service = OrganizationService()
-        org, _ = service.get_organization(session_data, org_id)
+        org, session_data = service.get_organization(session_data, org_id)
 
         if org is None:
             raise PreventUpdate
 
-        return True, org.name, org.location, str(org_id)
+        return True, org.name, org.location, str(org_id), session_data
     
     

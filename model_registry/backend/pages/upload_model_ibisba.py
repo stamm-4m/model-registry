@@ -238,7 +238,7 @@ def add_upload_model_ibisba_layout(project_id, model_id, session_data=None):
                     dbc.Button(
                         [
                             html.I(className="bi bi-check2-circle me-1"),
-                            "Confirm selection",
+                            "Continue",
                         ],
                         id="confirm-selection-btn",
                         color="success",
@@ -322,7 +322,7 @@ def add_upload_model_ibisba_layout(project_id, model_id, session_data=None):
                         dbc.Button(
                             [
                                 html.I(className="bi bi-check2-circle me-1"),
-                                "Confirm selection",
+                                "Continue",
                             ],
                             id="confirm-selection-ibisba-btn",
                             color="success",

@@ -1,28 +1,45 @@
 import os
-import yaml 
+import yaml
 from dash import html
 import dash_bootstrap_components as dbc
-from collections import OrderedDict
 
 
 def create_project_structure(project_id: str, project_name: str, description: str):
     """
     Create the folder structure and project_info.yaml for a new project.
+
+    The folder is named after ``project_name`` (sanitized) so the on-disk
+    layout matches the human-readable project name shown in the UI. The
+    YAML is written using ``yaml.safe_dump`` on a plain ``dict`` so it can
+    be re-read by ``yaml.safe_load`` (the loader rejects Python-specific
+    tags such as ``!!python/object/apply:collections.OrderedDict``).
     """
+    import re
+
     base_dir = os.path.join(os.path.dirname(__file__), '../../api/projects')
-    project_folder = os.path.join(base_dir, project_name)
+    # Sanitize the project name for use as a folder: keep letters/numbers,
+    # replace runs of unsafe chars with a single underscore. Fall back to
+    # the project_id (or "project") when the result would be empty.
+    raw_name = (project_name or '').strip()
+    safe_name = re.sub(r'[^A-Za-z0-9._-]+', '_', raw_name).strip('._-')
+    folder_name = safe_name or project_id or 'project'
+
+    project_folder = os.path.join(base_dir, folder_name)
     config_folder = os.path.join(project_folder, 'configs')
     models_folder = os.path.join(project_folder, 'models')
     os.makedirs(config_folder, exist_ok=True)
     os.makedirs(models_folder, exist_ok=True)
     yaml_path = os.path.join(project_folder, 'project_info.yaml')
-    project_info = OrderedDict([
-        ('project_ID', project_id),
-        ('project_name', project_name),
-        ('description', description)
-    ])
+    project_info = {
+        'project_ID': project_id,
+        'project_name': project_name,
+        'description': description or '',
+    }
     with open(yaml_path, 'w', encoding='utf-8') as f:
-        yaml.dump(project_info, f, allow_unicode=True, sort_keys=False)
+        yaml.safe_dump(
+            project_info, f, allow_unicode=True, sort_keys=False,
+        )
+    return project_folder
 
 _DASH = "\u2014"
 

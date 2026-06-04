@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 def register_delete_experiment_modal_callbacks(app):
     @app.callback(
-        Output("delete-exp-modal", "is_open"),
+        Output("delete-exp-modal", "is_open",allow_duplicate=True),
         Output("exp-delete-id", "data"),
         Input({"type": "btn-delete-exp", "index": ALL}, "n_clicks"),
         prevent_initial_call=True
@@ -29,7 +29,8 @@ def register_delete_experiment_modal_callbacks(app):
         Output("exp-toast", "is_open", allow_duplicate=True),
         Output("exp-toast", "children", allow_duplicate=True),
         Output("exp-toast", "icon", allow_duplicate=True),
-        Input("btn-confirm-delete", "n_clicks"),
+        Output("user-session", "data", allow_duplicate=True),
+        Input("btn-confirm-delete-exp", "n_clicks"),
         State("exp-delete-id", "data"),
         State("user-session", "data"),
         prevent_initial_call=True
@@ -39,13 +40,14 @@ def register_delete_experiment_modal_callbacks(app):
             raise PreventUpdate
         service = ExperimentService()
         try:
-            service.delete_experiment(session_data, exp_id)
+            _, session_data = service.delete_experiment(session_data, exp_id)
             return (
                 False,              # cerrar modal
                 n_clicks,           # refresh tabla
                 True,               # mostrar toast
                 "Experiment deleted successfully",
-                "success"
+                "success",
+                session_data,
             )
         
         except DepartmentInUseException as e:
@@ -54,7 +56,8 @@ def register_delete_experiment_modal_callbacks(app):
                 dash.no_update,
                 True,
                 str(e),
-                "warning"
+                "warning",
+                session_data,
             )
 
         except Exception as e:
@@ -63,12 +66,13 @@ def register_delete_experiment_modal_callbacks(app):
                 dash.no_update,
                 True,
                 f"Error deleting experiment: {str(e)}",
-                "danger"
+                "danger",
+                session_data,
             )
 
     @app.callback(
         Output("delete-exp-modal", "is_open", allow_duplicate=True),
-        Input("btn-cancel-delete", "n_clicks"),
+        Input("btn-cancel-delete-exp", "n_clicks"),
         prevent_initial_call=True
     )
     def cancel_delete(n):

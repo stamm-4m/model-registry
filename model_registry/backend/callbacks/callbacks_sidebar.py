@@ -1,6 +1,6 @@
 import logging
 import dash
-from dash import Input, Output, State
+from dash import Input, Output, State, no_update
 
 from model_registry.backend.layouts.auth_layout import login_form
 from model_registry.backend.pages.add_project import add_project_layout
@@ -31,18 +31,49 @@ def register_sidebar_callbacks(app):
     @app.callback(
         Output("main-content", "children"),
         Input("url", "pathname"),
-        State("user-session", "data")
+        Input("user-session", "data"),
+        State("main-content", "children"),
     )
-    def display_page(pathname, session_data):
-        logger.debug(f"Navigating to {pathname} with session {session_data}")
-        if not session_data or not session_data.get("authenticated"):
+    def display_page(pathname, session_data, current_children):
+        #logger.debug(f"Navigating to {pathname} with session {session_data}")
+
+        ctx = dash.callback_context
+        triggered_ids = {
+            t["prop_id"].split(".")[0] for t in (ctx.triggered or [])
+        }
+        is_authenticated = bool(
+            session_data and session_data.get("authenticated")
+        )
+
+        # Token-refresh short-circuit: skip the re-render only when the SOLE
+        # trigger is user-session, the user is still authenticated, and the
+        # page is already populated. If pathname also changed (e.g. nav to
+        # /home after creating a project) we must render the new page.
+        if (
+            triggered_ids == {"user-session"}
+            and is_authenticated
+            and current_children
+        ):
+            return no_update
+
+        if not is_authenticated:
             logger.debug("User not authenticated, redirecting to login")
             return login_form()
         
         if pathname == "/" or pathname == "/home":
-            projects_options, session_data = list_projects(session_data)
-            if projects_options is None:
+            projects_options, new_session_data = list_projects(session_data)
+            # Only treat as auth failure when the helper signals lost session
+            # (session_data set to None). A None payload with preserved
+            # session means an API error (e.g. 500) -- still render home.
+            if projects_options is None and new_session_data is None:
+                logger.warning("list_projects: session lost, redirecting to login")
                 return login_form()
+            if projects_options is None:
+                logger.warning(
+                    "list_projects returned None (API error); rendering home with empty list"
+                )
+                projects_options = []
+            session_data = new_session_data or session_data
             permissions = get_user_permissions(session_data)
             return home_layout(projects_options, permissions=permissions)
         

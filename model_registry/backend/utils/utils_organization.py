@@ -13,7 +13,7 @@ def _fmt_date(value):
         return str(value)[:10]
 
 
-def build_table(organizations):
+def build_table_organizations(organizations):
     """FermOps-style card list for organizations.
 
     Each card shows name (bold), location (sub), and created date (meta).
@@ -47,7 +47,6 @@ def build_table(organizations):
         ], className="tree-row")
         for org in organizations
     ]
-    return html.Div(rows)
     return html.Div(rows)
 
 def toast_confirm_delete():

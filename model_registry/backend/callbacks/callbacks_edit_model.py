@@ -1,13 +1,13 @@
 import base64
 import logging
 import os
+import dash
 
 import dash_bootstrap_components as dbc
-import requests
 from dash import ALL, Input, Output, State, ctx
 from dash.exceptions import PreventUpdate
 
-from model_registry.backend.config.settings import settings
+from model_registry.backend.services.model_service import ModelService
 from model_registry.backend.utils.utils_edit_model import (
     feature_item,
     new_feature,
@@ -132,10 +132,12 @@ def register_edit_model_callbacks(app):
 # ---------------- SAVE ----------------#
     @app.callback(
         Output("save-feedback", "children"),
+        Output("user-session", "data", allow_duplicate=True),
         Input("save-model", "n_clicks"),
 
         # ===== CONTEXT =====
         State("edit-model-info", "data"),
+        State("user-session", "data"),
 
         # ===== MODEL IDENTIFICATION =====
         State("edit_model_uuid", "value"),
@@ -206,6 +208,7 @@ def register_edit_model_callbacks(app):
     def save_model(
         _,
         info,
+        session_data,
         uuid, doi, name, version, creation_date, author, status, status_desc,
         learner, model_type, model_name, description, language, language_version,
         pkg_names, pkg_versions,
@@ -217,6 +220,8 @@ def register_edit_model_callbacks(app):
         f_names, f_types, f_units, f_lags, f_scalings, f_mins, f_maxs, f_descs,
         o_names, o_units, o_horizons, o_scalings, o_mins, o_maxs, o_descs,
     ):
+        if not _:
+            raise dash.exceptions.PreventUpdate
 
         try:
             # =======================
@@ -323,26 +328,27 @@ def register_edit_model_callbacks(app):
 
 
             # =======================
-            # API CALL
+            # API CALL (authenticated via ModelService)
             # =======================
-            response = requests.put(
-                f"{settings.API_BASE_URL}{info['project_id']}/update/{info['model_id']}",
-                json=payload,
-                timeout=10,
+            result, session_data = ModelService().update_registry_model(
+                session_data,
+                info["project_id"],
+                info["model_id"],
+                payload,
             )
 
-            if response.status_code != 200:
+            if result is None:
                 return dbc.Alert(
-                    f"❌ Error saving model: {response.text}",
+                    "❌ Error saving model",
                     color="danger",
                     dismissable=True,
-                )
+                ), session_data
 
             return dbc.Alert(
                 "✅ Model saved successfully",
                 color="success",
                 dismissable=True,
-            )
+            ), session_data
 
         except Exception as e:
             logger.exception("Save model failed")
@@ -350,7 +356,7 @@ def register_edit_model_callbacks(app):
                 f"❌ Unexpected error: {str(e)}",
                 color="danger",
                 dismissable=True,
-            )
+            ), session_data
 
     @app.callback(
         Output("edit_config_model_file_status", "children"),

@@ -106,13 +106,11 @@ def projects_layout(session_data=None):
 
     return dbc.Container(
         [
-            # Stores (kept verbatim so existing callbacks keep firing)
+            # Page-local stores
             dcc.Store(id="proj-edit-id"),
             dcc.Store(id="proj-delete-id"),
-            dcc.Store(id="proj-refresh-trigger"),
             dcc.Store(id="exp-edit-id"),
             dcc.Store(id="exp-delete-id"),
-            dcc.Store(id="exp-refresh-trigger"),
 
             header,
 

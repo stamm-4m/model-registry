@@ -32,6 +32,7 @@ def register_delete_organization_modal_callbacks(app):
         Output("org-toast", "is_open", allow_duplicate=True),
         Output("org-toast", "children", allow_duplicate=True),
         Output("org-toast", "icon", allow_duplicate=True),
+        Output("user-session", "data", allow_duplicate=True),
         Input("btn-confirm-delete", "n_clicks"),
         State("org-delete-id", "data"),
         State("user-session", "data"),
@@ -44,14 +45,15 @@ def register_delete_organization_modal_callbacks(app):
         service = OrganizationService()
 
         try:
-            service.delete_organization(session_data, org_id)
+            _, session_data = service.delete_organization(session_data, org_id)
 
             return (
                 False,              # cerrar modal
                 n_clicks,           # refresh tabla
                 True,               # mostrar toast
                 "Organization deleted successfully",
-                "success"
+                "success",
+                session_data,
             )
         
         except OrganizationInUseException as e:
@@ -60,7 +62,8 @@ def register_delete_organization_modal_callbacks(app):
                 dash.no_update,
                 True,
                 str(e),   # 🔥 mensaje dinámico
-                "warning"
+                "warning",
+                session_data,
             )
 
         except Exception as e:
@@ -69,7 +72,8 @@ def register_delete_organization_modal_callbacks(app):
                 dash.no_update,
                 True,
                 f"Error deleting organization: {str(e)}",
-                "danger"
+                "danger",
+                session_data,
             )
     
     @app.callback(

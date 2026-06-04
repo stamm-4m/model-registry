@@ -1,6 +1,7 @@
 import os
 
 import requests
+from datetime import datetime
 from model_registry.backend.config.settings import settings
 
 from model_registry.api.utils.project_loader import (
@@ -8,6 +9,29 @@ from model_registry.api.utils.project_loader import (
     list_projects_by_id,
     load_project_info,
 )
+
+
+def _format_date_ddmmyyyy(value):
+    if not value:
+        return None
+
+    raw_value = str(value).strip()
+    if not raw_value:
+        return None
+
+    # Accept ISO date/datetime values and keep original text if parsing fails.
+    try:
+        normalized = raw_value.replace("Z", "+00:00")
+        parsed = datetime.fromisoformat(normalized)
+        return parsed.strftime("%d-%m-%Y")
+    except ValueError:
+        pass
+
+    try:
+        parsed = datetime.strptime(raw_value, "%Y-%m-%d")
+        return parsed.strftime("%d-%m-%Y")
+    except ValueError:
+        return raw_value
 
 
 def get_option_projects_dropdown(session_data=None):

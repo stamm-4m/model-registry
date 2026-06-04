@@ -147,10 +147,9 @@ def users_layout(session_data=None):
 
     return dbc.Container(
         [
-            # Stores (kept verbatim so callbacks continue to fire).
+            # Page-local stores
             dcc.Store(id="user-edit-id"),
             dcc.Store(id="user-delete-id"),
-            dcc.Store(id="user-refresh-trigger"),
 
             header,
             filter_bar,

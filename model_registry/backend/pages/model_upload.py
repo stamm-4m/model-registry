@@ -14,6 +14,21 @@ def model_upload_layout(project_id):
                 data=[]
             ),
             html.H3("Add Model", className="text-center my-4"),
+            dbc.Toast(
+                id="save-model-toast",
+                header="Notification",
+                is_open=False,
+                dismissable=True,
+                duration=4000,
+                icon="success",
+                style={
+                    "position": "fixed",
+                    "top": 10,
+                    "right": 10,
+                    "width": 350,
+                    "zIndex": 9999,
+                },
+            ),
             # Section: Upload File
             dbc.Card(
                 dbc.CardBody(
@@ -391,18 +406,36 @@ def model_upload_layout(project_id):
                             ],md=12),
                         ],className="mb-4",),
 
-                            # Save button
-                            dbc.Row([
-                                dbc.Col([
-                                    dbc.Button("Save Configuration", id="save-ml-model-config", color="primary", className="mt-4"),
-                                ], className="text-center"),
-                                dbc.Col(
-                                    html.Div(
-                                        id="save-model-feedback",
-                                        className="ms-3 fw-semibold",
+                            # Save / Back buttons
+                            dbc.Row(
+                                [
+                                    dbc.Col(
+                                        dbc.Button(
+                                            "← Back to list",
+                                            id="back-to-list-upload",
+                                            color="secondary",
+                                            outline=True,
+                                            className="me-2",
+                                        ),
+                                        width="auto",
                                     ),
-                                ),
-                            ])
+                                    dbc.Col(
+                                        dbc.Button(
+                                            "Save Configuration",
+                                            id="save-ml-model-config",
+                                            color="primary",
+                                        ),
+                                        width="auto",
+                                    ),
+                                    dbc.Col(
+                                        html.Div(
+                                            id="save-model-feedback",
+                                            className="ms-3 fw-semibold",
+                                        ),
+                                    ),
+                                ],
+                                className="mt-4 justify-content-center align-items-center",
+                            )
 
                         ], fluid=True),
                     

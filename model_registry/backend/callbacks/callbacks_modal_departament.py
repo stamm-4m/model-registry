@@ -37,6 +37,7 @@ def register_department_modal_callbacks(app):
 
     @app.callback(
         Output("dept-org-dropdown", "options"),
+        Output("user-session", "data", allow_duplicate=True),
         Input("btn-open-dept-modal", "n_clicks"),
         Input({"type": "btn-edit-dept", "index": ALL}, "n_clicks"),
         State("user-session", "data"),
@@ -44,18 +45,19 @@ def register_department_modal_callbacks(app):
     )
     def load_organizations_dropdown(n, n_list, session_data):
         service = OrganizationService()
-        orgs, _ = service.get_all_organizations(session_data)
+        orgs, session_data = service.get_all_organizations(session_data)
         logger.debug(f"Loaded organizations for dropdown: {orgs}")
         return [
             {"label": org.name, "value": str(org.id)}
             for org in orgs
-    ]
+    ], session_data
 
     @app.callback(
         Output("dept-name-input", "value"),
         Output("dept-org-dropdown", "value"),
         Output("dept-edit-id", "data",allow_duplicate=True),
         Output("dept-refresh-trigger", "data", allow_duplicate=True),
+        Output("user-session", "data", allow_duplicate=True),
         Input("btn-save-dept", "n_clicks"),
         State("dept-name-input", "value"),
         State("dept-org-dropdown", "value"),
@@ -74,18 +76,19 @@ def register_department_modal_callbacks(app):
         service = DepartmentService()
         if dept_id:
             logger.debug(f"Editing department with ID: {dept_id}")
-            service.update_department(session_data, dept_id, name, org_id)
+            _, session_data = service.update_department(session_data, dept_id, name, org_id)
         else:
             logger.debug("Creating new department")
-            service.create_department(session_data, name, org_id)
+            _, session_data = service.create_department(session_data, name, org_id)
         logger.debug(f"Saved department: {name}, org_id: {org_id}")
-        return "", None, None, n
+        return "", None, None, n, session_data
     
     @app.callback(
         Output("department-modal", "is_open", allow_duplicate=True),
         Output("dept-name-input", "value", allow_duplicate=True),
         Output("dept-org-dropdown", "value", allow_duplicate=True),
         Output("dept-edit-id", "data"),
+        Output("user-session", "data", allow_duplicate=True),
         Input({"type": "btn-edit-dept", "index": ALL}, "n_clicks"),
         State("user-session", "data"),
         prevent_initial_call=True
@@ -107,4 +110,4 @@ def register_department_modal_callbacks(app):
             raise PreventUpdate
         org_id, session_data = service.get_organization_id_for_department(session_data, dept_id)
         logger.debug(f"Editing department with ID: {dept_id}, name: {dept.name}, org_id: {org_id}")
-        return True, dept.name, str(org_id) if org_id else None, str(dept_id)
+        return True, dept.name, str(org_id) if org_id else None, str(dept_id), session_data

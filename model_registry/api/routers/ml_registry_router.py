@@ -58,18 +58,24 @@ def list_projects(
         projects_db = db.query(Project).filter(Project.id.in_(project_ids)).all()
         projects = []
         for project in projects_db:
-            info = load_project_info(project.project_id)
-            if not info:
+            try:
+                info = load_project_info(project.project_id) or {}
+                projects.append({
+                    "project_ID": info.get("project_ID", project.project_id),
+                    "name": info.get("project_name", project.name),
+                    "description": info.get("description", project.description),
+                    "create_at": info.get("create_at", project.created_at),
+                })
+            except Exception as exc:
+                # A single corrupt project must not break the listing.
+                logger.warning(
+                    "Skipping project_id=%s due to error: %s",
+                    project.project_id, exc,
+                )
                 continue
-            projects.append({
-                "project_ID": info.get("project_ID", project.project_id),
-                "name": info.get("project_name", project.name),
-                "description": info.get("description", project.description),
-                "create_at": info.get("create_at", project.created_at),
-                
-            })
         return projects
     except Exception as e:
+        logger.exception("list_projects failed")
         raise HTTPException(status_code=500, detail=f"Error listing projects: {e}")
 
 @router.get("/{project_id}/project_info/")

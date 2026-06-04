@@ -211,6 +211,7 @@ def home_layout(projects_options=None, permissions=None):
             confirm_delete,
             dcc.Store(id="model-to-delete"),
             dcc.Store(id="proj-edit-id"),
+            dcc.Store(id="proj-delete-id"),
             project_required_modal,
             toast_confirm_delete_proj(),
         ],

@@ -37,6 +37,7 @@ def register_delete_user_modal_callbacks(app):
         Output("user-toast", "is_open", allow_duplicate=True),
         Output("user-toast", "children", allow_duplicate=True),
         Output("user-toast", "icon", allow_duplicate=True),
+        Output("user-session", "data", allow_duplicate=True),
         Input("btn-confirm-delete-user", "n_clicks"),  
         State("user-delete-id", "data"),
         State("user-session", "data"),
@@ -50,14 +51,15 @@ def register_delete_user_modal_callbacks(app):
         service = UserService()
 
         try:
-            service.delete_user(session_data, user_id)
+            _, session_data = service.delete_user(session_data, user_id)
 
             return (
                 False,              # cerrar modal
                 n_clicks,           # refresh tabla
                 True,               # mostrar toast
                 "User deleted successfully",
-                "success"
+                "success",
+                session_data,
             )
 
         except UserHasRolesException as e:
@@ -67,7 +69,8 @@ def register_delete_user_modal_callbacks(app):
                 dash.no_update,
                 True,
                 str(e),
-                "warning"
+                "warning",
+                session_data,
             )
 
         except Exception as e:
@@ -77,7 +80,8 @@ def register_delete_user_modal_callbacks(app):
                 dash.no_update,
                 True,
                 "Unexpected error deleting user",
-                "danger"
+                "danger",
+                session_data,
             )
 
     @app.callback(

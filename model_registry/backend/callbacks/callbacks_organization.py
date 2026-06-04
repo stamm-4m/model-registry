@@ -7,7 +7,7 @@ from model_registry.backend.services.department_service import DepartmentService
 from model_registry.backend.services.user_service import UserService
 from model_registry.backend.services.laboratory_service import LaboratoryService
 from model_registry.backend.utils.utils_laboratory import build_table_laboratories
-from model_registry.backend.utils.utils_organization import build_table
+from model_registry.backend.utils.utils_organization import build_table_organizations
 from model_registry.backend.utils.utils_department import build_table_departments
 from model_registry.backend.utils.utils_users import build_table_users
 import logging
@@ -29,7 +29,7 @@ def register_organizations_table_callbacks(app):
 
         if not organizations:
             return html.Div("No organizations found.")
-        return build_table(organizations)
+        return build_table_organizations(organizations)
     
     @app.callback(
         Output("departments-table", "children"),
@@ -41,7 +41,7 @@ def register_organizations_table_callbacks(app):
         departments, _ = service.get_all_departments_with_org(session_data)
         logger.debug(f"Loaded departments for table: {departments}")
         if not departments:
-            return "No departments found."
+            return html.Div("No departments found.")
         return build_table_departments(departments)
     
     @app.callback(

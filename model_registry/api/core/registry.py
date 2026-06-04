@@ -459,13 +459,80 @@ class ModelRegistry:
                 if "name" in ident:
                     model_row.name = ident["name"]
                 if "status" in ident:
-                    model_row.status = ident["status"]
+                    # ``status`` is read from ``is_active`` (Boolean) in
+                    # _synthesize_yaml_shape, so the dashboard sends a
+                    # Boolean here. ``Model.status`` is a String column
+                    # gated by a CHECK constraint, so route booleans to
+                    # ``is_active`` and only write strings to ``status``.
+                    status_value = ident["status"]
+                    if isinstance(status_value, bool):
+                        model_row.is_active = status_value
+                    elif status_value is not None:
+                        model_row.status = status_value
                 if "version" in ident:
                     model_row.version = ident["version"]
                 if "algorithm" in ident:
                     model_row.algorithm = ident["algorithm"]
                 if "description" in ident:
                     model_row.description = ident["description"]
+                if "doi" in ident:
+                    model_row.doi = ident["doi"] or None
+                if "UUID" in ident:
+                    model_row.external_uuid = ident["UUID"] or None
+                if "author" in ident:
+                    model_row.authors = ident["author"] or ""
+                if "creation_date" in ident:
+                    model_row.creation_date = ident["creation_date"] or None
+                if "status_description" in ident:
+                    model_row.status_description = ident["status_description"] or ""
+
+                # ----- Description-level dedicated columns -----
+                md = mlc.get("model_description") or {}
+                if "learner" in md:
+                    model_row.learner = md["learner"] or ""
+                if "model_type" in md:
+                    model_row.model_type = md["model_type"] or ""
+                if "language" in md:
+                    model_row.language = md["language"] or []
+                if "packages" in md:
+                    model_row.packages = md["packages"] or []
+                if "config_files" in md:
+                    model_row.config_files = md["config_files"] or {}
+                if "input_time_interval" in md:
+                    model_row.input_time_interval = md["input_time_interval"] or {}
+
+                # ----- Training information -----
+                if "training_information" in mlc:
+                    model_row.training_information = mlc["training_information"] or {}
+
+                # ----- Inputs / outputs (dedicated columns) -----
+                # ``_synthesize_yaml_shape`` rebuilds inputs.features/outputs.information
+                # from these columns, so the JSON merge alone is not enough --
+                # we must also persist them here for the changes to round-trip.
+                if "inputs" in mlc and isinstance(mlc["inputs"], dict):
+                    incoming_inputs = mlc["inputs"]
+                    current_inputs = (
+                        dict(model_row.inputs)
+                        if isinstance(model_row.inputs, dict)
+                        else {}
+                    )
+                    if "features" in incoming_inputs:
+                        current_inputs["features"] = incoming_inputs["features"] or []
+                    if "scaler" in incoming_inputs:
+                        current_inputs["scaler"] = incoming_inputs["scaler"]
+                    model_row.inputs = current_inputs
+                if "outputs" in mlc and isinstance(mlc["outputs"], dict):
+                    incoming_outputs = mlc["outputs"]
+                    current_outputs = (
+                        dict(model_row.outputs)
+                        if isinstance(model_row.outputs, dict)
+                        else {}
+                    )
+                    if "information" in incoming_outputs:
+                        current_outputs["information"] = incoming_outputs["information"] or []
+                    if "scaler" in incoming_outputs:
+                        current_outputs["scaler"] = incoming_outputs["scaler"]
+                    model_row.outputs = current_outputs
 
             # Flat-key payload (real column names).
             for key, value in (updates or {}).items():

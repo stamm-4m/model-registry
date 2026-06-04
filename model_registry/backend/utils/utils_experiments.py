@@ -65,8 +65,8 @@ def toast_confirm_delete_exp():
             dbc.ModalHeader(dbc.ModalTitle("Confirm Delete")),
             dbc.ModalBody("Are you sure you want to delete this experiment?"),
             dbc.ModalFooter([
-                dbc.Button("Cancel", id="btn-cancel-delete", color="secondary"),
-                dbc.Button("Delete", id="btn-confirm-delete", color="danger")
+                dbc.Button("Cancel", id="btn-cancel-delete-exp", color="secondary"),
+                dbc.Button("Delete", id="btn-confirm-delete-exp", color="danger")
             ])
         ], id="delete-exp-modal", is_open=False),
     ])

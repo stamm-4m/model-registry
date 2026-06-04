@@ -65,8 +65,8 @@ def toast_confirm_delete_dept():
             dbc.ModalHeader(dbc.ModalTitle("Confirm Delete")),
             dbc.ModalBody("Are you sure you want to delete this department?"),
             dbc.ModalFooter([
-                dbc.Button("Cancel", id="btn-cancel-delete", color="secondary"),
-                dbc.Button("Delete", id="btn-confirm-delete", color="danger")
+                dbc.Button("Cancel", id="btn-cancel-delete-dept", color="secondary"),
+                dbc.Button("Delete", id="btn-confirm-delete-dept", color="danger")
             ])
         ], id="delete-dept-modal", is_open=False),
     ])

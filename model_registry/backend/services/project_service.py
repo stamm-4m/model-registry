@@ -171,7 +171,14 @@ class ProjectService:
         description: Optional[str] = None,
         project_id: Optional[str] = None,
     ) -> Tuple[Optional[ProjectDTO], Optional[_SessionData]]:
-        payload: Dict[str, Any] = {"name": name}
+        from datetime import datetime, timezone
+
+        payload: Dict[str, Any] = {
+            "name": name,
+            # ``Project.created_at`` is a NOT NULL string column, so we set
+            # it client-side until the API gains a server-side default.
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
         if description is not None:
             payload["description"] = description
         if project_id is not None:

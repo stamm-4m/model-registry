@@ -33,6 +33,7 @@ def register_experiment_modal_callbacks(app):
 
     @app.callback(
         Output("exp-project-dropdown", "options"),
+        Output("user-session", "data", allow_duplicate=True),
         Input("btn-open-exp-modal", "n_clicks"),
         Input({"type": "btn-edit-exp", "index": ALL}, "n_clicks"),
         State("user-session", "data"),
@@ -40,12 +41,12 @@ def register_experiment_modal_callbacks(app):
     )
     def load_projects_dropdown(n, n_list, session_data):
         service = ProjectService()
-        projects, _ = service.get_all_projects(session_data)
+        projects, session_data = service.get_all_projects(session_data)
         logger.debug(f"Loaded projects for dropdown: {projects}")
         return [
             {"label": proj.name, "value": str(proj.id)}
             for proj in projects
-        ]
+        ], session_data
 
     @app.callback(
         Output("exp-name-input", "value"),
@@ -60,6 +61,7 @@ def register_experiment_modal_callbacks(app):
         Output("exp-toast", "is_open", allow_duplicate=True),
         Output("exp-toast", "children", allow_duplicate=True),
         Output("exp-toast", "icon", allow_duplicate=True),
+        Output("user-session", "data", allow_duplicate=True),
         Input("btn-save-exp", "n_clicks"),
         State("exp-name-input", "value"),
         State("exp-project-dropdown", "value"),
@@ -76,7 +78,7 @@ def register_experiment_modal_callbacks(app):
         if not n:
             raise PreventUpdate
         if not name or not project_id:
-            return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, True, "Name and project required", "danger"
+            return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, True, "Name and project required", "danger", session_data
         service = ExperimentService()
         ic = None
         sp = None
@@ -93,7 +95,7 @@ def register_experiment_modal_callbacks(app):
         try:
             if exp_id:
                 logger.debug(f"Editing experiment with ID: {exp_id}")
-                service.update_experiment(
+                _, session_data = service.update_experiment(
                     session_data,
                     exp_id,
                     name=name,
@@ -108,7 +110,7 @@ def register_experiment_modal_callbacks(app):
                 icon = "success"
             else:
                 logger.debug("Creating new experiment")
-                service.add_experiment(
+                _, session_data = service.add_experiment(
                     session_data,
                     name=name,
                     project_id=project_id,
@@ -121,10 +123,10 @@ def register_experiment_modal_callbacks(app):
                 msg = "Experiment created successfully"
                 icon = "success"
             logger.debug(f"Saved experiment: {name}, project_id: {project_id}")
-            return "", None, "", "", "", "", "", None, n, True, msg, icon
+            return "", None, "", "", "", "", "", None, n, True, msg, icon, session_data
         except Exception as e:
             logger.error(f"Error saving experiment: {e}")
-            return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, True, f"Error: {e}", "danger"
+            return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, True, f"Error: {e}", "danger", session_data
 
     @app.callback(
         Output("experiment-modal", "is_open", allow_duplicate=True),
@@ -136,6 +138,7 @@ def register_experiment_modal_callbacks(app):
         Output("exp-start-time-input", "value", allow_duplicate=True),
         Output("exp-end-time-input", "value", allow_duplicate=True),
         Output("exp-edit-id", "data"),
+        Output("user-session", "data", allow_duplicate=True),
         Input({"type": "btn-edit-exp", "index": ALL}, "n_clicks"),
         State("user-session", "data"),
         prevent_initial_call=True
@@ -148,7 +151,7 @@ def register_experiment_modal_callbacks(app):
             raise PreventUpdate
         exp_id = ctx.triggered_id["index"]
         service = ExperimentService()
-        exp, _ = service.get_experiment_by_id(session_data, exp_id)
+        exp, session_data = service.get_experiment_by_id(session_data, exp_id)
         if exp is None:
             raise PreventUpdate
         import json
@@ -157,4 +160,4 @@ def register_experiment_modal_callbacks(app):
         st = str(exp.start_time) if exp.start_time else ""
         et = str(exp.end_time) if exp.end_time else ""
         logger.debug(f"Editing experiment with ID: {exp_id}, name: {exp.name}, project_id: {exp.project_id}")
-        return True, exp.name, str(exp.project_id) if exp.project_id else None, exp.description or "", ic, sp, st, et, str(exp_id)
+        return True, exp.name, str(exp.project_id) if exp.project_id else None, exp.description or "", ic, sp, st, et, str(exp_id), session_data

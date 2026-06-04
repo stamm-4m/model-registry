@@ -38,6 +38,7 @@ def register_laboratory_modal_callbacks(app):
 
     @app.callback(
         Output("lab-dept-dropdown", "options"),
+        Output("user-session", "data", allow_duplicate=True),
         Input("btn-open-lab-modal", "n_clicks"),
         Input({"type": "btn-edit-lab", "index": ALL}, "n_clicks"),
         State("user-session", "data"),
@@ -45,12 +46,12 @@ def register_laboratory_modal_callbacks(app):
     )
     def load_departments_dropdown(n, n_list, session_data):
         service = DepartmentService()
-        deps, _ = service.get_all_departments(session_data)
+        deps, session_data = service.get_all_departments(session_data)
         logger.debug(f"Loaded departments for dropdown: {deps}")
         return [
             {"label": dept.name, "value": str(dept.id)}
             for dept in deps
-        ]
+        ], session_data
 
     @app.callback(
         Output("lab-name-input", "value"),
@@ -58,6 +59,7 @@ def register_laboratory_modal_callbacks(app):
         Output("lab-dept-dropdown", "value"),
         Output("lab-edit-id", "data",allow_duplicate=True),
         Output("lab-refresh-trigger", "data", allow_duplicate=True),
+        Output("user-session", "data", allow_duplicate=True),
         Input("btn-save-lab", "n_clicks"),
         State("lab-name-input", "value"),
         State("lab-location-input", "value"),
@@ -78,14 +80,14 @@ def register_laboratory_modal_callbacks(app):
 
         if lab_id:
             logger.debug(f"Editing laboratory with ID: {lab_id}")
-            service.update_laboratory(session_data, lab_id, name, location, dept_id)
+            _, session_data = service.update_laboratory(session_data, lab_id, name, location, dept_id)
         else:
             logger.debug("Creating new laboratory")
-            service.create_laboratory(session_data, name, location, dept_id)
+            _, session_data = service.create_laboratory(session_data, name, location, dept_id)
 
         logger.debug(f"Saved laboratory: {name}, location: {location}, dept_id: {dept_id}")
 
-        return "","", None, None, n
+        return "","", None, None, n, session_data
     
     @app.callback(
         Output("laboratory-modal", "is_open", allow_duplicate=True),
@@ -93,6 +95,7 @@ def register_laboratory_modal_callbacks(app):
         Output("lab-location-input", "value", allow_duplicate=True),
         Output("lab-dept-dropdown", "value", allow_duplicate=True),
         Output("lab-edit-id", "data"),
+        Output("user-session", "data", allow_duplicate=True),
         Input({"type": "btn-edit-lab", "index": ALL}, "n_clicks"),
         State("user-session", "data"),
         prevent_initial_call=True
@@ -109,33 +112,35 @@ def register_laboratory_modal_callbacks(app):
         lab_id = ctx.triggered_id["index"]
 
         service = LaboratoryService() 
-        (lab, dept_id), _ = service.get_laboratory_with_dept(session_data, lab_id)
+        (lab, dept_id), session_data = service.get_laboratory_with_dept(session_data, lab_id)
         if lab is None:
             raise PreventUpdate
         logger.debug(f"Editing laboratory with ID: {lab_id}, name: {lab.name}, dept_id: {dept_id}")
 
-        return True, lab.name, lab.location, str(dept_id) if dept_id else None, str(lab_id)
+        return True, lab.name, lab.location, str(dept_id) if dept_id else None, str(lab_id), session_data
     
     @app.callback(
         Output("user-lab-dropdown", "options"),
         Output("user-lab-dropdown", "style"),
         Output("lab-label", "style"),
+        Output("user-session", "data", allow_duplicate=True),
         Input("user-dept-dropdown", "value"),
         State("user-session", "data"),
+        prevent_initial_call="initial_duplicate",
     )
     def update_labs(department_id, session_data):
         if not department_id:
-            return [], {"display": "none"}, {"display": "none"}
+            return [], {"display": "none"}, {"display": "none"}, session_data
 
         service = LaboratoryService()
-        labs, _ = service.get_labs_by_department(session_data, department_id)
+        labs, session_data = service.get_labs_by_department(session_data, department_id)
 
         options = [
             {"label": lab.name, "value": str(lab.id)}
             for lab in labs
         ]
 
-        return options, {"display": "block"}, {"display": "block"}
+        return options, {"display": "block"}, {"display": "block"}, session_data
     
     #callback to reset lab dropdown when department changes in user modal
     @app.callback(

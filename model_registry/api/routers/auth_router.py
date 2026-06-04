@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from model_registry.api.core.security import create_access_token, get_current_user
 from model_registry.api.models.refresh_token import RefreshToken
 from model_registry.api.schemas import user
@@ -12,6 +13,10 @@ from model_registry.api.services.auth_service import register_user, login_user
 import logging
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["Auth"])
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
 
 @router.post("/register")
 def register(user: UserCreate, db: Session = Depends(get_db)):
@@ -75,7 +80,8 @@ def get_me(user = Depends(get_current_user)):
         "resources": resources
     }
 @router.post("/refresh")
-def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
+def refresh_token(payload: RefreshRequest, db: Session = Depends(get_db)):
+    refresh_token = payload.refresh_token
 
     token_db = (
         db.query(RefreshToken)
@@ -106,11 +112,13 @@ def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
 
     return {
         "access_token": new_access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer"
     }
 
 @router.post("/logout")
-def logout(refresh_token: str, db: Session = Depends(get_db)):
+def logout(payload: RefreshRequest, db: Session = Depends(get_db)):
+    refresh_token = payload.refresh_token
 
     token_db = (
         db.query(RefreshToken)
