@@ -114,15 +114,25 @@ def model_upload_layout(project_id):
                                     dbc.Label("Author"),
                                 ], className="mb-3"),
                                 html.Div([
-                                        dbc.Label("Status", className="fw-semibold"),
+                                        dbc.Label("Active", className="fw-semibold"),
                                         dbc.RadioItems(
-                                            id="add_status",
+                                            id="add_is_active",
                                             options=[
-                                                {"label": "Online", "value": "online"},
-                                                {"label": "Offline", "value": "offline"},
+                                                {"label": "Online", "value": True},
+                                                {"label": "Offline", "value": False},
                                             ],
+                                            value=True,
                                             inline=True,
                                         ),
+                                    ],className="mb-3"),
+
+                                    dbc.FormFloating([
+                                        dbc.Input(
+                                            id="add_status",
+                                            type="text",
+                                            placeholder="Status",
+                                        ),
+                                        dbc.Label("Status"),
                                     ],className="mb-3"),
 
                                     dbc.FormFloating([

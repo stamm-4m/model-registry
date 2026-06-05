@@ -108,7 +108,9 @@ def list_projects():
 def get_project_folder_from_id(project_id: str):
     """Return the folder name of a project given its project_ID."""
     project_map = list_projects_by_id()
+    logger.info(f"Project map: {project_map} and requested project_id: {project_id}")
     folder = project_map.get(project_id)
+    logger.info(f"Resolved project_id '{project_id}' to folder '{folder}'")
     if not folder:
         raise ValueError(f"Project ID '{project_id}' not found")
     return folder

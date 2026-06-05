@@ -150,6 +150,25 @@ def list_models_endpoint(
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+
+@router.post("/{project_id}/reload/")
+def reload_project_endpoint(
+    project_id: str,
+    request: Request,
+    user=Depends(require_permission_resource("models:write", "Models")),
+):
+    """Force the in-memory registry to reload ``project_id`` from the DB.
+
+    Called by the backend right after creating / linking a new model so the
+    next read endpoint sees the fresh state without a process restart.
+    """
+    try:
+        registry = request.app.state.registry
+        models = registry.reload_project(project_id)
+        return {"project_id": project_id, "model_count": len(models)}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
 @router.get("/{project_id}/metadata/{model_id}")
 def get_model_metadata(
     project_id: str, 

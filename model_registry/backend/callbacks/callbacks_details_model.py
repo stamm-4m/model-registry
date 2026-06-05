@@ -48,9 +48,10 @@ def register_details_model_callbacks(app):
         Output("download-model-file", "data"),
         Input("download-model", "n_clicks"),
         State("edit-model-info", "data"),
+        State("user-session", "data"),
         prevent_initial_call=True,
     )
-    def download_yaml(n_clicks, info):
+    def download_yaml(n_clicks, info, session_data):
 
         if not info:
             raise PreventUpdate
@@ -59,7 +60,7 @@ def register_details_model_callbacks(app):
             project_id = info["project_id"]
             model_id = info["model_id"]
 
-            path = get_path_config_folder(project_id)
+            path = get_path_config_folder(project_id, session_data)
             file_path = os.path.join(path, f"{model_id}.yaml")
 
             if not os.path.exists(file_path):

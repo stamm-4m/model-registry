@@ -58,6 +58,24 @@ class ModelsApiClient:
             return response.json(), session_data
         return None, session_data
 
+    def reload_project(
+        self, project_id: str, session_data: _SessionData
+    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+        """``POST /<project_id>/reload/`` -- force in-memory registry refresh."""
+        response, session_data = authenticated_request(
+            "POST", f"/{project_id}/reload/", session_data
+        )
+        if response is None:
+            return None, None
+        if response.status_code == 200:
+            return response.json(), session_data
+        logger.warning(
+            "reload_project failed status=%s body=%s",
+            response.status_code,
+            _safe_json(response),
+        )
+        return None, session_data
+
     def list_models_full(
         self, project_id: str, session_data: _SessionData
     ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:

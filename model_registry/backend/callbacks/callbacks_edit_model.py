@@ -147,6 +147,7 @@ def register_edit_model_callbacks(app):
         State("edit_creation_date", "value"),
         State("edit_author", "value"),
         State("edit_status", "value"),
+        State("edit_is_active", "value"),
         State("edit_status_description", "value"),
 
         # ===== MODEL DESCRIPTION =====
@@ -209,7 +210,7 @@ def register_edit_model_callbacks(app):
         _,
         info,
         session_data,
-        uuid, doi, name, version, creation_date, author, status, status_desc,
+        uuid, doi, name, version, creation_date, author, status, is_active, status_desc,
         learner, model_type, model_name, description, language, language_version,
         pkg_names, pkg_versions,
         cfg_model_file, cfg_server, cfg_port, cfg_rest,
@@ -279,6 +280,7 @@ def register_edit_model_callbacks(app):
                         "creation_date": creation_date,
                         "project": "../project_info.yaml",
                         "status": status,
+                        "is_active": bool(is_active) if is_active is not None else True,
                         "status_description": status_desc,
                     },
                     "model_description": {
@@ -364,9 +366,10 @@ def register_edit_model_callbacks(app):
         Input("edit_config_model_file_upload", "contents"),
         State("edit_config_model_file", "value"),
         State("edit-model-info", "data"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def update_model_file(filename, contents, current_value, model_info):
+    def update_model_file(filename, contents, current_value, model_info, session_data):
 
         if not filename:
             raise PreventUpdate
@@ -398,7 +401,9 @@ def register_edit_model_callbacks(app):
         decoded = base64.b64decode(content_string)
         try:
             # Create the storage folder if it does not exist
-            upload_folder = get_path_models_folder(model_info["project_id"])
+            upload_folder = get_path_models_folder(
+                model_info["project_id"], session_data,
+            )
             if not os.path.exists(upload_folder):
                 os.makedirs(upload_folder)
             # Save the file in the "Models" folder

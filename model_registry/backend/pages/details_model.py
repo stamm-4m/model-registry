@@ -122,7 +122,16 @@ def details_model_layout(project_id, model_id, session_data=None):
 
     model_name = identification.get("ID") or model_id
     model_version = identification.get("version", "")
-    status = identification.get("status", False)
+    # ``status`` is the textual lifecycle (e.g. draft / deployed) and
+    # ``is_active`` is the boolean online/offline flag. Older payloads only
+    # exposed ``status`` and used it as a boolean -- accept both shapes.
+    status_text = identification.get("status", "")
+    if isinstance(status_text, bool):
+        status_text = ""
+    if "is_active" in identification:
+        is_active = identification.get("is_active")
+    else:
+        is_active = identification.get("status", False)
 
     # -------- Hero / page header --------------------------------------------
     hero = dbc.Card(
@@ -158,7 +167,7 @@ def details_model_layout(project_id, model_id, session_data=None):
                             ),
                             html.Div(
                                 [
-                                    _status_badge(status),
+                                    _status_badge(is_active),
                                     dbc.Badge(
                                         [html.I(className="bi bi-code-slash me-1"), f"{language_name} {language_version}".strip() or "—"],
                                         color="light",
@@ -215,6 +224,7 @@ def details_model_layout(project_id, model_id, session_data=None):
                 [
                     _info_item("Name", identification.get("name", "")),
                     _info_item("Version", identification.get("version", "")),
+                    _info_item("Status", status_text),
                     _info_item(
                         "Status description",
                         identification.get("status_description", ""),

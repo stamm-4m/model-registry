@@ -58,7 +58,7 @@ def register_home_callbacks(app):
                         m.get("metadata", {}).get("created_at")
                     ),
                     "version": m.get("metadata", {}).get("version"),
-                    "status": m.get("metadata", {}).get("status", False),
+                    "status": m.get("metadata", {}).get("is_active", False),
                     "project_id": pid,
                     "model_id": m.get("metadata", {}).get("ID"),
                     "actions": "edit"

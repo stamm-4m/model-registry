@@ -76,7 +76,11 @@ def _synthesize_yaml_shape(model_row: Model) -> Dict[str, Any]:
         "doi": model_row.doi or ident_existing.get("doi", "") or "",
         "name": model_row.name,
         "version": model_row.version,
-        "status": model_row.is_active,
+        # ``status`` is the textual lifecycle (draft / training / trained /
+        # deployed / archived). ``is_active`` is the runtime online/offline
+        # boolean. They are independent and both surfaced for the UI.
+        "status": model_row.status or "",
+        "is_active": bool(model_row.is_active),
         "status_description": (
             model_row.status_description
             or model_row.validation_notes
@@ -469,6 +473,14 @@ class ModelRegistry:
                         model_row.is_active = status_value
                     elif status_value is not None:
                         model_row.status = status_value
+                if "is_active" in ident:
+                    is_active_value = ident["is_active"]
+                    if isinstance(is_active_value, bool):
+                        model_row.is_active = is_active_value
+                    elif isinstance(is_active_value, str):
+                        model_row.is_active = is_active_value.strip().lower() in {
+                            "true", "1", "yes", "on", "online", "active",
+                        }
                 if "version" in ident:
                     model_row.version = ident["version"]
                 if "algorithm" in ident:

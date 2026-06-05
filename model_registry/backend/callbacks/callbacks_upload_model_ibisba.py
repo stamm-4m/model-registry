@@ -43,11 +43,11 @@ def register_upload_model_ibisba_callbacks(app):
             return "", "", ""
 
         metadata_yaml_path = os.path.join(
-            get_path_config_folder(project_id),
+            get_path_config_folder(project_id, session_data),
             model_id + ".yaml",
         )
         model_file_path = os.path.join(
-            get_path_models_folder(project_id),
+            get_path_models_folder(project_id, session_data),
             model_file_relative,
         )
 

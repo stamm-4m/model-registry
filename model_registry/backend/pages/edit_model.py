@@ -125,16 +125,40 @@ def edit_model_layout(project_id, model_id, session_data=None):
                                     dbc.Label("Author"),
                                 ], className="mb-3"),
                                 html.Div([
-                                        dbc.Label("Status", className="fw-semibold"),
+                                        dbc.Label("Active", className="fw-semibold"),
                                         dbc.RadioItems(
-                                            id="edit_status",
+                                            id="edit_is_active",
                                             options=[
                                                 {"label": "Online", "value": True},
                                                 {"label": "Offline", "value": False},
                                             ],
-                                            value=model["model_identification"].get("status", False),
+                                            value=bool(
+                                                model["model_identification"].get(
+                                                    "is_active",
+                                                    model["model_identification"].get(
+                                                        "status", False,
+                                                    ),
+                                                )
+                                            ),
                                             inline=True,
                                         ),
+                                    ],className="mb-3"),
+
+                                    dbc.FormFloating([
+                                        dbc.Input(
+                                            id="edit_status",
+                                            type="text",
+                                            placeholder="Status",
+                                            value=(
+                                                model["model_identification"].get("status", "")
+                                                if not isinstance(
+                                                    model["model_identification"].get("status"),
+                                                    bool,
+                                                )
+                                                else ""
+                                            ),
+                                        ),
+                                        dbc.Label("Status"),
                                     ],className="mb-3"),
 
                                     dbc.FormFloating([

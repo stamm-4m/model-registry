@@ -10,12 +10,15 @@ Conventions (same as other unified services):
 * HTTP traffic flows through ``authenticated_request`` via ``ModelsApiClient``.
 """
 
+import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 from model_registry.backend.services.api_clients import ModelsApiClient
 
 
 _SessionData = Dict[str, Any]
+
+logger = logging.getLogger(__name__)
 
 
 class ModelService:
@@ -172,6 +175,19 @@ class ModelService:
         _, session_data = self.client.create_project_model(
             link_payload, session_data
         )
+
+        # Refresh the in-memory registry so subsequent reads (list / metadata)
+        # see the new model without waiting for an API restart.
+        try:
+            _, session_data = self.client.reload_project(
+                project_external_id, session_data
+            )
+        except Exception as exc:  # non-fatal: read endpoints have a fallback
+            logger.warning(
+                "Registry reload failed for project %s: %s",
+                project_external_id, exc,
+            )
+
         return model, session_data
 
     def list_db_models_for_project(
@@ -234,6 +250,7 @@ class ModelService:
                     or row.get("created_at"),
                     "version": row.get("version"),
                     "status": row.get("status"),
+                    "is_active": bool(row.get("is_active")),
                 },
             })
         return formatted, session_data

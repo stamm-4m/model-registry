@@ -41,24 +41,48 @@ def register_model_upload_callbacks(app):
         Input("upload-data", 'contents'),
         State("upload-data", 'filename'),
         State("add-model-info", "data"),
+        State("user-session", "data"),
         prevent_initial_call=True
     )
-    def update_output(contents, filename, model_info):
-        metadata = {}
+    def update_output(contents, filename, model_info, session_data):
+        # Preserve any existing context (most importantly project_id) so a
+        # transient failure does not wipe it out and break the next attempt.
+        model_info = dict(model_info or {})
+
         if contents is None or filename is None:
-            return html.Div(["No file has been uploaded."]), metadata
+            return html.Div(["No file has been uploaded."]), model_info
 
         # Validate allowed extensions
         extension = filename.split('.')[-1].lower()
         if extension not in allowed_extensions:
-            return html.Div(["File type not allowed. Only allowed types are: " + ", ".join(allowed_extensions)]), metadata
+            return html.Div(["File type not allowed. Only allowed types are: " + ", ".join(allowed_extensions)]), model_info
+        logger.info(f"model info: {model_info}")
+        project_id = model_info.get("project_id")
+        if not project_id:
+            logger.error("Model upload aborted: project_id missing from add-model-info store")
+            return html.Div([
+                html.P("Error processing the file."),
+                html.P("No project selected. Please open the upload page from a project."),
+            ]), model_info
 
         # Decode the uploaded file
-        content_type, content_string = contents.split(',')
-        decoded = base64.b64decode(content_string)
+        try:
+            _content_type, content_string = contents.split(',')
+            decoded = base64.b64decode(content_string)
+        except (ValueError, base64.binascii.Error) as e:
+            logger.exception("Failed to decode uploaded file %s", filename)
+            return html.Div([
+                html.P("Error processing the file."),
+                html.P(str(e)),
+            ]), model_info
+
         try:
             # Create the storage folder if it does not exist
-            upload_folder = get_path_models_folder(model_info["project_id"])
+            upload_folder = get_path_models_folder(project_id, session_data)
+            if not upload_folder:
+                raise ValueError(
+                    f"Could not resolve models folder for project '{project_id}'"
+                )
             if not os.path.exists(upload_folder):
                 os.makedirs(upload_folder)
             # Save the file in the "Models" folder
@@ -67,8 +91,8 @@ def register_model_upload_callbacks(app):
                 f.write(decoded)
 
             extractor = ModelMetadataExtractor(filepath)
-            metadata = extractor.extract()
-            metadata["project_id"] = model_info["project_id"]
+            metadata = extractor.extract() or {}
+            metadata["project_id"] = project_id
             metadata["artifact_path"] = filepath
             metadata["artifact_format"] = extension
             metadata["artifact_size_bytes"] = len(decoded)
@@ -79,10 +103,12 @@ def register_model_upload_callbacks(app):
                 html.P(f"File {filename} uploaded successfully."),
             ]), metadata
         except Exception as e:
+            logger.exception("Error processing uploaded model file %s", filename)
+            # Keep project_id (and any other prior context) so the user can retry.
             return html.Div([
                 html.P("Error processing the file."),
                 html.P(str(e))
-            ]), metadata
+            ]), model_info
         
     # ----- Callback to populate the form -----    
     @app.callback(
@@ -92,13 +118,14 @@ def register_model_upload_callbacks(app):
         Output("add_creation_date", "value"),
         Output("add_model_version", "value"),
         Output("add_status", "value"),
+        Output("add_is_active", "value"),
         Output("add_language", "value"),
         Input("add-model-info", "data"),
         prevent_initial_call=True
     )
     def populate_add_model_form(metadata):
         if not metadata:
-            return "", "", "", None, "", "", None
+            return "", "", "", None, "", "", True, None
 
         return (
             metadata.get("model_id"),
@@ -107,6 +134,7 @@ def register_model_upload_callbacks(app):
             normalize_date(metadata.get("created_at")),
             metadata.get("version"),
             metadata.get("status"),
+            bool(metadata.get("is_active", True)),
             metadata.get("language_name"),
         )
     # ----- Callback to packages -----
@@ -226,6 +254,7 @@ def register_model_upload_callbacks(app):
         State("add_creation_date", "value"),
         State("add_author", "value"),
         State("add_status", "value"),
+        State("add_is_active", "value"),
         State("add_status_description", "value"),
 
         # ===== MODEL DESCRIPTION =====
@@ -286,7 +315,7 @@ def register_model_upload_callbacks(app):
     )
     def save_metadata(
         n_clicks, model_info, model_id,
-        uuid, doi, name, version, creation_date, author, status, status_desc,
+        uuid, doi, name, version, creation_date, author, status, is_active, status_desc,
         learner, model_type, model_name, description, language, language_version,
         pkg_names, pkg_versions,
         cfg_model_file, cfg_server, cfg_port, cfg_rest,
@@ -367,6 +396,7 @@ def register_model_upload_callbacks(app):
             "description": description,
             "algorithm": _algorithm,
             "status": _status,
+            "is_active": bool(is_active) if is_active is not None else True,
             "version": version or "1.0.0",
 
             # ----- IO contract -----
