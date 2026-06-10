@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/ensemble.schema.json",
+  "title": "STAMM Model - ensemble",
+  "description": "Validates a ensemble model. Common core via $ref to base; config hyperparameters from PMML MiningModel (multipleModelMethod).",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "ensemble"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "method",
+            "members"
+          ],
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": [
+                "voting",
+                "bagging",
+                "boosting",
+                "stacking"
+              ]
+            },
+            "combination": {
+              "type": "string",
+              "enum": [
+                "majority_vote",
+                "average",
+                "weighted_average",
+                "soft_vote",
+                "median",
+                "stacking"
+              ]
+            },
+            "members": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "model_ref"
+                ],
+                "properties": {
+                  "model_ref": {
+                    "type": "string"
+                  },
+                  "weight": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "meta_learner": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

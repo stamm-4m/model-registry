@@ -14,6 +14,10 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 from model_registry.backend.services.api_clients import ModelsApiClient
+from model_registry.backend.services.template_validator import (
+    validate_model_payload,
+    TemplateValidationError,
+)
 
 
 _SessionData = Dict[str, Any]
@@ -140,10 +144,23 @@ class ModelService:
         ``project_external_id`` is the human-readable code stored in
         ``projects.project_id`` (e.g. ``"P0004"``). The project's UUID is
         resolved via the projects CRUD endpoint.
+
+        Raises:
+            TemplateValidationError: If model payload fails schema validation.
         """
         from model_registry.backend.services.api_clients import (
             ProjectsApiClient,
         )
+
+        # Validate payload against template schema (if algorithm specified)
+        try:
+            validate_model_payload(payload)
+        except TemplateValidationError as e:
+            logger.error(f"Template validation failed: {e}")
+            raise
+        except ValueError as e:
+            logger.error(f"Invalid model payload: {e}")
+            raise
 
         # Resolve project UUID from external code.
         projects_client = ProjectsApiClient()

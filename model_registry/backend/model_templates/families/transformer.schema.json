@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/transformer.schema.json",
+  "title": "STAMM Model - transformer",
+  "description": "Validates a transformer model. Common core via $ref to base; config hyperparameters from Attention model (no native PMML element).",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "transformer"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "d_model",
+            "n_heads",
+            "context_length"
+          ],
+          "properties": {
+            "d_model": {
+              "type": "integer"
+            },
+            "n_heads": {
+              "type": "integer"
+            },
+            "n_encoder_layers": {
+              "type": "integer"
+            },
+            "n_decoder_layers": {
+              "type": "integer"
+            },
+            "ff_dim": {
+              "type": "integer"
+            },
+            "context_length": {
+              "type": "integer"
+            },
+            "dropout": {
+              "type": "number"
+            },
+            "positional_encoding": {
+              "type": "string",
+              "enum": [
+                "sinusoidal",
+                "learned",
+                "rotary",
+                "alibi",
+                "none"
+              ]
+            },
+            "optimizer": {
+              "type": "string"
+            },
+            "learning_rate": {
+              "type": "number"
+            },
+            "warmup_steps": {
+              "type": "integer"
+            },
+            "batch_size": {
+              "type": "integer"
+            },
+            "epochs": {
+              "type": "integer"
+            },
+            "n_parameters": {
+              "type": "integer"
+            },
+            "pretrained_checkpoint": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

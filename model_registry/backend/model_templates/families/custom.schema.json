@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/custom.schema.json",
+  "title": "STAMM Model - custom",
+  "description": "Validates a custom model. Common core via $ref to base; config hyperparameters from No standard mapping (e.g. Cubist/M5 model trees) - free-form, still requires provenance.",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "custom"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "description",
+            "params"
+          ],
+          "properties": {
+            "description": {
+              "type": "string"
+            },
+            "code_reference": {
+              "type": "string"
+            },
+            "params": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

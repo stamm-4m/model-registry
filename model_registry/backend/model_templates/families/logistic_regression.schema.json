@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/logistic_regression.schema.json",
+  "title": "STAMM Model - logistic_regression",
+  "description": "Validates a logistic_regression model. Common core via $ref to base; config hyperparameters from PMML RegressionModel (classification).",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "logistic_regression"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "penalty",
+            "C",
+            "solver"
+          ],
+          "properties": {
+            "penalty": {
+              "type": "string",
+              "enum": [
+                "l1",
+                "l2",
+                "elasticnet",
+                "none"
+              ]
+            },
+            "C": {
+              "type": "number"
+            },
+            "solver": {
+              "type": "string",
+              "enum": [
+                "lbfgs",
+                "liblinear",
+                "newton-cg",
+                "sag",
+                "saga"
+              ]
+            },
+            "multi_class": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "ovr",
+                "multinomial"
+              ]
+            },
+            "max_iter": {
+              "type": "integer"
+            },
+            "l1_ratio": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "class_weight": {
+              "type": [
+                "object",
+                "string",
+                "null"
+              ]
+            },
+            "classes": {
+              "type": "array"
+            },
+            "coefficients": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "intercept": {
+              "type": [
+                "number",
+                "array"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

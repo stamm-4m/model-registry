@@ -13,10 +13,12 @@ Limitations (intentional, for a v1 scaffold):
     can be added per-table if FermOps wants stricter typing on a route.
   * ``PATCH`` semantics: any field NOT supplied stays unchanged; supplied
     ``None`` writes NULL.
+  * Pre-validation hooks can be provided for model-specific validation
+    (e.g., template validation for Model table).
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Callable, Dict, List, Optional, Type
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -27,6 +29,7 @@ from model_registry.api.core.database import Base, get_db
 from model_registry.api.core.dependencies import require_permission_resource
 
 logger = logging.getLogger(__name__)
+
 
 
 def _row_to_dict(row) -> Dict[str, Any]:
@@ -65,8 +68,20 @@ def register_crud(
     read_perms: Optional[List[str]] = None,
     write_perms: Optional[List[str]] = None,
     tag: Optional[str] = None,
+    create_validator: Optional[Callable[[Dict[str, Any]], None]] = None,
 ) -> None:
-    """Register list/get/create/update/delete endpoints for ``model``."""
+    """Register list/get/create/update/delete endpoints for ``model``.
+
+    Args:
+        router: FastAPI router
+        model: SQLAlchemy model class
+        path_prefix: URL path prefix (e.g., "models")
+        read_perms: Permissions required for read operations
+        write_perms: Permissions required for write operations
+        tag: OpenAPI tag for endpoints
+        create_validator: Optional callable to validate POST body.
+                         Raises HTTPException on validation failure.
+    """
     read_perms = read_perms or []
     write_perms = write_perms or []
     if not read_perms:
@@ -111,6 +126,17 @@ def register_crud(
         # we want server-side UUIDs.
         if pk_name in body and pk_col.default is not None:
             body = {k: v for k, v in body.items() if k != pk_name}
+
+        # Run model-specific validator if provided
+        if create_validator is not None:
+            try:
+                create_validator(body)
+            except HTTPException:
+                raise
+            except Exception as exc:
+                logger.warning(f"Validation error for {model.__tablename__}: {exc}")
+                raise HTTPException(422, f"validation error: {exc}")
+
         try:
             row = model(**body)
             db.add(row)

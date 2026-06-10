@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/cubist.schema.json",
+  "title": "STAMM Model - cubist",
+  "description": "Validates a cubist model. Common core via $ref to base; config hyperparameters from Rule-based model tree (no PMML element; Cubist = advanced M5).",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "cubist"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "committees"
+          ],
+          "properties": {
+            "committees": {
+              "type": "integer"
+            },
+            "instance_based_corrections": {
+              "type": "integer"
+            },
+            "neighbors": {
+              "type": "integer"
+            },
+            "min_instances_per_leaf": {
+              "type": "integer"
+            },
+            "rules": {
+              "type": [
+                "integer",
+                "string"
+              ]
+            },
+            "extrapolation": {
+              "type": "number"
+            },
+            "unbiased": {
+              "type": "boolean"
+            },
+            "n_rules": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

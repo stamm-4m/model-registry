@@ -310,6 +310,10 @@ def register_model_upload_callbacks(app):
         State({"type": "output-min", "fid": ALL}, "value"),
         State({"type": "output-max", "fid": ALL}, "value"),
         State({"type": "output-description", "fid": ALL}, "value"),
+        
+        # ===== TEMPLATE CONFIG =====
+        State("template-config-store", "data"),
+        
         State("user-session", "data"),
         prevent_initial_call=True
     )
@@ -325,6 +329,7 @@ def register_model_upload_callbacks(app):
         n_instances, validation, experiments_id,
         f_names, f_types, f_units, f_lags, f_scalings, f_mins, f_maxs, f_descs,
         o_names, o_units, o_horizons, o_scalings, o_mins, o_maxs, o_descs,
+        template_config,
         session_data,
     ):
         if not n_clicks or not model_info:
@@ -383,12 +388,29 @@ def register_model_upload_callbacks(app):
         _algorithm = (
             learner or model_type or _info.get("algorithm") or "custom"
         )
+        
+        # Use template algorithm if selected
+        template_cfg = {}
+        if template_config and isinstance(template_config, dict):
+            if template_config.get("algorithm"):
+                _algorithm = template_config["algorithm"]
+            
+            # Build config from collected template values
+            if template_config.get("config") and template_config["config"].get("values"):
+                # Extract collected field values
+                collected_values = template_config["config"].get("values", {})
+                # Filter out None values and convert to appropriate types
+                for field_id, value in collected_values.items():
+                    if value is not None and value != "":
+                        template_cfg[field_id] = value
+                logger.debug(f"Template config extracted: {template_cfg}")
+        
         if _algorithm not in ModelMetadataExtractor.ALLOWED_ALGORITHMS:
             _algorithm = "custom"
         _status = status or _info.get("status") or "draft"
         if _status not in ModelMetadataExtractor.ALLOWED_STATUS:
             _status = "draft"
-
+        
         payload = {
             # ----- core identification -----
             "slug": model_id,
@@ -407,6 +429,9 @@ def register_model_upload_callbacks(app):
             "artifact_path": (model_info or {}).get("artifact_path"),
             "artifact_format": (model_info or {}).get("artifact_format"),
             "artifact_size_bytes": (model_info or {}).get("artifact_size_bytes"),
+
+            # ----- template configuration (if selected) -----
+            "config": template_cfg if template_cfg else None,
 
             # ----- identification mirror columns -----
             "doi": doi,

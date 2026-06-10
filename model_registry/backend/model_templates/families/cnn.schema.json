@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/cnn.schema.json",
+  "title": "STAMM Model - cnn",
+  "description": "Validates a cnn model. Common core via $ref to base; config hyperparameters from PMML NeuralNetwork (convolutional).",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "cnn"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "layers",
+            "optimizer",
+            "learning_rate"
+          ],
+          "properties": {
+            "input_shape": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "layers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "conv1d",
+                      "conv2d",
+                      "maxpool",
+                      "avgpool",
+                      "flatten",
+                      "dense",
+                      "dropout",
+                      "batchnorm"
+                    ]
+                  },
+                  "filters": {
+                    "type": "integer"
+                  },
+                  "kernel_size": {
+                    "type": [
+                      "integer",
+                      "array"
+                    ]
+                  },
+                  "stride": {
+                    "type": [
+                      "integer",
+                      "array"
+                    ]
+                  },
+                  "padding": {
+                    "type": "string"
+                  },
+                  "units": {
+                    "type": "integer"
+                  },
+                  "activation": {
+                    "type": "string"
+                  },
+                  "rate": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "optimizer": {
+              "type": "string"
+            },
+            "learning_rate": {
+              "type": "number"
+            },
+            "loss": {
+              "type": "string"
+            },
+            "batch_size": {
+              "type": "integer"
+            },
+            "epochs": {
+              "type": "integer"
+            },
+            "n_parameters": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

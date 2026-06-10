@@ -33,6 +33,7 @@ alembic = "^1.18.4"
 bcrypt = "4.0.1"
 colorlog = "^6.10.1"
 psycopg2-binary = "^2.9.12"
+jsonschema = "^4.20.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10"

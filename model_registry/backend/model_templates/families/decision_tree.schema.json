@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/decision_tree.schema.json",
+  "title": "STAMM Model - decision_tree",
+  "description": "Validates a decision_tree model. Common core via $ref to base; config hyperparameters from PMML TreeModel.",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "decision_tree"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "criterion",
+            "max_depth"
+          ],
+          "properties": {
+            "criterion": {
+              "type": "string",
+              "enum": [
+                "squared_error",
+                "friedman_mse",
+                "absolute_error",
+                "poisson",
+                "gini",
+                "entropy",
+                "log_loss"
+              ]
+            },
+            "splitter": {
+              "type": "string",
+              "enum": [
+                "best",
+                "random"
+              ]
+            },
+            "max_depth": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "min_samples_split": {
+              "type": "number"
+            },
+            "min_samples_leaf": {
+              "type": "number"
+            },
+            "min_impurity_decrease": {
+              "type": "number"
+            },
+            "max_features": {
+              "type": [
+                "number",
+                "string",
+                "null"
+              ]
+            },
+            "ccp_alpha": {
+              "type": "number"
+            },
+            "n_nodes": {
+              "type": "integer"
+            },
+            "n_leaves": {
+              "type": "integer"
+            },
+            "feature_importances": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "feature -> importance"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

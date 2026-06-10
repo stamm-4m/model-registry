@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/kmeans.schema.json",
+  "title": "STAMM Model - kmeans",
+  "description": "Validates a kmeans model. Common core via $ref to base; config hyperparameters from PMML ClusteringModel.",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "kmeans"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "n_clusters",
+            "init"
+          ],
+          "properties": {
+            "n_clusters": {
+              "type": "integer"
+            },
+            "init": {
+              "type": "string",
+              "enum": [
+                "k-means++",
+                "random"
+              ]
+            },
+            "n_init": {
+              "type": [
+                "integer",
+                "string"
+              ]
+            },
+            "max_iter": {
+              "type": "integer"
+            },
+            "tol": {
+              "type": "number"
+            },
+            "distance_measure": {
+              "type": "string",
+              "enum": [
+                "euclidean",
+                "manhattan",
+                "cosine",
+                "chebyshev"
+              ]
+            },
+            "inertia": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "cluster_centers": {
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

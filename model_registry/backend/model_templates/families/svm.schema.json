@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/svm.schema.json",
+  "title": "STAMM Model - svm",
+  "description": "Validates a svm model. Common core via $ref to base; config hyperparameters from PMML SupportVectorMachineModel.",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "svm"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "svm_type",
+            "kernel"
+          ],
+          "properties": {
+            "svm_type": {
+              "type": "string",
+              "enum": [
+                "c_svc",
+                "nu_svc",
+                "epsilon_svr",
+                "nu_svr",
+                "one_class"
+              ]
+            },
+            "kernel": {
+              "type": "string",
+              "enum": [
+                "linear",
+                "poly",
+                "rbf",
+                "sigmoid"
+              ]
+            },
+            "C": {
+              "type": "number"
+            },
+            "nu": {
+              "type": "number"
+            },
+            "epsilon": {
+              "type": "number"
+            },
+            "gamma": {
+              "type": [
+                "number",
+                "string"
+              ]
+            },
+            "degree": {
+              "type": "integer"
+            },
+            "coef0": {
+              "type": "number"
+            },
+            "shrinking": {
+              "type": "boolean"
+            },
+            "tol": {
+              "type": "number"
+            },
+            "n_support_vectors": {
+              "type": [
+                "integer",
+                "array"
+              ]
+            },
+            "class_weight": {
+              "type": [
+                "object",
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

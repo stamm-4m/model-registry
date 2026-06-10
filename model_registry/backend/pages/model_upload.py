@@ -1,5 +1,9 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html
+from model_registry.backend.utils.utils_template_ui import (
+    algorithm_selector_dropdown,
+    template_config_section,
+)
 
 
 def model_upload_layout(project_id):
@@ -12,6 +16,10 @@ def model_upload_layout(project_id):
             dcc.Store(
                 id="add-outputs-store",
                 data=[]
+            ),
+            dcc.Store(
+                id="template-config-store",
+                data={}
             ),
             html.H3("Add Model", className="text-center my-4"),
             dbc.Toast(
@@ -145,6 +153,21 @@ def model_upload_layout(project_id):
                                     ],className="mb-3"), 
                             ],md=6,),
                         ],className="mb-4",),
+
+                        # TEMPLATE SELECTOR
+                        dbc.Row([
+                            dbc.Col([
+                                html.H4("STAMM Template Selection", className="mb-4"),
+                                algorithm_selector_dropdown(),
+                            ], md=12),
+                        ], className="mb-4"),
+
+                        # TEMPLATE-SPECIFIC CONFIG
+                        dbc.Row([
+                            dbc.Col([
+                                template_config_section(),
+                            ], md=12),
+                        ], className="mb-4"),
                     
                         dbc.Row([
                             html.H4("Model Description", className="mb-4"),

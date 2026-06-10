@@ -49,6 +49,10 @@ class ModelMetadataExtractor:
         "nn": "neural_network",
         "mlp": "neural_network",
         "ann": "neural_network",
+        "cubist": "cubist",
+        "m5": "m5",
+        "tree": "m5",
+        "ensemble": "ensemble",
     }
 
     # Pattern for the trailing algorithm token in filenames such as
@@ -75,7 +79,7 @@ class ModelMetadataExtractor:
         "decision_tree", "random_forest", "gradient_boosting", "ensemble",
         "svm", "linear_regression", "logistic_regression", "neural_network",
         "rnn", "cnn", "transformer", "gaussian_process", "pls", "pca",
-        "kmeans", "custom",
+        "kmeans", "cubist", "m5", "custom",
     }
 
     def extract(self) -> dict:

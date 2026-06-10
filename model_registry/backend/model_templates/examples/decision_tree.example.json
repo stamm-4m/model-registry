@@ -1,0 +1,282 @@
+{
+  "slug": "0005_python_penicillin_cart",
+  "name": "CART (Classification And Regression Tree) [Python version]",
+  "description": "CART (Classification And Regression Tree) [Python version] - IndPenSim penicillin soft sensor.",
+  "algorithm": "decision_tree",
+  "status": "deployed",
+  "version": "1.0.0",
+  "uuid": null,
+  "creation_date": "22-01-2024",
+  "project_id": "P0001",
+  "serving_status": "online",
+  "ml_task": "regression",
+  "model_category": "data_driven",
+  "model_type": "interpretable",
+  "learner": "CART",
+  "author": "Acosta-Pavas, J. C., Robles-Rodriguez, C. E., Griol, D., Daboussi, F., Aceves-Lara, C. A., & Corrales, D. C",
+  "doi": "https://doi.org/10.1016/j.compchemeng.2024.108736",
+  "status_description": "Model is loaded and ready for predictions.",
+  "sampling_interval": {
+    "value": 12,
+    "unit": "minutes",
+    "aggregation": null
+  },
+  "validation": "10-fold CV - 3 repetitions",
+  "n_instances": 89800,
+  "prediction_horizon_min": null,
+  "inputs": [
+    {
+      "name": "temperature",
+      "type": "sensor",
+      "unit": "K",
+      "dtype": "float",
+      "lag": 0,
+      "feature_scaling": "none",
+      "expected_range": {
+        "min": 298,
+        "max": 308
+      },
+      "description": "Current temperature (T) in the bioreactor."
+    },
+    {
+      "name": "pH",
+      "type": "sensor",
+      "unit": "pH",
+      "dtype": "float",
+      "lag": 0,
+      "feature_scaling": "none",
+      "expected_range": {
+        "min": 5.5,
+        "max": 7.5
+      },
+      "description": "Current pH level in the bioreactor."
+    },
+    {
+      "name": "dissolved_oxygen_concentration",
+      "type": "sensor",
+      "unit": "mg/L",
+      "dtype": "float",
+      "lag": 0,
+      "feature_scaling": "none",
+      "expected_range": {
+        "min": 0,
+        "max": 10
+      },
+      "description": "Dissolved oxygen (DO) concentration."
+    },
+    {
+      "name": "agitator",
+      "type": "actuator",
+      "unit": "rpm",
+      "dtype": "float",
+      "lag": 0,
+      "feature_scaling": "none",
+      "expected_range": {
+        "min": 100,
+        "max": 1200
+      },
+      "description": "Agitation speed in revolutions per minute."
+    },
+    {
+      "name": "CO2_percent_in_off_gas",
+      "type": "sensor",
+      "unit": "%",
+      "dtype": "float",
+      "lag": 0,
+      "feature_scaling": "none",
+      "expected_range": {
+        "min": 0,
+        "max": 10
+      },
+      "description": "CO2 percentage in the off-gas (CO2,og)."
+    },
+    {
+      "name": "oxygen_in_percent_in_off_gas",
+      "type": "sensor",
+      "unit": "%",
+      "dtype": "float",
+      "lag": 0,
+      "feature_scaling": "none",
+      "expected_range": {
+        "min": 10,
+        "max": 21
+      },
+      "description": "O2 percentage in the off-gas (O2,og)."
+    },
+    {
+      "name": "vessel_volume",
+      "type": "computed_variable",
+      "unit": "L",
+      "dtype": "float",
+      "lag": 0,
+      "feature_scaling": "none",
+      "expected_range": {
+        "min": 1,
+        "max": 1000
+      },
+      "description": "Total volume of the bioreactor vessel (V)."
+    },
+    {
+      "name": "sugar_feed_rate",
+      "type": "actuator",
+      "unit": "L/h",
+      "dtype": "float",
+      "lag": 0,
+      "feature_scaling": "none",
+      "expected_range": {
+        "min": 0,
+        "max": 2
+      },
+      "description": "Sugar feed rate (Fs) into the bioreactor."
+    }
+  ],
+  "outputs": [
+    {
+      "name": "penicillin_concentration",
+      "type": "soft_sensor",
+      "unit": "g/L",
+      "dtype": "float",
+      "role": "target",
+      "forecast_horizon": 0,
+      "feature_scaling": "none",
+      "expected_range": {
+        "min": 0,
+        "max": 50
+      },
+      "description": "Prediction of the penicillin concentration."
+    }
+  ],
+  "config": {
+    "criterion": "squared_error",
+    "max_depth": 7
+  },
+  "metrics": {},
+  "implementation": {
+    "language": "python",
+    "language_version": "3.12.7",
+    "packages": [
+      {
+        "package": "sklearn.tree",
+        "class": "DecisionTreeRegressor",
+        "version": "1.5.2"
+      }
+    ]
+  },
+  "artifact": {
+    "path": "/models/IndPenSim/0005_[python]_penicillin_CART.pkl",
+    "format": "joblib",
+    "size_bytes": null,
+    "sha256": "sha256:<fill-on-register>",
+    "additional_files": []
+  },
+  "training": {
+    "framework": "python",
+    "framework_version": "3.12.7",
+    "dataset_hash": "sha256:<indpensim-train-hash>",
+    "training_experiment_ids": [
+      "21",
+      "13",
+      "26",
+      "9",
+      "29",
+      "30",
+      "11",
+      "24",
+      "3",
+      "20",
+      "7",
+      "22",
+      "17",
+      "5",
+      "6",
+      "12",
+      "10",
+      "19",
+      "25",
+      "27",
+      "4",
+      "1",
+      "8",
+      "54",
+      "47",
+      "37",
+      "45",
+      "55",
+      "59",
+      "38",
+      "50",
+      "34",
+      "57",
+      "43",
+      "44",
+      "49",
+      "39",
+      "53",
+      "33",
+      "40",
+      "36",
+      "58",
+      "51",
+      "56",
+      "42",
+      "31",
+      "48",
+      "65",
+      "70",
+      "67",
+      "73",
+      "82",
+      "87",
+      "77",
+      "76",
+      "90",
+      "66",
+      "85",
+      "69",
+      "89",
+      "83",
+      "71",
+      "88",
+      "81",
+      "72",
+      "62",
+      "80",
+      "61",
+      "74",
+      "84",
+      "75",
+      "92",
+      "96",
+      "97",
+      "94",
+      "98",
+      "93",
+      "95",
+      "99"
+    ],
+    "started_at": null,
+    "completed_at": null,
+    "trained_by": "Acosta-Pavas, J. C., Robles-Rodriguez, C. E., Griol, D., Daboussi, F., Aceves-Lara, C. A., & Corrales, D. C",
+    "random_seed": null
+  },
+  "lineage": {
+    "parent_model": null,
+    "superseded_by": null,
+    "fine_tuned_from": null,
+    "federation": null
+  },
+  "governance": {
+    "validation_status": "approved",
+    "validated_by": null,
+    "validated_at": null,
+    "validation_notes": "10-fold CV - 3 repetitions",
+    "intended_use": "Online soft-sensing of penicillin concentration on IndPenSim fed-batch runs.",
+    "risks_bias_limitations": "Trained on the IndPenSim benchmark (simulated industrial penicillin fermentation); validate before transfer to other organisms/scales.",
+    "reference_publication": "https://doi.org/10.1016/j.compchemeng.2024.108736",
+    "tags": [
+      "IndPenSim",
+      "penicillin",
+      "soft_sensor"
+    ]
+  }
+}

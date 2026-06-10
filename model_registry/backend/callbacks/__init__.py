@@ -23,6 +23,9 @@ from model_registry.backend.callbacks.callbacks_modal_user_roles import register
 from model_registry.backend.callbacks.callbacks_model_upload import (
     register_model_upload_callbacks,
 )
+from model_registry.backend.callbacks.callbacks_template_selector import (
+    register_template_callbacks,
+)
 from model_registry.backend.callbacks.callbacks_organization import register_organizations_table_callbacks
 from model_registry.backend.callbacks.callbacks_project import register_project_table_callbacks
 from model_registry.backend.callbacks.callbacks_sidebar import (
@@ -39,6 +42,7 @@ from model_registry.backend.callbacks.callbacks_upload_model_ibisba import (
 def register_callbacks(app):
     register_sidebar_callbacks(app)
     register_model_upload_callbacks(app)
+    register_template_callbacks(app)
     register_auth_callbacks(app)
     register_toolbar_callbacks(app)
     register_home_callbacks(app)
