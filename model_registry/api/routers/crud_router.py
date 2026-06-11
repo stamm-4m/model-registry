@@ -118,6 +118,10 @@ _TABLES = [
     ("federations",               M.Federation,                 None),
     ("federation_participants",   M.FederationParticipant,      None),
     ("model_contributions",       M.ModelContribution,          None),
+
+    # --- Phase 4: drift monitoring
+    ("experiment_drift_detectors", M.ExperimentDriftDetector,   None),
+    ("drift_results",              M.DriftResult,               None),
 ]
 
 for entry in _TABLES:

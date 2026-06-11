@@ -48,6 +48,10 @@ from .project_model import ProjectModel
 from .federation import Federation
 from .federation_participant import FederationParticipant
 from .model_contribution import ModelContribution
+
+# --- Phase 4: drift monitoring (selection + results)
+from .experiment_drift_detector import ExperimentDriftDetector
+from .drift_result import DriftResult
 from .department_laboratory import DepartmentLaboratory
 
 # FermOps streaming + soft-sensor demo models. Files were already present in
