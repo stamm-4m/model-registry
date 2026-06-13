@@ -38,20 +38,63 @@ model-registry/
 │   │   ├── services/
 │   │   ├── utils/
 │   │   └── app_api.py
-│   └── backend/
-│       ├── assets/
-│       ├── callbacks/
-│       ├── components/
-│       ├── config/
-│       ├── data/
-│       ├── layouts/
-│       ├── models/
-│       ├── pages/
-│       ├── services/
-│       └── app_backend.py
+│   ├── backend/
+│   │   ├── assets/
+│   │   ├── callbacks/
+│   │   ├── components/
+│   │   ├── config/
+│   │   ├── data/
+│   │   ├── layouts/
+│   │   ├── models/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   └── app_backend.py
+│   └── postgres/
+│       ├── docker-entrypoint-initdb.d/
+│       ├── .env
+│       └── .env.example
+├── docker-compose.yml
 ├── LICENSE
 ├── pyproject.toml
 └── README.md
+```
+
+## Running with Docker Compose
+
+Docker Compose starts the full local stack, including the backend dashboard,
+REST API, and PostgreSQL database.
+
+### Requirements
+
+- Docker
+- Docker Compose v2+
+
+### Start the application
+
+Create the required environment files from the provided examples:
+
+```bash
+cp model_registry/api/.env.example model_registry/api/.env
+cp model_registry/backend/.env.example model_registry/backend/.env
+cp model_registry/postgres/.env.example model_registry/postgres/.env
+```
+
+Then start the stack:
+
+```bash
+docker compose up --build
+```
+
+After the containers are running, open:
+
+- Backend Dashboard: http://localhost
+- REST API: http://localhost:8080
+- PostgreSQL: localhost:5432
+
+To stop the stack, press `Ctrl+C` in the terminal running Docker Compose, or run:
+
+```bash
+docker compose down
 ```
 
 ## Setup with Poetry
@@ -108,7 +151,7 @@ poetry run ml-repository-api
 
 ## Configure .env
 
-To configure the project environment variables, rename the .env.example file to .env in both the api and backend directories.
+To configure the project environment variables, create each `.env` file from its matching `.env.example` file in the `api`, `backend`, and `postgres` directories.
 
 ## Quick Start (Docker)
 
@@ -145,15 +188,15 @@ Open the following URLs in your browser:
 
 Service  -	URL
 
-- Backend (Dashboard)	http://localhost:8051
-- API (REST)	http://localhost:8081
+- Backend (Dashboard)	http://localhost
+- API (REST)	http://localhost:8080
 
 Health check
 
 If the containers are running, you should see logs similar to:
 
-- Backend running on port 8051
-- API running on port 8081
+- Backend running on port 80
+- API running on port 8080
 
 ## Contributing
 
