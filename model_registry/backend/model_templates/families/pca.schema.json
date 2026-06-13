@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/pca.schema.json",
+  "title": "STAMM Model - pca",
+  "description": "Validates a pca model. Common core via $ref to base; config hyperparameters from Dimensionality reduction.",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "pca"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "n_components"
+          ],
+          "properties": {
+            "n_components": {
+              "type": [
+                "integer",
+                "number"
+              ]
+            },
+            "svd_solver": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "full",
+                "arpack",
+                "randomized"
+              ]
+            },
+            "whiten": {
+              "type": "boolean"
+            },
+            "scaling": {
+              "type": "string",
+              "enum": [
+                "none",
+                "standard",
+                "minmax"
+              ]
+            },
+            "n_features_in": {
+              "type": "integer"
+            },
+            "explained_variance_ratio": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

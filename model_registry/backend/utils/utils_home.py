@@ -1,5 +1,9 @@
 import os
 
+import requests
+from datetime import datetime
+from model_registry.backend.config.settings import settings
+
 from model_registry.api.utils.project_loader import (
     get_project_paths,
     list_projects_by_id,
@@ -7,14 +11,50 @@ from model_registry.api.utils.project_loader import (
 )
 
 
-def get_option_projects_dropdown():
-    project_map = list_projects_by_id()
-    options = []
-    for project_id, folder_name in project_map.items():
-        info = load_project_info(project_id)
-        project_name = info.get("project_name", folder_name) if info else folder_name
-        options.append({"label": project_id + " - " + project_name, "value": project_id})
-    return options
+def _format_date_ddmmyyyy(value):
+    if not value:
+        return None
+
+    raw_value = str(value).strip()
+    if not raw_value:
+        return None
+
+    # Accept ISO date/datetime values and keep original text if parsing fails.
+    try:
+        normalized = raw_value.replace("Z", "+00:00")
+        parsed = datetime.fromisoformat(normalized)
+        return parsed.strftime("%d-%m-%Y")
+    except ValueError:
+        pass
+
+    try:
+        parsed = datetime.strptime(raw_value, "%Y-%m-%d")
+        return parsed.strftime("%d-%m-%Y")
+    except ValueError:
+        return raw_value
+
+
+def get_option_projects_dropdown(session_data=None):
+    headers = {
+        "Authorization": f"Bearer {session_data['access_token']}"
+    }
+
+    response = requests.get(f"{settings.API_BASE_URL}/list_projects/", headers=headers) 
+    project_map = {}
+    
+    if response.status_code == 200:
+        for p in response.json():
+            project_map[p["project_ID"]] = p.get("project_name", p["project_ID"])
+        options = []
+        for project_id, project_name in project_map.items():
+            options.append({"label": project_id + " - " + project_name, "value": project_id})
+        return options
+    
+    if response.status_code != 200:
+        print(f"Error fetching projects: {response.status_code} - {response.text}")
+        return []
+
+    
 
 def delete_model_from_registry(project_id: str, model_id: str):
     """Delete a model from the registry given its project_ID and model_ID."""   

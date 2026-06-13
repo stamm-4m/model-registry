@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/gradient_boosting.schema.json",
+  "title": "STAMM Model - gradient_boosting",
+  "description": "Validates a gradient_boosting model. Common core via $ref to base; config hyperparameters from PMML MiningModel (boosting); incl. HistGradientBoosting (HGB).",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "gradient_boosting"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "n_estimators",
+            "learning_rate"
+          ],
+          "properties": {
+            "n_estimators": {
+              "type": "integer"
+            },
+            "learning_rate": {
+              "type": "number"
+            },
+            "loss": {
+              "type": "string"
+            },
+            "max_depth": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "subsample": {
+              "type": "number"
+            },
+            "min_samples_leaf": {
+              "type": "number"
+            },
+            "max_features": {
+              "type": [
+                "number",
+                "string",
+                "null"
+              ]
+            },
+            "early_stopping_rounds": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "base_learner": {
+              "type": "string"
+            },
+            "feature_importances": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "feature -> importance"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

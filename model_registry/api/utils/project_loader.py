@@ -19,48 +19,98 @@ soft_sensors = {}
 
 # ---------------- Project Utilities ----------------
 
+def _read_project_info(info_file: str):
+    """Read a ``project_info.yaml`` file robustly.
+
+    Returns the parsed dict on success, or ``None`` if the file is
+    unreadable / malformed / not a mapping. Never raises.
+    """
+    try:
+        with open(info_file, encoding="utf-8") as f:
+            info = yaml.safe_load(f)
+    except (yaml.YAMLError, OSError, UnicodeDecodeError) as e:
+        logger.warning(
+            "Skipping unreadable project_info.yaml at %s: %s", info_file, e,
+        )
+        return None
+    except Exception as e:  # pragma: no cover - defensive
+        logger.exception(
+            "Unexpected error reading %s: %s", info_file, e,
+        )
+        return None
+    if not isinstance(info, dict):
+        logger.warning(
+            "Skipping %s: top-level YAML is not a mapping (got %s)",
+            info_file, type(info).__name__,
+        )
+        return None
+    return info
+
+
 def list_projects_by_id():
-    """Return a dict mapping project_ID to project folder names."""
-    projects_dir = os.path.join(BASE_DIR,"../","projects")
+    """Return a dict mapping project_ID to project folder names.
+
+    A single malformed ``project_info.yaml`` never aborts the listing --
+    bad entries are logged and skipped.
+    """
+    projects_dir = os.path.join(BASE_DIR, "../", "projects")
     project_map = {}
     if not os.path.exists(projects_dir):
         return project_map
 
-    for project_folder in os.listdir(projects_dir):
+    try:
+        folders = os.listdir(projects_dir)
+    except OSError as e:
+        logger.warning("Cannot list projects dir %s: %s", projects_dir, e)
+        return project_map
+
+    for project_folder in folders:
         project_path = os.path.join(projects_dir, project_folder)
         info_file = os.path.join(project_path, "project_info.yaml")
-        if os.path.exists(info_file):
-            with open(info_file, encoding="utf-8") as f:
-                info = yaml.safe_load(f)
-                project_id = info.get("project_ID")
-                if project_id:
-                    project_map[project_id] = project_folder
+        if not os.path.exists(info_file):
+            continue
+        info = _read_project_info(info_file)
+        if not info:
+            continue
+        project_id = info.get("project_ID")
+        if project_id:
+            project_map[project_id] = project_folder
     return project_map
 
 def list_projects():
     """Return a list of available info projects with name, project id)."""
 
-    projects_dir = os.path.join(BASE_DIR,"../","projects")
+    projects_dir = os.path.join(BASE_DIR, "../", "projects")
     projects = []
     if not os.path.exists(projects_dir):
         return projects
 
-    for project_folder in os.listdir(projects_dir):
+    try:
+        folders = os.listdir(projects_dir)
+    except OSError as e:
+        logger.warning("Cannot list projects dir %s: %s", projects_dir, e)
+        return projects
+
+    for project_folder in folders:
         project_path = os.path.join(projects_dir, project_folder)
         info_file = os.path.join(project_path, "project_info.yaml")
-        if os.path.exists(info_file):
-            with open(info_file, encoding="utf-8") as f:
-                info = yaml.safe_load(f)
-                project_id = info.get("project_ID")
-                if project_id:
-                    project_name = info.get("project_name", project_folder)
-                    projects.append({"name": project_name, "id": project_id})
+        if not os.path.exists(info_file):
+            continue
+        info = _read_project_info(info_file)
+        if not info:
+            continue
+        project_id = info.get("project_ID")
+        if project_id:
+            project_name = info.get("project_name", project_folder)
+            projects.append({"name": project_name, "id": project_id})
     return projects
 
 def get_project_folder_from_id(project_id: str):
     """Return the folder name of a project given its project_ID."""
     project_map = list_projects_by_id()
+    logger.info(f"Project map: {project_map} and requested project_id: {project_id}")
     folder = project_map.get(project_id)
+    logger.info(f"Resolved project_id '{project_id}' to folder '{folder}'")
     if not folder:
         raise ValueError(f"Project ID '{project_id}' not found")
     return folder
@@ -86,7 +136,14 @@ def load_project(project_id: str):
     models = {}
 
     if not os.path.exists(paths["CONFIG_DIR"]):
-        raise FileNotFoundError(f"No configs found for project_ID {project_id}")
+         # Empty / placeholder project (project_info.yaml exists but no configs
+        # or models yet). Don't crash the entire registry on startup -- just
+        # register it with an empty model set and log a warning.
+        logger.warning(
+            f"Project '{project_id}' has no configs/ directory yet -- "
+            "registering it with no models"
+        )
+        return {}
 
     for file in os.listdir(paths["CONFIG_DIR"]):
         if file.endswith(".yaml"):
@@ -163,12 +220,21 @@ def list_models_by_id(project_id: str):
 # ---------------- Project Metadata ----------------
 
 def load_project_info(project_id: str):
-    """Load project metadata for a given project_ID."""
-    paths = get_project_paths(project_id)
-    if os.path.exists(paths["PROJECT_INFO_FILE"]):
-        with open(paths["PROJECT_INFO_FILE"], encoding="utf-8") as f:
-            return yaml.safe_load(f)
-    return {}
+    """Load project metadata for a given project_ID.
+
+    Returns ``{}`` (and logs a warning) when the YAML file is missing or
+    unparseable so callers can keep iterating other projects.
+    """
+    try:
+        paths = get_project_paths(project_id)
+    except ValueError as e:
+        logger.warning("load_project_info: %s", e)
+        return {}
+    info_file = paths["PROJECT_INFO_FILE"]
+    if not os.path.exists(info_file):
+        return {}
+    info = _read_project_info(info_file)
+    return info or {}
 
 # ---------------- Model save utils ----------------
 

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/linear_regression.schema.json",
+  "title": "STAMM Model - linear_regression",
+  "description": "Validates a linear_regression model. Common core via $ref to base; config hyperparameters from PMML RegressionModel / GeneralRegressionModel.",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "linear_regression"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "fit_intercept",
+            "regularization"
+          ],
+          "properties": {
+            "fit_intercept": {
+              "type": "boolean"
+            },
+            "regularization": {
+              "type": "string",
+              "enum": [
+                "none",
+                "l1",
+                "l2",
+                "elasticnet"
+              ]
+            },
+            "alpha": {
+              "type": "number"
+            },
+            "l1_ratio": {
+              "type": "number"
+            },
+            "max_iter": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "coefficients": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            },
+            "intercept": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

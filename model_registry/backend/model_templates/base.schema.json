@@ -1,0 +1,677 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/base.schema.json",
+  "title": "STAMM Model - common core",
+  "description": "Family-agnostic envelope for every registry model. Mirrors public.models. FAIR4ML (fair4ml:MLModel) + ML-Schema (mls:Model). Field set is a superset of the IndPenSim model YAMLs.",
+  "type": "object",
+  "required": [
+    "slug",
+    "name",
+    "algorithm",
+    "status",
+    "version",
+    "ml_task",
+    "model_category",
+    "inputs",
+    "outputs",
+    "config",
+    "metrics",
+    "artifact",
+    "training",
+    "governance"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]*$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "algorithm": {
+      "type": "string",
+      "enum": [
+        "decision_tree",
+        "random_forest",
+        "gradient_boosting",
+        "ensemble",
+        "svm",
+        "linear_regression",
+        "logistic_regression",
+        "neural_network",
+        "rnn",
+        "cnn",
+        "transformer",
+        "gaussian_process",
+        "pls",
+        "pca",
+        "kmeans",
+        "cubist",
+        "m5",
+        "custom"
+      ],
+      "description": "Family discriminator (mls:Algorithm). Matches models.algorithm CHECK."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "training",
+        "trained",
+        "deployed",
+        "archived"
+      ]
+    },
+    "version": {
+      "type": "string"
+    },
+    "uuid": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Stable model UUID (YAML model_identification.UUID; = public.models.id)"
+    },
+    "creation_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Model authoring date (YAML model_identification.creation_date) - distinct from training timestamps"
+    },
+    "project_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Owning project, e.g. 'P0001' (YAML model_identification.project)"
+    },
+    "serving_status": {
+      "type": "string",
+      "enum": [
+        "online",
+        "offline",
+        "unknown"
+      ],
+      "description": "Operational availability (YAML status online/offline) - SEPARATE axis from lifecycle 'status'"
+    },
+    "ml_task": {
+      "type": "string",
+      "enum": [
+        "regression",
+        "classification",
+        "clustering",
+        "dimensionality_reduction",
+        "forecasting",
+        "density_estimation",
+        "anomaly_detection"
+      ],
+      "description": "fair4ml:mlTask"
+    },
+    "model_category": {
+      "type": "string",
+      "enum": [
+        "data_driven",
+        "mechanistic",
+        "hybrid"
+      ],
+      "description": "fair4ml:modelCategory; SOFT/DYNAMIC/HYBRID overlay types"
+    },
+    "model_type": {
+      "type": "string",
+      "enum": [
+        "interpretable",
+        "black_box",
+        "hybrid"
+      ],
+      "description": "IndPenSim YAML model_description.model_type"
+    },
+    "learner": {
+      "type": "string",
+      "description": "Human learner name, e.g. 'Random Forest', 'Support Vector Regressor (SVR)'"
+    },
+    "author": {
+      "type": "string",
+      "description": "YAML model_identification.author"
+    },
+    "doi": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "YAML model_identification.doi"
+    },
+    "status_description": {
+      "type": "string"
+    },
+    "sampling_interval": {
+      "type": "object",
+      "description": "YAML input_time_interval",
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "aggregation": {
+          "type": [
+            "object",
+            "string",
+            "null"
+          ],
+          "description": "YAML input_time_interval.aggregation (method/description) or simple string",
+          "properties": {
+            "method": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "validation": {
+      "type": "string",
+      "description": "e.g. '10-fold CV - 3 repetitions'"
+    },
+    "n_instances": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "YAML training_information.number_of_instances"
+    },
+    "implementation": {
+      "type": "object",
+      "description": "Concrete realization (mls:Implementation): YAML language + packages + scalers + serving.",
+      "properties": {
+        "language": {
+          "type": "string"
+        },
+        "language_version": {
+          "type": "string"
+        },
+        "packages": {
+          "type": "array",
+          "description": "library + estimator class + version",
+          "items": {
+            "type": "object",
+            "properties": {
+              "package": {
+                "type": "string"
+              },
+              "class": {
+                "type": "string"
+              },
+              "classes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Multiple classes used from this package (YAML packages[].classes)"
+              },
+              "version": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "scaler_inputs": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "scaler_outputs": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "serving": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "server": {
+              "type": "string"
+            },
+            "port": {
+              "type": [
+                "integer",
+                "string"
+              ]
+            },
+            "rest_api": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "prediction_horizon_min": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "Input feature or output target (mls:hasInput/hasOutput). Field names mirror IndPenSim YAML inputs.features/outputs.information.",
+        "required": [
+          "name"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "renamed_variable, e.g. 'temperature', 'penicillin_concentration'"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "sensor",
+              "actuator",
+              "computed_variable",
+              "offline_measurement",
+              "soft_sensor",
+              "experiment",
+              "context"
+            ],
+            "description": "Variable origin (IndPenSim column_type)."
+          },
+          "unit": {
+            "type": "string"
+          },
+          "dtype": {
+            "type": "string",
+            "enum": [
+              "float",
+              "int",
+              "bool",
+              "categorical",
+              "string"
+            ]
+          },
+          "lag": {
+            "type": "number",
+            "description": "Time-lag steps; 0 = current value"
+          },
+          "feature_scaling": {
+            "type": "string",
+            "description": "'none' | 'Z-score' | 'Min-Max normalization'"
+          },
+          "expected_range": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              }
+            }
+          },
+          "range": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "forecast_horizon": {
+            "type": "number",
+            "description": "Steps ahead; 0 = instantaneous"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "feature",
+              "target",
+              "context",
+              "control"
+            ]
+          },
+          "sensor_id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "Input feature or output target (mls:hasInput/hasOutput). Field names mirror IndPenSim YAML inputs.features/outputs.information.",
+        "required": [
+          "name"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "renamed_variable, e.g. 'temperature', 'penicillin_concentration'"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "sensor",
+              "actuator",
+              "computed_variable",
+              "offline_measurement",
+              "soft_sensor",
+              "experiment",
+              "context"
+            ],
+            "description": "Variable origin (IndPenSim column_type)."
+          },
+          "unit": {
+            "type": "string"
+          },
+          "dtype": {
+            "type": "string",
+            "enum": [
+              "float",
+              "int",
+              "bool",
+              "categorical",
+              "string"
+            ]
+          },
+          "lag": {
+            "type": "number",
+            "description": "Time-lag steps; 0 = current value"
+          },
+          "feature_scaling": {
+            "type": "string",
+            "description": "'none' | 'Z-score' | 'Min-Max normalization'"
+          },
+          "expected_range": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              }
+            }
+          },
+          "range": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "forecast_horizon": {
+            "type": "number",
+            "description": "Steps ahead; 0 = instantaneous"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "feature",
+              "target",
+              "context",
+              "control"
+            ]
+          },
+          "sensor_id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "description": "Family-specific hyperparameters (mls:HyperParameterSetting). Constrained per family."
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Evaluation results (fair4ml:evaluationMetrics / mls:EvaluationMeasure).",
+      "additionalProperties": {
+        "type": [
+          "number",
+          "string",
+          "boolean",
+          "null"
+        ]
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "required": [
+        "path",
+        "format",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "pickle",
+            "joblib",
+            "onnx",
+            "savedmodel",
+            "pmml",
+            "rds",
+            "rdata",
+            "torch",
+            "keras",
+            "custom"
+          ]
+        },
+        "size_bytes": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "additional_files": {
+          "type": "array",
+          "description": "Secondary artifacts: serialized_model_file, weight files, scalers, etc.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "format": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "training": {
+      "type": "object",
+      "required": [
+        "dataset_hash"
+      ],
+      "description": "Provenance (fair4ml:trainedOn)",
+      "properties": {
+        "framework": {
+          "type": "string"
+        },
+        "framework_version": {
+          "type": "string"
+        },
+        "software_requirements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dataset_hash": {
+          "type": "string"
+        },
+        "training_experiment_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "started_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "completed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "trained_by": {
+          "type": "string"
+        },
+        "random_seed": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "co2e_kg": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "properties": {
+        "parent_model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "superseded_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fine_tuned_from": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "federation": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "federation_id": {
+              "type": "string"
+            },
+            "round": {
+              "type": "integer"
+            },
+            "role": {
+              "type": "string",
+              "enum": [
+                "local_update",
+                "aggregated_global"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "required": [
+        "validation_status"
+      ],
+      "properties": {
+        "validation_status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "approved",
+            "rejected"
+          ]
+        },
+        "validated_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "validated_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "validation_notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "intended_use": {
+          "type": "string"
+        },
+        "risks_bias_limitations": {
+          "type": "string"
+        },
+        "ethical_social": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reference_publication": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

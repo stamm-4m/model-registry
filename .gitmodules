@@ -1,3 +1,0 @@
-[submodule "model_registry/backend/vendor/metadata_tools"]
-	path = model_registry/backend/vendor/metadata_tools
-	url = git@gitlab.com:bmetcalfeWUR/metadata_tools.git

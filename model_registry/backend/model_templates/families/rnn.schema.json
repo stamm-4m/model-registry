@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/rnn.schema.json",
+  "title": "STAMM Model - rnn",
+  "description": "Validates a rnn model. Common core via $ref to base; config hyperparameters from PMML NeuralNetwork (recurrent) - sequence model.",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "rnn"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "cell_type",
+            "input_window",
+            "optimizer",
+            "learning_rate"
+          ],
+          "properties": {
+            "cell_type": {
+              "type": "string",
+              "enum": [
+                "LSTM",
+                "GRU",
+                "SimpleRNN"
+              ]
+            },
+            "layers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "units": {
+                    "type": "integer"
+                  },
+                  "activation": {
+                    "type": "string"
+                  },
+                  "rate": {
+                    "type": "number"
+                  },
+                  "return_sequences": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "hidden_units": {
+              "type": [
+                "integer",
+                "array"
+              ]
+            },
+            "input_window": {
+              "type": "integer"
+            },
+            "output_window": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "bidirectional": {
+              "type": "boolean"
+            },
+            "optimizer": {
+              "type": "string"
+            },
+            "learning_rate": {
+              "type": "number"
+            },
+            "loss": {
+              "type": "string"
+            },
+            "batch_size": {
+              "type": "integer"
+            },
+            "epochs": {
+              "type": "integer"
+            },
+            "dropout": {
+              "type": "number"
+            },
+            "n_parameters": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/m5.schema.json",
+  "title": "STAMM Model - m5",
+  "description": "Validates a m5 model. Common core via $ref to base; config hyperparameters from M5 model tree (PMML TreeModel with regression at leaves).",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "m5"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "min_instances_per_leaf"
+          ],
+          "properties": {
+            "min_instances_per_leaf": {
+              "type": "integer"
+            },
+            "pruned": {
+              "type": "boolean"
+            },
+            "smoothed": {
+              "type": "boolean"
+            },
+            "use_unsmoothed": {
+              "type": "boolean"
+            },
+            "build_regression_tree": {
+              "type": "boolean"
+            },
+            "num_rules": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "n_leaves": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

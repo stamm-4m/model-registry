@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/neural_network.schema.json",
+  "title": "STAMM Model - neural_network",
+  "description": "Validates a neural_network model. Common core via $ref to base; config hyperparameters from PMML NeuralNetwork (feedforward MLP).",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "neural_network"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "architecture",
+            "layers",
+            "optimizer",
+            "learning_rate"
+          ],
+          "properties": {
+            "architecture": {
+              "type": "string"
+            },
+            "layers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "dense",
+                      "dropout",
+                      "batchnorm",
+                      "activation"
+                    ]
+                  },
+                  "units": {
+                    "type": "integer"
+                  },
+                  "activation": {
+                    "type": "string"
+                  },
+                  "rate": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "optimizer": {
+              "type": "string"
+            },
+            "learning_rate": {
+              "type": "number"
+            },
+            "loss": {
+              "type": "string"
+            },
+            "batch_size": {
+              "type": "integer"
+            },
+            "epochs": {
+              "type": "integer"
+            },
+            "regularization": {
+              "type": "object",
+              "properties": {
+                "l1": {
+                  "type": "number"
+                },
+                "l2": {
+                  "type": "number"
+                },
+                "dropout": {
+                  "type": "number"
+                }
+              }
+            },
+            "weight_init": {
+              "type": "string"
+            },
+            "early_stopping": {
+              "type": [
+                "object",
+                "boolean"
+              ]
+            },
+            "n_parameters": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

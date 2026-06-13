@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/gaussian_process.schema.json",
+  "title": "STAMM Model - gaussian_process",
+  "description": "Validates a gaussian_process model. Common core via $ref to base; config hyperparameters from PMML GaussianProcessModel.",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "gaussian_process"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "kernel"
+          ],
+          "properties": {
+            "kernel": {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "rbf",
+                    "matern",
+                    "rational_quadratic",
+                    "exp_sine_squared",
+                    "dot_product",
+                    "white",
+                    "sum",
+                    "product"
+                  ]
+                },
+                "length_scale": {
+                  "type": [
+                    "number",
+                    "array"
+                  ]
+                },
+                "variance": {
+                  "type": "number"
+                },
+                "nu": {
+                  "type": "number"
+                },
+                "components": {
+                  "type": "array"
+                }
+              }
+            },
+            "noise_variance": {
+              "type": "number"
+            },
+            "alpha": {
+              "type": "number"
+            },
+            "optimizer": {
+              "type": "string"
+            },
+            "n_restarts_optimizer": {
+              "type": "integer"
+            },
+            "normalize_y": {
+              "type": "boolean"
+            },
+            "mean_function": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

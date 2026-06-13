@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/random_forest.schema.json",
+  "title": "STAMM Model - random_forest",
+  "description": "Validates a random_forest model. Common core via $ref to base; config hyperparameters from PMML MiningModel (bagging of TreeModel).",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "random_forest"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "n_estimators",
+            "criterion"
+          ],
+          "properties": {
+            "n_estimators": {
+              "type": "integer"
+            },
+            "criterion": {
+              "type": "string",
+              "enum": [
+                "squared_error",
+                "absolute_error",
+                "gini",
+                "entropy",
+                "log_loss"
+              ]
+            },
+            "max_depth": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "min_samples_split": {
+              "type": "number"
+            },
+            "min_samples_leaf": {
+              "type": "number"
+            },
+            "max_features": {
+              "type": [
+                "number",
+                "string",
+                "null"
+              ]
+            },
+            "bootstrap": {
+              "type": "boolean"
+            },
+            "oob_score": {
+              "type": "boolean"
+            },
+            "base_estimator": {
+              "const": "decision_tree"
+            },
+            "feature_importances": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "feature -> importance"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

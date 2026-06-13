@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stamm.example/schemas/families/pls.schema.json",
+  "title": "STAMM Model - pls",
+  "description": "Validates a pls model. Common core via $ref to base; config hyperparameters from Partial Least Squares.",
+  "allOf": [
+    {
+      "$ref": "../base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "pls"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "n_components"
+          ],
+          "properties": {
+            "n_components": {
+              "type": "integer"
+            },
+            "scale": {
+              "type": "boolean"
+            },
+            "algorithm": {
+              "type": "string",
+              "enum": [
+                "nipals",
+                "svd"
+              ]
+            },
+            "max_iter": {
+              "type": "integer"
+            },
+            "tol": {
+              "type": "number"
+            },
+            "explained_variance": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

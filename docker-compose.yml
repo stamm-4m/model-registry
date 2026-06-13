@@ -1,10 +1,30 @@
 services:
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: stamm-postgres
+    restart: unless-stopped
+    env_file:
+      - ./model_registry/postgres/.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - stamm_pgdata:/var/lib/postgresql/data
+      - ./model_registry/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+    networks:
+      - ml_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+
   backend:
     build: .
     container_name: model-registry-backend
     command: python model_registry/backend/app_backend.py
     ports:
-      - "8051:8051"
+      - "80:80"
     volumes:
       - ./model_registry:/app/model_registry
     networks:
@@ -15,13 +35,18 @@ services:
     build: .
     container_name: model-registry-api
     command: >
-      uvicorn model_registry.api.app_api:main
+      uvicorn model_registry.api.app_api:api
       --host 0.0.0.0
-      --port 8081
+      --port 8080
     ports:
-      - "8081:8081"
+      - "8080:8080"
     depends_on:
-      - backend
+      backend:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./model_registry/api/.env
     environment:
       - R_API_URL=http://r-api:8501/predict
     volumes:
@@ -46,3 +71,6 @@ services:
 networks:
   ml_net:
     driver: bridge
+
+volumes:
+  stamm_pgdata:

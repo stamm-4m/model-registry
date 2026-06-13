@@ -79,6 +79,16 @@ def add_project_layout():
                     dbc.FormFloating(
                         [
                             dcc.Dropdown(
+                                id="assigned-laboratory",
+                                placeholder="Assign to laboratory",
+                            )
+                        ],
+                        className="mb-3",
+                    ),
+
+                    dbc.FormFloating(
+                        [
+                            dcc.Dropdown(
                                 id="assigned-users",
                                 multi=True,
                                 placeholder="Assign users",
