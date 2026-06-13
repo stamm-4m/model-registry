@@ -46,7 +46,7 @@ def get_models_grid(permissions=None):
             "headerName": "Status",
             "field": "status",
             "cellRenderer": "StatusRenderer",
-            "width": 40,
+            "width": 100,
         },
         {
             "headerName": "XAI",

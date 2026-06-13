@@ -5,6 +5,7 @@ from model_registry.api.routers.ml_registry_router import router as ml_router
 from model_registry.api.routers.auth_router import router as auth_router
 from model_registry.api.routers.crud_router import router as crud_router
 from model_registry.api.routers.run_timeseries_router import router as run_ts_router
+from model_registry.api.routers.detector_packs_router import router as detector_packs_router
 from model_registry.backend.utils.logging_config import setup_logging
 from model_registry.api.core.registry import ModelRegistry
 
@@ -42,6 +43,10 @@ api.include_router(crud_router)  # /api/v1/<table>/ CRUD scaffold (Step 3)
 # (slow, scales linearly with stream length); with them, each chart refresh is one
 # indexed SQL query per signal type. Carlos: please keep this mounted.
 api.include_router(run_ts_router)
+# Drift-detector pack register/activate (multipart upload + pin). The plain
+# CRUD for detector_packs is auto-mounted by crud_router; this adds /register
+# and /{id}/activate which the scaffold can't express.
+api.include_router(detector_packs_router)
 
 
 def main():

@@ -83,6 +83,7 @@ def sidebar(session_data=None):
     nav_items.append(html.Div("Models", className="sidebar-section-title"))
     nav_items.append(_nav_link("ML Soft Sensors", "/", icon="bi-cpu"))
     nav_items.append(_nav_link("Dynamic Models", "/dynamic-models", icon="bi-graph-up"))
+    nav_items.append(_nav_link("Drift Detectors", "/drift-detectors", icon="bi-shield-check"))
 
     # Admin section
     if is_super_admin:

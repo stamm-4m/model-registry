@@ -216,10 +216,14 @@ def _resolve_artifact_path(path: str) -> Optional[str]:
     repo_root = os.path.dirname(pkg_dir)       # .../<repo>
 
     # Strip a leading "<repo-folder-name>/" if present (e.g. "model-registry/").
+    # Also handle the Docker case where repo_folder resolves to "app" but the
+    # stored path starts with the literal repo name "model-registry/".
     repo_folder = os.path.basename(repo_root)
     stripped = normalized
-    if stripped.startswith(repo_folder + "/"):
-        stripped = stripped[len(repo_folder) + 1:]
+    for prefix in {repo_folder + "/", "model-registry/"}:
+        if stripped.startswith(prefix):
+            stripped = stripped[len(prefix):]
+            break
 
     candidates = [
         path,

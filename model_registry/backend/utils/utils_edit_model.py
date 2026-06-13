@@ -2,6 +2,7 @@ import logging
 import uuid
 from datetime import datetime
 
+from dash import dcc, html
 import dash_bootstrap_components as dbc
 
 logger = logging.getLogger(__name__)
@@ -75,7 +76,36 @@ def package_row(index, package="", version=""):
         align="center",
     )
 
-def feature_card(feature):
+
+def _scaler_section(fid: str, kind: str, data: dict, scaler_opts: list | None = None) -> html.Div:
+    """Scaler assignment block — picks from the shared Scaler Library.
+
+    The Scaler Library lives in dcc.Store(id="scalers-store"); options are
+    populated by a callback.  kind = 'feature' | 'output'.
+    """
+    selected_id = data.get("scaler_id") or None
+    return html.Div([
+        dbc.Row([
+            dbc.Col(
+                dbc.Label("Scaler", className="fw-semibold text-muted small text-uppercase mt-2"),
+                width="auto",
+            ),
+            dbc.Col(
+                dcc.Dropdown(
+                    id={"type": f"{kind}-scaler-select", "fid": fid},
+                    options=scaler_opts or [],  # pre-populated; also updated by callback
+                    value=selected_id,
+                    placeholder="None — no scaler",
+                    clearable=True,
+                    className="mb-0",
+                ),
+            ),
+        ], className="align-items-center border-top pt-2 mt-2"),
+    ])
+
+
+
+def feature_card(feature, scaler_opts=None):
     fid = feature["id"]
 
     return dbc.Card(
@@ -204,6 +234,8 @@ def feature_card(feature):
                     ]
                 ),
 
+                _scaler_section(fid, "feature", feature, scaler_opts),
+
                 dbc.Button(
                     "🗑 Remove feature",
                     id={"type": "remove-feature", "fid": fid},
@@ -219,11 +251,11 @@ def feature_card(feature):
     )
 
         
-def feature_item(feature):
+def feature_item(feature, scaler_opts=None):
     return dbc.AccordionItem(
         item_id=feature["id"],
         title=feature["name"] or "New feature",
-        children=[feature_card(feature)],
+        children=[feature_card(feature, scaler_opts)],
     )
 
 def new_feature():
@@ -236,6 +268,9 @@ def new_feature():
         "feature_scaling": "none",
         "expected_range": {"min": None, "max": None},
         "description": "",
+        "has_scaler": False,
+        "scaler_path": "",
+        "scaler_filename": "",
     }
 
 def normalize_features(features):
@@ -252,7 +287,7 @@ def normalize_features(features):
 ###
 # outputs
 ###
-def output_card(fid, output=None):
+def output_card(fid, output=None, scaler_opts=None):
     output = output or {}
 
     return dbc.Card(
@@ -367,6 +402,8 @@ def output_card(fid, output=None):
                     ]
                 ),
 
+                _scaler_section(fid, "output", output, scaler_opts),
+
                 dbc.Button(
                     "🗑 Remove output",
                     id={"type": "remove-output", "fid": fid},
@@ -380,7 +417,7 @@ def output_card(fid, output=None):
         ),
         className="mb-3 shadow-sm",
     )
-def output_item(output):
+def output_item(output, scaler_opts=None):
     fid = output["id"]
 
     title = output.get("name") or "New output"
@@ -388,7 +425,7 @@ def output_item(output):
     return dbc.AccordionItem(
         item_id=fid,
         title=title,
-        children=[output_card(fid, output)],
+        children=[output_card(fid, output, scaler_opts)],
     )
 
 def new_output():
@@ -400,4 +437,7 @@ def new_output():
         "forecast_horizon": 0,
         "feature_scaling": "none",
         "expected_range": {"min": None, "max": None},
+        "has_scaler": False,
+        "scaler_path": "",
+        "scaler_filename": "",
     }

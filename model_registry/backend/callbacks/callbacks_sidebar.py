@@ -10,6 +10,7 @@ from model_registry.backend.pages.edit_model import edit_model_layout
 from model_registry.backend.pages.help import help_layout
 from model_registry.backend.pages.home import home_layout
 from model_registry.backend.pages.dynamic_models import dynamic_models_layout
+from model_registry.backend.pages.drift_detectors import drift_detectors_layout
 from model_registry.backend.pages.projects import projects_layout
 from model_registry.backend.pages.organizations import organizations_layout
 from model_registry.backend.pages.users import users_layout
@@ -96,6 +97,9 @@ def register_sidebar_callbacks(app):
         
         elif pathname == "/dynamic-models":
             return dynamic_models_layout()
+        
+        elif pathname == "/drift-detectors":
+            return drift_detectors_layout(session_data)
         
         elif pathname == "/projects":
             return projects_layout(session_data)

@@ -27,30 +27,31 @@ STAMM_ALGORITHMS = {
 }
 
 
-def algorithm_selector_dropdown():
-    """Create dropdown component for template/algorithm selection."""
-    return dbc.FormFloating([
+def algorithm_selector_dropdown(value=None, disabled=False):
+    """Create dropdown component for learner family selection (lives in Description tab)."""
+    return html.Div([
+        dbc.Label("Learner Family", className="fw-semibold text-muted small text-uppercase mb-1"),
         dcc.Dropdown(
             id="template-algorithm-selector",
             options=[
                 {"label": label, "value": algo}
                 for algo, label in sorted(STAMM_ALGORITHMS.items(), key=lambda x: x[1])
             ],
-            value=None,
-            placeholder="Select a template algorithm (optional)",
+            value=value,
+            placeholder="Select algorithm family…",
             clearable=True,
+            disabled=disabled,
         ),
-        
     ], className="mb-3")
 
 
 def template_config_section():
     """Create section for template-specific configuration fields."""
     return html.Div([
-        html.H4("Template Configuration", className="mb-4", id="template-config-header"),
+        html.H4("Learner Hyperparameters", className="mb-4", id="template-config-header"),
         html.Div(
             id="template-config-fields",
-            children=html.P("Select an algorithm to see template-specific fields.", 
+            children=html.P("Select an algorithm family above to load its standard hyperparameters.",
                            className="text-muted"),
         ),
     ], id="template-config-container", style={"display": "none"})
@@ -165,7 +166,7 @@ def get_template_fields_by_algorithm(algorithm: str):
             {"name": "Number of Layers", "id": "template-num-layers", "type": "number", "required": True, "value": 6},
         ],
         "custom": [
-            {"name": "Custom Configuration (JSON)", "id": "template-custom-config", "type": "textarea", "required": False, "placeholder": "{}", "style": {"height": "150px"}},
+            {"name": "Custom Configuration (JSON)", "id": "template-custom-config", "type": "textarea", "required": False,            "value": "{}"},
         ],
     }
     return fields_map.get(algorithm, [])

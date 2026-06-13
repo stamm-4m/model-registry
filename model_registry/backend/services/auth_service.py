@@ -11,7 +11,7 @@ def login_request(username: str, password: str):
     """Call backend login endpoint"""
     try:
         response = requests.post(
-            f"{settings.API_BASE_URL}/auth/login",
+            f"{settings.API_BASE_URL.rstrip('/')}/auth/login",
             data={
                 "username": username,
                 "password": password
@@ -32,7 +32,7 @@ def login_request(username: str, password: str):
 def refresh_token(refresh_token):
     try:
         response = requests.post(
-            f"{settings.API_BASE_URL}/auth/refresh",
+            f"{settings.API_BASE_URL.rstrip('/')}/auth/refresh",
             json={"refresh_token": refresh_token}
         )
 

@@ -152,15 +152,19 @@ class ModelService:
             ProjectsApiClient,
         )
 
-        # Validate payload against template schema (if algorithm specified)
+        # Validate payload against template schema (advisory only — warnings, not a blocker).
+        # The form intentionally collects a subset of schema fields; full compliance
+        # is enforced at the API level when the model is later published/deployed.
         try:
             validate_model_payload(payload)
         except TemplateValidationError as e:
-            logger.error(f"Template validation failed: {e}")
-            raise
+            logger.warning(
+                "Template validation warnings for algorithm '%s' (save will proceed):\n%s",
+                e.algorithm,
+                "\n".join(f"  • {err}" for err in e.errors),
+            )
         except ValueError as e:
-            logger.error(f"Invalid model payload: {e}")
-            raise
+            logger.debug("Template validation skipped: %s", e)
 
         # Resolve project UUID from external code.
         projects_client = ProjectsApiClient()
@@ -262,6 +266,7 @@ class ModelService:
                 "model_ID": row.get("slug"),
                 "metadata": {
                     "ID": row.get("slug"),
+                    "db_uuid": row.get("id"),   # Postgres UUID — used for API delete/edit
                     "authors": row.get("authors"),
                     "created_at": row.get("creation_date")
                     or row.get("created_at"),

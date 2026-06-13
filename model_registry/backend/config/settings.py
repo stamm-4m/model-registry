@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import Field, field_validator
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -7,6 +7,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 class Settings(BaseSettings):
     # --- API ML---
     API_BASE_URL: str = Field(..., description="Base URL of the API")
+
+    @field_validator("API_BASE_URL")
+    @classmethod
+    def strip_trailing_slash(cls, v: str) -> str:
+        return v.rstrip("/")
 
     # --   - IBISBA HUB config ---  
     MODEL2SEEK_API_TOKEN: str = Field(..., description="API token for the MODEL2SEEK API")

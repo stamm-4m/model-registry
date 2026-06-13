@@ -31,6 +31,9 @@ from model_registry.backend.callbacks.callbacks_project import register_project_
 from model_registry.backend.callbacks.callbacks_sidebar import (
     register_sidebar_callbacks,
 )
+from model_registry.backend.callbacks.callbacks_drift_detectors import (
+    register_drift_detectors_callbacks,
+)
 from model_registry.backend.callbacks.callbacks_toolbar import (
     register_toolbar_callbacks,
 )
@@ -65,3 +68,4 @@ def register_callbacks(app):
     register_delete_project_modal_callbacks(app)
     register_experiment_modal_callbacks(app)
     register_delete_experiment_modal_callbacks(app)
+    register_drift_detectors_callbacks(app)

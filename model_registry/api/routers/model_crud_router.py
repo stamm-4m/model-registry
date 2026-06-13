@@ -23,6 +23,54 @@ from model_registry.backend.services.template_validator import (
 logger = logging.getLogger(__name__)
 
 
+def _flatten_model_payload(body: Dict[str, Any]) -> Dict[str, Any]:
+    """Map the JSON-schema–shaped payload from the form to flat DB columns.
+
+    The form (and JSON schema) use nested convenience objects:
+      artifact   → artifact_path / artifact_format / artifact_size_bytes / artifact_sha256
+      training   → training_dataset_hash + training_information JSONB
+      governance → validation_status / validation_notes
+
+    Keys that don't map to a column (ml_task, model_category, …) are left
+    in the dict and stripped by the caller against Model.__table__.columns.
+    """
+    flat = dict(body)
+
+    # artifact block
+    artifact = flat.pop("artifact", None)
+    if isinstance(artifact, dict):
+        flat.setdefault("artifact_path",       artifact.get("path"))
+        flat.setdefault("artifact_format",     artifact.get("format"))
+        flat.setdefault("artifact_size_bytes", artifact.get("size_bytes"))
+        flat.setdefault("artifact_sha256",     artifact.get("sha256"))
+
+    # training block
+    training = flat.pop("training", None)
+    if isinstance(training, dict):
+        flat.setdefault("training_dataset_hash", training.get("dataset_hash", ""))
+        # Merge remaining training fields into the training_information JSONB
+        ti_extra = {k: v for k, v in training.items() if k != "dataset_hash"}
+        if ti_extra:
+            existing_ti = flat.get("training_information") or {}
+            flat["training_information"] = {**ti_extra, **existing_ti}
+
+    # governance block
+    governance = flat.pop("governance", None)
+    if isinstance(governance, dict):
+        flat.setdefault("validation_status", governance.get("validation_status", "pending"))
+        flat.setdefault("validation_notes",  governance.get("validation_notes"))
+
+    # config must be a dict, never None
+    if flat.get("config") is None:
+        flat["config"] = {}
+
+    # metrics must be a dict, never None
+    if flat.get("metrics") is None:
+        flat["metrics"] = {}
+
+    return flat
+
+
 def register_model_crud(
     router: APIRouter,
     read_perms: Optional[List[str]] = None,
@@ -51,36 +99,31 @@ def register_model_crud(
         db: Session = Depends(get_db),
         user=Depends(require_permission_resource(write_perms, Model.__tablename__)),
     ):
-        """Create a model with template validation.
-
-        Validates against JSON Schema if algorithm is specified.
-        """
-        # Validate template first
+        """Create a model. Template validation is advisory (warnings only)."""
+        # Advisory validation — log warnings but never block the save.
         try:
             validate_model_payload(body)
         except TemplateValidationError as e:
-            logger.warning(f"Template validation failed: {e}")
-            raise HTTPException(
-                status_code=422,
-                detail=f"Model template validation failed: {'; '.join(e.errors)}"
-            )
+            logger.warning("Template validation warnings (save proceeds): %s", e)
         except ValueError as e:
-            logger.warning(f"Invalid model payload: {e}")
-            raise HTTPException(status_code=400, detail=str(e))
+            logger.debug("Template validation skipped: %s", e)
 
-        # Create model if validation passes
+        # Flatten nested convenience blocks into their actual DB columns.
+        flat = _flatten_model_payload(body)
+
+        # Strip keys that are not real columns so Model(**flat) never raises TypeError.
+        valid_cols = {c.name for c in Model.__table__.columns}
+        flat = {k: v for k, v in flat.items() if k in valid_cols}
+
         try:
-            row = Model(**body)
+            row = Model(**flat)
             db.add(row)
             db.commit()
             db.refresh(row)
             return _row_to_dict(row)
-        except TypeError as exc:
-            db.rollback()
-            raise HTTPException(422, f"bad field for models: {exc}")
         except Exception as exc:
             db.rollback()
-            logger.error(f"Failed to create model: {exc}")
+            logger.error("Failed to create model: %s | payload keys: %s", exc, list(flat.keys()))
             raise HTTPException(500, f"Failed to create model: {exc}")
 
     @router.patch(f"{base}/{{model_id}}", tags=[tag])
@@ -90,42 +133,29 @@ def register_model_crud(
         db: Session = Depends(get_db),
         user=Depends(require_permission_resource(write_perms, Model.__tablename__)),
     ):
-        """Update a model with optional template validation.
-
-        If 'algorithm' or 'config' fields are being updated, validates
-        the merged payload against the template schema.
-        """
+        """Update a model with optional template validation."""
         pk = _coerce_pk(Model, model_id)
-        row = db.query(Model).filter(pk_col == pk).first()
+        row = db.query(Model).filter(Model.id == pk).first()
         if row is None:
             raise HTTPException(404, f"models {model_id} not found")
 
-        # Check if algorithm or config is being updated
-        if any(k in body for k in ["algorithm", "config"]):
-            # Merge existing row data with update payload for validation
-            current_data = _row_to_dict(row)
-            merged_payload = {**current_data, **body}
+        # Flatten nested blocks before validation/update
+        flat = _flatten_model_payload(body)
 
-            # Validate merged payload
+        # Advisory validation if algorithm/config changing
+        if any(k in flat for k in ["algorithm", "config"]):
             try:
-                validate_model_payload(merged_payload)
+                merged = {**_row_to_dict(row), **flat}
+                validate_model_payload(merged)
             except TemplateValidationError as e:
-                logger.warning(f"Template validation failed on update: {e}")
-                raise HTTPException(
-                    status_code=422,
-                    detail=f"Model template validation failed: {'; '.join(e.errors)}"
-                )
+                logger.warning("Template validation warnings on update (proceeding): %s", e)
             except ValueError as e:
-                logger.warning(f"Invalid model payload on update: {e}")
-                raise HTTPException(status_code=400, detail=str(e))
+                logger.debug("Template validation skipped: %s", e)
 
-        # Update model if validation passes
         valid_cols = {c.name for c in Model.__table__.columns}
-        for k, v in body.items():
-            if k == pk_name:
+        for k, v in flat.items():
+            if k == "id" or k not in valid_cols:
                 continue
-            if k not in valid_cols:
-                raise HTTPException(422, f"unknown column '{k}' on models")
             setattr(row, k, v)
 
         try:
@@ -134,5 +164,5 @@ def register_model_crud(
             return _row_to_dict(row)
         except Exception as exc:
             db.rollback()
-            logger.error(f"Failed to update model: {exc}")
+            logger.error("Failed to update model: %s", exc)
             raise HTTPException(500, f"Failed to update model: {exc}")

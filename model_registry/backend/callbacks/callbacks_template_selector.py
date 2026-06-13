@@ -2,7 +2,7 @@
 
 import json
 import logging
-from dash import Input, Output, State, html, ctx, ALL, callback, MATCH
+from dash import Input, Output, State, html, ALL
 import dash_bootstrap_components as dbc
 from model_registry.backend.utils.utils_template_ui import (
     get_template_fields_by_algorithm,
@@ -12,47 +12,9 @@ from model_registry.backend.utils.utils_template_ui import (
 
 logger = logging.getLogger(__name__)
 
-# All possible template field IDs across all algorithms
-_ALL_TEMPLATE_FIELD_IDS = [
-    # Random Forest, Decision Tree, Gradient Boosting
-    "template-n-estimators", "template-max-depth", "template-min-samples-split",
-    "template-max-features", "template-criterion", "template-learning-rate",
-    
-    # SVM
-    "template-kernel", "template-c", "template-gamma",
-    
-    # Neural Network, RNN
-    "template-hidden-layers", "template-activation", "template-batch-size",
-    "template-hidden-units", "template-num-layers", "template-dropout",
-    
-    # Cubist, M5
-    "template-committees", "template-instance-corrections", "template-min-instances",
-    "template-pruned", "template-smoothed",
-    
-    # Linear Regression, Logistic Regression
-    "template-fit-intercept", "template-positive", "template-penalty", "template-solver",
-    
-    # PLS, PCA
-    "template-n-components", "template-scale", "template-whiten",
-    
-    # K-Means
-    "template-n-clusters", "template-init", "template-max-iter",
-    
-    # Gaussian Process
-    "template-alpha",
-    
-    # Ensemble
-    "template-ensemble-method", "template-num-estimators",
-    
-    # CNN
-    "template-num-filters", "template-kernel-size", "template-pool-size",
-    
-    # Transformer
-    "template-d-model", "template-num-heads",
-    
-    # Custom
-    "template-custom-config",
-]
+# Pattern-matching type used for all rendered hyperparameter inputs.
+# Each input gets id={"type": "template-field", "index": <field_id>}
+_TEMPLATE_FIELD_TYPE = "template-field"
 
 
 def register_template_callbacks(app):
@@ -106,23 +68,26 @@ def register_template_callbacks(app):
                 "default_value": field_value,
             }
 
+            # Pattern-matching ID — collected as a group at save time via ALL.
+            pm_id = {"type": _TEMPLATE_FIELD_TYPE, "index": field_id}
+
             # Create appropriate input component
             if field_type == "checkbox":
                 component = html.Div(
                     [
                         dbc.Checkbox(
-                            id=field_id,
+                            id=pm_id,
                             value=field_value or False,
                             className="me-2",
                         ),
-                        html.Label(field_name, htmlFor=field_id),
+                        html.Label(field_name),
                     ],
                     className="d-flex align-items-center mb-3",
                 )
             elif field_type == "textarea":
                 component = dbc.FormFloating([
                     dbc.Textarea(
-                        id=field_id,
+                        id=pm_id,
                         placeholder=field_placeholder or field_name,
                         style=field.get("style", {}),
                         value=field_value or "",
@@ -132,7 +97,7 @@ def register_template_callbacks(app):
             else:
                 # Number, text, etc.
                 input_props = {
-                    "id": field_id,
+                    "id": pm_id,
                     "type": field_type,
                     "placeholder": field_placeholder or field_name,
                     "value": field_value or "",
@@ -169,58 +134,54 @@ def register_template_callbacks(app):
             field_data,
         )
 
-    # Callback: Collect template values before save (triggered by save button)
+    # Callback: Collect template values before save (triggered by save button).
+    # Uses pattern-matching ALL so only currently-rendered fields are read —
+    # no references to non-existent component IDs.
     @app.callback(
         Output("template-config-store", "data", allow_duplicate=True),
         Input("save-ml-model-config", "n_clicks"),
         State("template-algorithm-selector", "value"),
         State("template-config-store", "data"),
-        # Include all possible template field states
-        *[State(field_id, "value") for field_id in _ALL_TEMPLATE_FIELD_IDS],
+        State({"type": _TEMPLATE_FIELD_TYPE, "index": ALL}, "value"),
+        State({"type": _TEMPLATE_FIELD_TYPE, "index": ALL}, "id"),
         prevent_initial_call=True,
     )
-    def collect_template_config(n_clicks, selected_algorithm, current_store, *field_values):
-        """Collect all template field values into store before saving."""
-        if not selected_algorithm or not current_store:
+    def collect_template_config(n_clicks, selected_algorithm, current_store, field_values, field_ids):
+        """Collect currently-rendered template field values into the store."""
+        if not selected_algorithm:
             return current_store or {}
 
-        # Map field IDs to their values
-        field_value_map = dict(zip(_ALL_TEMPLATE_FIELD_IDS, field_values))
+        # Build {field_id_string: value} from the pattern-matched lists
+        field_value_map = {
+            fid["index"]: val
+            for fid, val in zip(field_ids, field_values)
+        }
 
-        # Get the fields for this algorithm
         fields = get_template_fields_by_algorithm(selected_algorithm)
-        field_ids = [f.get("id") for f in fields]
-
-        # Build config object with collected values
         config = {
             "algorithm": selected_algorithm,
             "fields": {},
-            "values": {}
+            "values": {},
         }
 
         for field in fields:
-            field_id = field.get("id")
+            field_id   = field.get("id")
             field_name = field.get("name", "")
             field_type = field.get("type", "number")
-            field_value = field_value_map.get(field_id)
+            field_val  = field_value_map.get(field_id)
 
-            # Store metadata
             config["fields"][field_id] = {
-                "name": field_name,
-                "type": field_type,
+                "name":     field_name,
+                "type":     field_type,
                 "required": field.get("required", False),
             }
+            config["values"][field_id] = field_val
+            logger.debug("Collected %s = %s (%s)", field_id, field_val, field_type)
 
-            # Store collected value
-            config["values"][field_id] = field_value
-
-            logger.debug(f"Collected {field_id} = {field_value} ({field_type})")
-
-        # Store collected values
-        current_store["config"] = config
-        logger.info(f"Template config collected for algorithm {selected_algorithm}: {config['values']}")
-
-        return current_store
+        store = dict(current_store or {})
+        store["config"] = config
+        logger.info("Template config collected for %s: %s", selected_algorithm, config["values"])
+        return store
 
     # Callback: Reset template config when algorithm is cleared
     @app.callback(

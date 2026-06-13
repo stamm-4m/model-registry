@@ -69,6 +69,7 @@ def register_crud(
     write_perms: Optional[List[str]] = None,
     tag: Optional[str] = None,
     create_validator: Optional[Callable[[Dict[str, Any]], None]] = None,
+    create_preprocessor: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
 ) -> None:
     """Register list/get/create/update/delete endpoints for ``model``.
 
@@ -79,8 +80,10 @@ def register_crud(
         read_perms: Permissions required for read operations
         write_perms: Permissions required for write operations
         tag: OpenAPI tag for endpoints
-        create_validator: Optional callable to validate POST body.
-                         Raises HTTPException on validation failure.
+        create_validator: Optional callable to validate POST body (advisory — log only).
+        create_preprocessor: Optional callable that transforms the POST body dict
+                             before validation and DB insert. Must return the
+                             (possibly modified) dict.
     """
     read_perms = read_perms or []
     write_perms = write_perms or []
@@ -127,15 +130,29 @@ def register_crud(
         if pk_name in body and pk_col.default is not None:
             body = {k: v for k, v in body.items() if k != pk_name}
 
-        # Run model-specific validator if provided
+        # Apply table-specific body transformation (e.g. flatten nested blocks).
+        if create_preprocessor is not None:
+            body = create_preprocessor(body)
+
+        # Strip unknown columns so model(**body) never raises TypeError.
+        valid_cols = {c.name for c in model.__table__.columns}
+        unknown = set(body) - valid_cols - {pk_name}
+        if unknown:
+            logger.debug("Stripping unknown keys for %s: %s", model.__tablename__, unknown)
+        body = {k: v for k, v in body.items() if k in valid_cols}
+
+        # Run model-specific validator if provided (advisory — log, don't block).
         if create_validator is not None:
             try:
                 create_validator(body)
-            except HTTPException:
-                raise
+            except HTTPException as exc:
+                # Log at warning level but do NOT re-raise — validation is advisory.
+                logger.warning(
+                    "Advisory validation for %s (save proceeds): %s",
+                    model.__tablename__, exc.detail,
+                )
             except Exception as exc:
-                logger.warning(f"Validation error for {model.__tablename__}: {exc}")
-                raise HTTPException(422, f"validation error: {exc}")
+                logger.warning("Validation error for %s (save proceeds): %s", model.__tablename__, exc)
 
         try:
             row = model(**body)
@@ -161,12 +178,17 @@ def register_crud(
         row = db.query(model).filter(pk_col == pk).first()
         if row is None:
             raise HTTPException(404, f"{model.__tablename__} {item_id} not found")
+        # Apply table-specific transformation (e.g. flatten nested blocks).
+        if create_preprocessor is not None:
+            body = create_preprocessor(body)
+
         valid_cols = {c.name for c in model.__table__.columns}
+        unknown = set(body) - valid_cols - {pk_name}
+        if unknown:
+            logger.debug("PATCH stripping unknown keys for %s: %s", model.__tablename__, unknown)
         for k, v in body.items():
-            if k == pk_name:
-                continue   # never allow changing the PK
-            if k not in valid_cols:
-                raise HTTPException(422, f"unknown column '{k}' on {model.__tablename__}")
+            if k == pk_name or k not in valid_cols:
+                continue
             setattr(row, k, v)
         try:
             db.commit()

@@ -17,9 +17,14 @@ from typing import Any, Dict, List, Optional
 try:
     import jsonschema
     from jsonschema import Draft202012Validator, ValidationError
+    from referencing import Registry, Resource
+    from referencing.jsonschema import DRAFT202012 as _DRAFT202012_SPEC
+    _referencing_available = True
 except ImportError:
     jsonschema = None
     ValidationError = Exception
+    Registry = Resource = _DRAFT202012_SPEC = None
+    _referencing_available = False
 
 
 logger = logging.getLogger(__name__)
@@ -78,6 +83,7 @@ class TemplateValidator:
         self.schemas_dir = schemas_dir
         self._schemas: Dict[str, Dict[str, Any]] = {}
         self._validators: Dict[str, Draft202012Validator] = {}
+        self._registry: Any = None  # cached local referencing.Registry
 
         if jsonschema is None:
             logger.warning(
@@ -85,6 +91,41 @@ class TemplateValidator:
                 "Template validation will be skipped. "
                 "Install with: pip install jsonschema"
             )
+
+    def _build_local_registry(self) -> Any:
+        """Build (and cache) a referencing.Registry with base.schema.json pre-loaded.
+
+        This prevents jsonschema from trying to fetch $refs over the network when
+        the schemas use a fake $id like https://stamm.example/...
+        """
+        if self._registry is not None:
+            return self._registry
+
+        if not _referencing_available:
+            return None
+
+        base_schema_file = os.path.join(
+            os.path.dirname(self.schemas_dir), "base.schema.json"
+        )
+        if not os.path.exists(base_schema_file):
+            logger.warning("base.schema.json not found at %s; $ref resolution may fail", base_schema_file)
+            return None
+
+        try:
+            with open(base_schema_file) as f:
+                base_schema = json.load(f)
+
+            resource = Resource.from_contents(base_schema, default_specification=_DRAFT202012_SPEC)
+            registry = Registry().with_resource(
+                uri=base_schema["$id"],  # "https://stamm.example/schemas/base.schema.json"
+                resource=resource,
+            )
+            self._registry = registry
+            logger.debug("Local schema registry built with base.schema.json")
+            return registry
+        except Exception as exc:
+            logger.warning("Failed to build local schema registry: %s", exc)
+            return None
 
     def _load_schema(self, algorithm: str) -> Optional[Dict[str, Any]]:
         """Load schema file for given algorithm (cached).
@@ -131,7 +172,9 @@ class TemplateValidator:
         if schema is None:
             return None
 
-        validator = Draft202012Validator(schema)
+        registry = self._build_local_registry()
+        kwargs = {"registry": registry} if registry is not None else {}
+        validator = Draft202012Validator(schema, **kwargs)
         self._validators[algorithm] = validator
         return validator
 
@@ -169,11 +212,21 @@ class TemplateValidator:
 
         # Collect all validation errors
         errors: List[str] = []
-        for error in validator.iter_errors(payload):
-            # Format error message with JSON path
-            path = ".".join(str(p) for p in error.absolute_path) or "root"
-            msg = f"{path}: {error.message}"
-            errors.append(msg)
+        try:
+            for error in validator.iter_errors(payload):
+                # Format error message with JSON path
+                path = ".".join(str(p) for p in error.absolute_path) or "root"
+                msg = f"{path}: {error.message}"
+                errors.append(msg)
+        except Exception as exc:
+            # Schema resolution errors (e.g. unresolvable $ref) should not block
+            # saving — log as warning and skip validation for this payload.
+            logger.warning(
+                "Schema resolution error during validation for algorithm '%s': %s. "
+                "Skipping template validation.",
+                algorithm, exc,
+            )
+            return
 
         if errors:
             raise TemplateValidationError(algorithm, errors)

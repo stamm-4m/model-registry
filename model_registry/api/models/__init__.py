@@ -54,6 +54,9 @@ from .experiment_drift_detector import ExperimentDriftDetector
 from .drift_result import DriftResult
 from .department_laboratory import DepartmentLaboratory
 
+# --- Phase 5: drift-detector packs (versioned, uploadable catalog source)
+from .detector_pack import DetectorPack
+
 # FermOps streaming + soft-sensor demo models. Files were already present in
 # the develop tree but weren't registered here. Without these imports the
 # CRUD scaffold can't see the tables and `/api/v1/streaming_jobs/` returns 404.
@@ -84,4 +87,6 @@ __all__ = [
     # Model registry + federated learning (proposal 2026-05-22)
     "Model", "ProjectModel",
     "Federation", "FederationParticipant", "ModelContribution",
+    # Drift-detector packs (Phase 5)
+    "ExperimentDriftDetector", "DriftResult", "DetectorPack",
 ]
