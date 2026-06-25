@@ -92,8 +92,13 @@ def register_sidebar_callbacks(app):
             _, project_id = parts
             return model_upload_layout(project_id)
         
-        elif pathname == "/model-explainability":
-            return model_explainability_layout()
+        elif pathname.startswith("/model-explainability"):
+            parts = pathname.strip("/").split("/")
+            if len(parts) == 3:
+                _, project_id, model_id = parts
+                return model_explainability_layout(project_id, model_id, session_data)
+            # legacy / parameterless link -> 'select a model' prompt
+            return model_explainability_layout()    
         
         elif pathname == "/dynamic-models":
             return dynamic_models_layout()

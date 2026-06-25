@@ -112,6 +112,13 @@ def register_home_callbacks(app):
                 False,
                 None
             )
+    
+        if col_id == "xai":
+            return (
+                f"/model-explainability/{row['project_id']}/{row['model_id']}",
+                False,
+                None
+            )
         
         # ===== REGISTER TO =====
         if col_id == "register_to":

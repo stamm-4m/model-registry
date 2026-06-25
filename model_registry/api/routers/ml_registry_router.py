@@ -3,6 +3,9 @@ from fastapi import APIRouter, HTTPException
 from model_registry.api.models import user
 from model_registry.api.models.prediction_request import PredictionRequest
 from model_registry.api.models.laboratory_project import LaboratoryProject
+from model_registry.api.models.explain_request import ExplainRequest
+from model_registry.api.services import explainability
+from model_registry.api.models.laboratory_project import LaboratoryProject
 from fastapi import Request
 from model_registry.api.models.project import Project
 
@@ -281,3 +284,44 @@ def predict(
     # Otherwise -> run Python prediction
     logger.info(f"Running prediction for project '{project_id}', model '{model}' using Python model.")
     return ModelPredictor(model, input_scaler, output_scaler, outputs).predict(request)
+
+
+# ---------------- Explainability Endpoint ----------------
+
+@router.post("/{project_id}/explain/{model_id}")
+def explain_model(
+    project_id: str,
+    model_id: str,
+    req: Request,
+    body: Optional[ExplainRequest] = None,
+    user=Depends(require_permission_resource("models:read", "Models")),
+):
+    """Return XAI explanations for a model. Loads nothing — uses the model the
+    registry already holds in memory (resolved from the DB row). With no body,
+    explanations use a background sampled from each feature's declared range;
+    pass `rows` (+ optional `target_column`) to evaluate on uploaded data."""
+    try:
+        models = req.app.state.registry.get_project(project_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    if model_id not in models:
+        raise HTTPException(status_code=404, detail="Model not found")
+
+    info = models[model_id]
+    model = info.get("model")
+    config = info.get("config")
+    scaler = info.get("input_scaler")
+    family = body.family if body else None
+
+    if body and body.rows:
+        try:
+            import pandas as pd
+            df = pd.DataFrame(body.rows)
+        except Exception as e:
+            return {"ok": False, "reason": f"could not parse rows: {e}"}
+        y = None
+        if body.target_column and body.target_column in df.columns:
+            y = df[body.target_column].to_numpy()
+        return explainability.explain_with_data(model, config, scaler, family, df, y)
+
+    return explainability.explain(model, config, scaler, family)

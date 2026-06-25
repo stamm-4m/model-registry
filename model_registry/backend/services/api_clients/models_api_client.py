@@ -75,6 +75,34 @@ class ModelsApiClient:
             _safe_json(response),
         )
         return None, session_data
+    
+    def explain(
+        self,
+        project_id: str,
+        model_id: str,
+        session_data: _SessionData,
+        family: Optional[str] = None,
+        rows: Optional[List[Dict[str, Any]]] = None,
+        target_column: Optional[str] = None,
+    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+        """``POST /<project_id>/explain/<model_id>`` -- protected XAI endpoint.
+
+        With no ``rows`` the API explains over a sampled background; pass
+        ``rows`` (records of an uploaded CSV) + optional ``target_column`` to
+        evaluate on real data. Returns the explanation dict (or an ``ok=False``
+        dict) and the (possibly refreshed) session.
+        """
+        body = {"family": family, "rows": rows, "target_column": target_column}
+        response, session_data = authenticated_request(
+            "POST", f"/{project_id}/explain/{model_id}", session_data, json=body
+        )
+        if response is None:
+            return None, None
+        if response.status_code == 200:
+            return response.json(), session_data
+        logger.warning("explain failed status=%s body=%s",
+                       response.status_code, _safe_json(response))
+        return {"ok": False, "reason": f"HTTP {response.status_code}"}, session_data
 
     def list_models_full(
         self, project_id: str, session_data: _SessionData

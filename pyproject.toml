@@ -21,6 +21,7 @@ dotenv = "^0.9.9"
 pandas = "^2.3.3"
 tensorflow = "^2.20.0"
 scikit-learn = "1.5.2"
+shap = "^0.46.0"
 dash-ag-grid = "^32.3.4"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 sqlalchemy = "^2.0.48"
