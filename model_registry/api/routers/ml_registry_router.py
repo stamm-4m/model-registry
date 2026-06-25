@@ -1,8 +1,8 @@
+from typing import Optional
 from fastapi import APIRouter, HTTPException
 
 from model_registry.api.models import user
 from model_registry.api.models.prediction_request import PredictionRequest
-from model_registry.api.models.laboratory_project import LaboratoryProject
 from model_registry.api.models.explain_request import ExplainRequest
 from model_registry.api.services import explainability
 from model_registry.api.models.laboratory_project import LaboratoryProject
