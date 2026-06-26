@@ -1,27 +1,32 @@
 """DTOs for user-related entities (user + role link)."""
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 @dataclass
 class UserDTO:
-    id: Optional[str] = None
-    email: Optional[str] = None
-    full_name: Optional[str] = None
-    is_active: Optional[bool] = None
-    external_provider: Optional[str] = None
-    external_id: Optional[str] = None
-    created_at: Optional[str] = None
-    extra: Dict[str, Any] = field(default_factory=dict)
+    id: str | None = None
+    email: str | None = None
+    full_name: str | None = None
+    is_active: bool | None = None
+    external_provider: str | None = None
+    external_id: str | None = None
+    created_at: str | None = None
+    extra: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "UserDTO":
+    def from_dict(cls, data: dict[str, Any]) -> "UserDTO":
         if not data:
             return cls()
         known = {
-            "id", "email", "full_name", "is_active",
-            "external_provider", "external_id", "created_at",
+            "id",
+            "email",
+            "full_name",
+            "is_active",
+            "external_provider",
+            "external_id",
+            "created_at",
         }
         extras = {k: v for k, v in data.items() if k not in known}
         return cls(
@@ -35,7 +40,7 @@ class UserDTO:
             extra=extras,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         out = {
             "id": self.id,
             "email": self.email,
@@ -51,15 +56,15 @@ class UserDTO:
 
 @dataclass
 class UserRoleDTO:
-    id: Optional[str] = None
-    user_id: Optional[str] = None
-    role_id: Optional[str] = None
-    permission_id: Optional[str] = None
-    real_resource_id: Optional[str] = None
-    extra: Dict[str, Any] = field(default_factory=dict)
+    id: str | None = None
+    user_id: str | None = None
+    role_id: str | None = None
+    permission_id: str | None = None
+    real_resource_id: str | None = None
+    extra: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "UserRoleDTO":
+    def from_dict(cls, data: dict[str, Any]) -> "UserRoleDTO":
         if not data:
             return cls()
         known = {"id", "user_id", "role_id", "permission_id", "real_resource_id"}

@@ -11,8 +11,7 @@ def home_layout(projects_options=None, permissions=None):
 
     projects_list = projects_options or []
     options_projects_dropdown = [
-        {"label": p["name"], "value": p["project_ID"]}
-        for p in projects_list
+        {"label": p["name"], "value": p["project_ID"]} for p in projects_list
     ]
     default_project_id = (
         options_projects_dropdown[0]["value"] if options_projects_dropdown else None
@@ -108,7 +107,7 @@ def home_layout(projects_options=None, permissions=None):
         className="mb-4 shadow-sm border-0 home-card",
     )
     # MODAL
-    project_modal(),
+    (project_modal(),)
     # ---- Models card ----
     models_card = dbc.Card(
         [
@@ -183,9 +182,7 @@ def home_layout(projects_options=None, permissions=None):
     project_required_modal = dbc.Modal(
         [
             dbc.ModalHeader(dbc.ModalTitle("Project Required")),
-            dbc.ModalBody(
-                "Please select a project name before adding a new model."
-            ),
+            dbc.ModalBody("Please select a project name before adding a new model."),
             dbc.ModalFooter(
                 dbc.Button(
                     "OK",

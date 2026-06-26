@@ -1,7 +1,7 @@
-
 # Class to manage permissions, loading them from the database and caching them for efficient access.
 from model_registry.api.core.database import SessionLocal
 from model_registry.api.models.permission import Permission as PermissionModel
+
 
 class PermissionManager:
     _permissions = None

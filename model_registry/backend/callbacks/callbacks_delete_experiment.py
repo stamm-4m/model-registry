@@ -1,17 +1,21 @@
-from dash import Output, Input, State, ALL
+import logging
+
 import dash
+from dash import ALL, Input, Output, State
 from dash.exceptions import PreventUpdate
+
 from model_registry.backend.core.exceptions import DepartmentInUseException
 from model_registry.backend.services.experiment_service import ExperimentService
-import logging
+
 logger = logging.getLogger(__name__)
+
 
 def register_delete_experiment_modal_callbacks(app):
     @app.callback(
-        Output("delete-exp-modal", "is_open",allow_duplicate=True),
+        Output("delete-exp-modal", "is_open", allow_duplicate=True),
         Output("exp-delete-id", "data"),
         Input({"type": "btn-delete-exp", "index": ALL}, "n_clicks"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
     )
     def open_delete_modal_exp(n_clicks_list):
         logger.debug(f"Delete buttons clicked: {n_clicks_list}")
@@ -33,7 +37,7 @@ def register_delete_experiment_modal_callbacks(app):
         Input("btn-confirm-delete-exp", "n_clicks"),
         State("exp-delete-id", "data"),
         State("user-session", "data"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
     )
     def confirm_delete_exp(n_clicks, exp_id, session_data):
         if not n_clicks or not exp_id:
@@ -42,14 +46,14 @@ def register_delete_experiment_modal_callbacks(app):
         try:
             _, session_data = service.delete_experiment(session_data, exp_id)
             return (
-                False,              # cerrar modal
-                n_clicks,           # refresh tabla
-                True,               # mostrar toast
+                False,  # cerrar modal
+                n_clicks,  # refresh tabla
+                True,  # mostrar toast
                 "Experiment deleted successfully",
                 "success",
                 session_data,
             )
-        
+
         except DepartmentInUseException as e:
             return (
                 False,
@@ -73,7 +77,7 @@ def register_delete_experiment_modal_callbacks(app):
     @app.callback(
         Output("delete-exp-modal", "is_open", allow_duplicate=True),
         Input("btn-cancel-delete-exp", "n_clicks"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
     )
     def cancel_delete(n):
         return False

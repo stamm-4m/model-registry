@@ -18,7 +18,7 @@ def build_footer(logos=None, text="© 2026 My App. All rights reserved."):
     for logo in logos:
         img = html.Img(
             src=logo.get("src"),
-            style={"height":logo.get("height"), "margin": "0 10px"},
+            style={"height": logo.get("height"), "margin": "0 10px"},
         )
 
         # Si tiene link

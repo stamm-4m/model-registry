@@ -1,21 +1,20 @@
-from dash import Output, Input, html, State, ALL
-import dash_bootstrap_components as dbc
+import logging
 
+from dash import Input, Output, State, html
 
-from model_registry.backend.services.organization_service import OrganizationService
 from model_registry.backend.services.department_service import DepartmentService
-from model_registry.backend.services.user_service import UserService
 from model_registry.backend.services.laboratory_service import LaboratoryService
+from model_registry.backend.services.organization_service import OrganizationService
+from model_registry.backend.services.user_service import UserService
+from model_registry.backend.utils.utils_department import build_table_departments
 from model_registry.backend.utils.utils_laboratory import build_table_laboratories
 from model_registry.backend.utils.utils_organization import build_table_organizations
-from model_registry.backend.utils.utils_department import build_table_departments
 from model_registry.backend.utils.utils_users import build_table_users
-import logging
+
 logger = logging.getLogger(__name__)
 
 
 def register_organizations_table_callbacks(app):
-
     # Callback load organizations and departments
     @app.callback(
         Output("organizations-table", "children"),
@@ -30,7 +29,7 @@ def register_organizations_table_callbacks(app):
         if not organizations:
             return html.Div("No organizations found.")
         return build_table_organizations(organizations)
-    
+
     @app.callback(
         Output("departments-table", "children"),
         Input("dept-refresh-trigger", "data"),
@@ -43,7 +42,7 @@ def register_organizations_table_callbacks(app):
         if not departments:
             return html.Div("No departments found.")
         return build_table_departments(departments)
-    
+
     @app.callback(
         Output("laboratories-table", "children"),
         Input("lab-refresh-trigger", "data"),
@@ -58,7 +57,6 @@ def register_organizations_table_callbacks(app):
             return "No laboratories found."
 
         return build_table_laboratories(rows)
-    
 
     @app.callback(
         Output("users-table", "children"),
@@ -78,8 +76,7 @@ def register_organizations_table_callbacks(app):
         if role_filter and role_filter != "__all__":
             rf = role_filter.lower()
             rows = [
-                row for row in rows
-                if any(rn.lower() == rf for rn in (row[3] or []))
+                row for row in rows if any(rn.lower() == rf for rn in (row[3] or []))
             ]
 
         # Filter by free-text search (name or email).
@@ -87,7 +84,8 @@ def register_organizations_table_callbacks(app):
             q = search_query.strip().lower()
             if q:
                 rows = [
-                    row for row in rows
+                    row
+                    for row in rows
                     if q in ((row[0].full_name or "").lower())
                     or q in ((row[0].email or "").lower())
                 ]

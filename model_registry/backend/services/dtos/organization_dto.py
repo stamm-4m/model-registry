@@ -1,19 +1,19 @@
 """DTOs for organization-related entities (organization + relations)."""
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 @dataclass
 class OrganizationDTO:
-    id: Optional[str] = None
-    name: Optional[str] = None
-    location: Optional[str] = None
-    created_at: Optional[str] = None
-    extra: Dict[str, Any] = field(default_factory=dict)
+    id: str | None = None
+    name: str | None = None
+    location: str | None = None
+    created_at: str | None = None
+    extra: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "OrganizationDTO":
+    def from_dict(cls, data: dict[str, Any]) -> "OrganizationDTO":
         if not data:
             return cls()
         known = {"id", "name", "location", "created_at"}
@@ -26,7 +26,7 @@ class OrganizationDTO:
             extra=extras,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         out = {
             "id": self.id,
             "name": self.name,
@@ -39,12 +39,12 @@ class OrganizationDTO:
 
 @dataclass
 class OrganizationDepartmentDTO:
-    id: Optional[str] = None
-    organization_id: Optional[str] = None
-    department_id: Optional[str] = None
+    id: str | None = None
+    organization_id: str | None = None
+    department_id: str | None = None
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "OrganizationDepartmentDTO":
+    def from_dict(cls, data: dict[str, Any]) -> "OrganizationDepartmentDTO":
         data = data or {}
         return cls(
             id=data.get("id"),

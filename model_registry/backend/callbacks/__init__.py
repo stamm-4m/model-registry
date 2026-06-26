@@ -1,41 +1,71 @@
 from model_registry.backend.callbacks.callback_auth import register_auth_callbacks
-from model_registry.backend.callbacks.callbacks_add_organization import register_add_organization_modal_callbacks
+from model_registry.backend.callbacks.callbacks_add_organization import (
+    register_add_organization_modal_callbacks,
+)
 from model_registry.backend.callbacks.callbacks_add_project import (
     register_add_project_callbacks,
 )
-from model_registry.backend.callbacks.callbacks_delete_department import register_delete_department_modal_callbacks
-from model_registry.backend.callbacks.callbacks_delete_experiment import register_delete_experiment_modal_callbacks
-from model_registry.backend.callbacks.callbacks_delete_organization import register_delete_organization_modal_callbacks
-from model_registry.backend.callbacks.callbacks_delete_project import register_delete_project_modal_callbacks
-from model_registry.backend.callbacks.callbacks_delete_user import register_delete_user_modal_callbacks
-from model_registry.backend.callbacks.callbacks_details_model import register_details_model_callbacks
+from model_registry.backend.callbacks.callbacks_delete_department import (
+    register_delete_department_modal_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_delete_experiment import (
+    register_delete_experiment_modal_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_delete_organization import (
+    register_delete_organization_modal_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_delete_project import (
+    register_delete_project_modal_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_delete_user import (
+    register_delete_user_modal_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_details_model import (
+    register_details_model_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_drift_detectors import (
+    register_drift_detectors_callbacks,
+)
 from model_registry.backend.callbacks.callbacks_edit_model import (
     register_edit_model_callbacks,
 )
 from model_registry.backend.callbacks.callbacks_help import register_help_callbacks
 from model_registry.backend.callbacks.callbacks_home import register_home_callbacks
-from model_registry.backend.callbacks.callbacks_modal_departament import register_department_modal_callbacks
-from model_registry.backend.callbacks.callbacks_modal_experiment import register_experiment_modal_callbacks
-from model_registry.backend.callbacks.callbacks_modal_laboratory import register_laboratory_modal_callbacks
-from model_registry.backend.callbacks.callbacks_modal_project import register_project_modal_callbacks
-from model_registry.backend.callbacks.callbacks_modal_user import register_user_modal_callbacks
-from model_registry.backend.callbacks.callbacks_modal_user_roles import register_user_modal_role_callbacks
-from model_registry.backend.callbacks.callbacks_model_upload import (
-    register_model_upload_callbacks,
+from model_registry.backend.callbacks.callbacks_modal_departament import (
+    register_department_modal_callbacks,
 )
-from model_registry.backend.callbacks.callbacks_template_selector import (
-    register_template_callbacks,
+from model_registry.backend.callbacks.callbacks_modal_experiment import (
+    register_experiment_modal_callbacks,
 )
-from model_registry.backend.callbacks.callbacks_organization import register_organizations_table_callbacks
-from model_registry.backend.callbacks.callbacks_project import register_project_table_callbacks
-from model_registry.backend.callbacks.callbacks_sidebar import (
-    register_sidebar_callbacks,
+from model_registry.backend.callbacks.callbacks_modal_laboratory import (
+    register_laboratory_modal_callbacks,
 )
-from model_registry.backend.callbacks.callbacks_drift_detectors import (
-    register_drift_detectors_callbacks,
+from model_registry.backend.callbacks.callbacks_modal_project import (
+    register_project_modal_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_modal_user import (
+    register_user_modal_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_modal_user_roles import (
+    register_user_modal_role_callbacks,
 )
 from model_registry.backend.callbacks.callbacks_model_explainability import (
     register_model_explainability_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_model_upload import (
+    register_model_upload_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_organization import (
+    register_organizations_table_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_project import (
+    register_project_table_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_sidebar import (
+    register_sidebar_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_template_selector import (
+    register_template_callbacks,
 )
 from model_registry.backend.callbacks.callbacks_toolbar import (
     register_toolbar_callbacks,

@@ -18,12 +18,13 @@ Limitations (intentional, for a v1 scaffold):
 """
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Type
+from collections.abc import Callable
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 from model_registry.api.core.database import Base, get_db
 from model_registry.api.core.dependencies import require_permission_resource
@@ -31,13 +32,12 @@ from model_registry.api.core.dependencies import require_permission_resource
 logger = logging.getLogger(__name__)
 
 
-
-def _row_to_dict(row) -> Dict[str, Any]:
+def _row_to_dict(row) -> dict[str, Any]:
     """Serialize a SQLAlchemy row to a plain dict.
 
     UUID -> str, datetime -> ISO string, all else -> as-is.
     """
-    out: Dict[str, Any] = {}
+    out: dict[str, Any] = {}
     for col in row.__table__.columns:
         val = getattr(row, col.name)
         if isinstance(val, UUID):
@@ -48,7 +48,7 @@ def _row_to_dict(row) -> Dict[str, Any]:
     return out
 
 
-def _coerce_pk(model: Type[Base], pk_value: str):
+def _coerce_pk(model: type[Base], pk_value: str):
     """Coerce a string-as-path-param to the model's actual PK column type."""
     pk_col = list(model.__table__.primary_key.columns)[0]
     pk_type_str = str(pk_col.type)
@@ -62,14 +62,14 @@ def _coerce_pk(model: Type[Base], pk_value: str):
 
 def register_crud(
     router: APIRouter,
-    model: Type[Base],
+    model: type[Base],
     path_prefix: str,
     *,
-    read_perms: Optional[List[str]] = None,
-    write_perms: Optional[List[str]] = None,
-    tag: Optional[str] = None,
-    create_validator: Optional[Callable[[Dict[str, Any]], None]] = None,
-    create_preprocessor: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
+    read_perms: list[str] | None = None,
+    write_perms: list[str] | None = None,
+    tag: str | None = None,
+    create_validator: Callable[[dict[str, Any]], None] | None = None,
+    create_preprocessor: Callable[[dict[str, Any]], dict[str, Any]] | None = None,
 ) -> None:
     """Register list/get/create/update/delete endpoints for ``model``.
 
@@ -121,7 +121,7 @@ def register_crud(
 
     @router.post(f"{base}/", tags=[tag], status_code=201)
     def _create(
-        body: Dict[str, Any],
+        body: dict[str, Any],
         db: Session = Depends(get_db),
         user=Depends(require_permission_resource(write_perms, model.__tablename__)),
     ):
@@ -138,7 +138,9 @@ def register_crud(
         valid_cols = {c.name for c in model.__table__.columns}
         unknown = set(body) - valid_cols - {pk_name}
         if unknown:
-            logger.debug("Stripping unknown keys for %s: %s", model.__tablename__, unknown)
+            logger.debug(
+                "Stripping unknown keys for %s: %s", model.__tablename__, unknown
+            )
         body = {k: v for k, v in body.items() if k in valid_cols}
 
         # Run model-specific validator if provided (advisory — log, don't block).
@@ -149,10 +151,15 @@ def register_crud(
                 # Log at warning level but do NOT re-raise — validation is advisory.
                 logger.warning(
                     "Advisory validation for %s (save proceeds): %s",
-                    model.__tablename__, exc.detail,
+                    model.__tablename__,
+                    exc.detail,
                 )
             except Exception as exc:
-                logger.warning("Validation error for %s (save proceeds): %s", model.__tablename__, exc)
+                logger.warning(
+                    "Validation error for %s (save proceeds): %s",
+                    model.__tablename__,
+                    exc,
+                )
 
         try:
             row = model(**body)
@@ -170,7 +177,7 @@ def register_crud(
     @router.patch(f"{base}/{{item_id}}", tags=[tag])
     def _update(
         item_id: str,
-        body: Dict[str, Any],
+        body: dict[str, Any],
         db: Session = Depends(get_db),
         user=Depends(require_permission_resource(write_perms, model.__tablename__)),
     ):
@@ -185,7 +192,9 @@ def register_crud(
         valid_cols = {c.name for c in model.__table__.columns}
         unknown = set(body) - valid_cols - {pk_name}
         if unknown:
-            logger.debug("PATCH stripping unknown keys for %s: %s", model.__tablename__, unknown)
+            logger.debug(
+                "PATCH stripping unknown keys for %s: %s", model.__tablename__, unknown
+            )
         for k, v in body.items():
             if k == pk_name or k not in valid_cols:
                 continue

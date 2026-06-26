@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -11,6 +11,7 @@ class ExplainRequest(BaseModel):
     an uploaded CSV) to evaluate on real data; include `target_column` to also
     compute permutation importance.
     """
-    family: Optional[str] = None
-    rows: Optional[List[Dict[str, Any]]] = None
-    target_column: Optional[str] = None
+
+    family: str | None = None
+    rows: list[dict[str, Any]] | None = None
+    target_column: str | None = None

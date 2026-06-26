@@ -1,7 +1,10 @@
 """Equipments (bioreactors are the canonical instance: brand+model+version)."""
-from sqlalchemy import Column, String, DateTime, Text
-from sqlalchemy.dialects.postgresql import UUID
+
 from uuid import uuid4
+
+from sqlalchemy import Column, DateTime, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+
 from model_registry.api.core.database import Base
 
 

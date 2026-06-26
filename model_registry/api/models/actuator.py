@@ -1,8 +1,11 @@
 """Actuator catalog. Schema patched 2026-04-30 (Step 4) with the rich
 fields FermOps' Actuator dataclass carries."""
-from sqlalchemy import Column, String, DateTime, Float, Text
-from sqlalchemy.dialects.postgresql import UUID
+
 from uuid import uuid4
+
+from sqlalchemy import Column, DateTime, Float, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+
 from model_registry.api.core.database import Base
 
 

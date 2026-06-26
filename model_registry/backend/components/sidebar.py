@@ -1,7 +1,12 @@
-import dash_bootstrap_components as dbc
-from dash import dcc, html
-from model_registry.backend.utils.utils_sidebar import get_user_role, get_user_permissions
 import logging
+
+import dash_bootstrap_components as dbc
+from dash import html
+
+from model_registry.backend.utils.utils_sidebar import (
+    get_user_permissions,
+    get_user_role,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +88,9 @@ def sidebar(session_data=None):
     nav_items.append(html.Div("Models", className="sidebar-section-title"))
     nav_items.append(_nav_link("ML Soft Sensors", "/", icon="bi-cpu"))
     nav_items.append(_nav_link("Dynamic Models", "/dynamic-models", icon="bi-graph-up"))
-    nav_items.append(_nav_link("Drift Detectors", "/drift-detectors", icon="bi-shield-check"))
+    nav_items.append(
+        _nav_link("Drift Detectors", "/drift-detectors", icon="bi-shield-check")
+    )
 
     # Admin section
     if is_super_admin:

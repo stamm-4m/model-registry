@@ -19,6 +19,7 @@ soft_sensors = {}
 
 # ---------------- Project Utilities ----------------
 
+
 def _read_project_info(info_file: str):
     """Read a ``project_info.yaml`` file robustly.
 
@@ -30,18 +31,23 @@ def _read_project_info(info_file: str):
             info = yaml.safe_load(f)
     except (yaml.YAMLError, OSError, UnicodeDecodeError) as e:
         logger.warning(
-            "Skipping unreadable project_info.yaml at %s: %s", info_file, e,
+            "Skipping unreadable project_info.yaml at %s: %s",
+            info_file,
+            e,
         )
         return None
     except Exception as e:  # pragma: no cover - defensive
         logger.exception(
-            "Unexpected error reading %s: %s", info_file, e,
+            "Unexpected error reading %s: %s",
+            info_file,
+            e,
         )
         return None
     if not isinstance(info, dict):
         logger.warning(
             "Skipping %s: top-level YAML is not a mapping (got %s)",
-            info_file, type(info).__name__,
+            info_file,
+            type(info).__name__,
         )
         return None
     return info
@@ -77,6 +83,7 @@ def list_projects_by_id():
             project_map[project_id] = project_folder
     return project_map
 
+
 def list_projects():
     """Return a list of available info projects with name, project id)."""
 
@@ -105,6 +112,7 @@ def list_projects():
             projects.append({"name": project_name, "id": project_id})
     return projects
 
+
 def get_project_folder_from_id(project_id: str):
     """Return the folder name of a project given its project_ID."""
     project_map = list_projects_by_id()
@@ -115,28 +123,31 @@ def get_project_folder_from_id(project_id: str):
         raise ValueError(f"Project ID '{project_id}' not found")
     return folder
 
+
 def get_project_paths(project_id: str):
     """Return important directories/files for a given project_ID."""
     project_folder = get_project_folder_from_id(project_id)
-    project_dir = os.path.join(BASE_DIR,"../" "projects", project_folder)
+    project_dir = os.path.join(BASE_DIR, "../projects", project_folder)
     return {
         "CONFIG_DIR": os.path.join(project_dir, "configs"),
         "MODEL_DIR": os.path.join(project_dir, "models"),
-        "PROJECT_INFO_FILE": os.path.join(project_dir, "project_info.yaml")
+        "PROJECT_INFO_FILE": os.path.join(project_dir, "project_info.yaml"),
     }
+
 
 # ---------------- Project Loading ----------------
 
+
 def load_project(project_id: str):
     """Load all models and config for a given project_ID into registry using model_ID as key."""
-    #if project_id in soft_sensors:
+    # if project_id in soft_sensors:
     #    return soft_sensors[project_id]  # Already loaded
     logger.info(f"Loading project '{project_id}'")
     paths = get_project_paths(project_id)
     models = {}
 
     if not os.path.exists(paths["CONFIG_DIR"]):
-         # Empty / placeholder project (project_info.yaml exists but no configs
+        # Empty / placeholder project (project_info.yaml exists but no configs
         # or models yet). Don't crash the entire registry on startup -- just
         # register it with an empty model set and log a warning.
         logger.warning(
@@ -149,46 +160,60 @@ def load_project(project_id: str):
         if file.endswith(".yaml"):
             with open(os.path.join(paths["CONFIG_DIR"], file), encoding="utf-8") as f:
                 config = yaml.safe_load(f)
-                model_name = config["ml_model_configuration"]["model_identification"]["name"]
-                model_id = config["ml_model_configuration"]["model_identification"].get("ID")
+                model_name = config["ml_model_configuration"]["model_identification"][
+                    "name"
+                ]
+                model_id = config["ml_model_configuration"]["model_identification"].get(
+                    "ID"
+                )
                 if not model_id:
                     logger.warning(f"Warning: Model {model_name} has no ID, skipping.")
                     continue
 
-                model_file = config["ml_model_configuration"]["model_description"]["config_files"]["model_file"]
+                model_file = config["ml_model_configuration"]["model_description"][
+                    "config_files"
+                ]["model_file"]
                 model_path = os.path.join(paths["MODEL_DIR"], model_file)
 
                 # inside load_project(), replace the extension handling block with this:
                 if os.path.exists(model_path):
                     file_ext = os.path.splitext(model_file)[-1].lower()
-                
+
                     if file_ext in [".keras", ".h5"]:
                         model = tf.keras.models.load_model(model_path)
                     elif file_ext in [".joblib", ".pkl"]:
                         model = joblib.load(model_path)
-                    elif file_ext in [".rds", ".rdata"]:   # <- R models
+                    elif file_ext in [".rds", ".rdata"]:  # <- R models
                         model = None  # keep metadata only
-                        logger.info(f"Info: R model {model_file} registered (metadata + REST only).")
+                        logger.info(
+                            f"Info: R model {model_file} registered (metadata + REST only)."
+                        )
                     else:
-                        logger.warning(f"Warning: Unsupported model file format for {model_file}")
+                        logger.warning(
+                            f"Warning: Unsupported model file format for {model_file}"
+                        )
                         model = None
-                    
+
                     input_scaler = None
                     output_scaler = None
                     # ---- Load input scaler ----
                     if "scaler" in config["ml_model_configuration"]["inputs"]:
-                        scaler_file = config["ml_model_configuration"]["inputs"]["scaler"]
+                        scaler_file = config["ml_model_configuration"]["inputs"][
+                            "scaler"
+                        ]
                         scaler_path = os.path.join(paths["MODEL_DIR"], scaler_file)
                         if os.path.exists(scaler_path):
                             input_scaler = joblib.load(scaler_path)
 
                     # ---- Load output scaler ----
                     if "scaler" in config["ml_model_configuration"]["outputs"]:
-                        scaler_file = config["ml_model_configuration"]["outputs"]["scaler"]
+                        scaler_file = config["ml_model_configuration"]["outputs"][
+                            "scaler"
+                        ]
                         scaler_path = os.path.join(paths["MODEL_DIR"], scaler_file)
                         if os.path.exists(scaler_path):
                             output_scaler = joblib.load(scaler_path)
-                    
+
                     models[model_id] = {
                         "config": config,
                         "model": model,  # None if R
@@ -199,25 +224,31 @@ def load_project(project_id: str):
                 else:
                     logger.warning(f"Warning: Model file {model_file} not found!")
 
-
     soft_sensors[project_id] = models
     return models
 
+
 # ---------------- Model Utilities ----------------
+
 
 def get_model_name_from_id(project_id: str, model_id: str):
     """Return the human-readable model name for a given model_ID."""
     models = load_project(project_id)
     if model_id not in models:
-        raise ValueError(f"Model ID '{model_id}' not found in project_ID '{project_id}'")
+        raise ValueError(
+            f"Model ID '{model_id}' not found in project_ID '{project_id}'"
+        )
     return models[model_id]["name"]
+
 
 def list_models_by_id(project_id: str):
     """Return dict mapping model_ID to model_name for a given project."""
     models = load_project(project_id)
     return {model_id: info["name"] for model_id, info in models.items()}
 
+
 # ---------------- Project Metadata ----------------
+
 
 def load_project_info(project_id: str):
     """Load project metadata for a given project_ID.
@@ -236,44 +267,39 @@ def load_project_info(project_id: str):
     info = _read_project_info(info_file)
     return info or {}
 
+
 # ---------------- Model save utils ----------------
+
 
 def load_model(project_id: str, model_id: str):
     paths = get_project_paths(project_id)
 
-    #logger.debug(f"Loading model '{model_id}' for project '{project_id}'")
-    #logger.debug(f"Paths: {paths}")
+    # logger.debug(f"Loading model '{model_id}' for project '{project_id}'")
+    # logger.debug(f"Paths: {paths}")
 
     # ---- Paths reales ----
 
-    config_file = os.path.join(
-        paths["CONFIG_DIR"],
-        f"{model_id}.yaml"
-    )
+    config_file = os.path.join(paths["CONFIG_DIR"], f"{model_id}.yaml")
 
     # ---- Validaciones ----
     if not os.path.isfile(config_file):
         raise HTTPException(
-            404,
-            f"Config file '{model_id}.yaml' not found for project '{project_id}'"
+            404, f"Config file '{model_id}.yaml' not found for project '{project_id}'"
         )
 
     # ---- Load files ----
     with open(config_file, encoding="utf-8") as f:
         return yaml.safe_load(f)
 
+
 def save_model(project_id: str, model_id: str, model_config: dict) -> None:
     paths = get_project_paths(project_id)
 
-    config_path = os.path.join(
-        paths["CONFIG_DIR"],
-        f"{model_id}.yaml"
-    )
+    config_path = os.path.join(paths["CONFIG_DIR"], f"{model_id}.yaml")
 
     if not os.path.isfile(config_path):
         raise HTTPException(
-            404,
-            f"Config file '{model_id}.yaml' not found for project '{project_id}'"
+            404, f"Config file '{model_id}.yaml' not found for project '{project_id}'"
         )
 
     # ---- Backup ----
@@ -282,18 +308,9 @@ def save_model(project_id: str, model_id: str, model_config: dict) -> None:
 
     # ---- Escritura atómica ----
     with tempfile.NamedTemporaryFile(
-        mode="w",
-        encoding="utf-8",
-        delete=False,
-        dir=paths["CONFIG_DIR"],
-        suffix=".tmp"
+        mode="w", encoding="utf-8", delete=False, dir=paths["CONFIG_DIR"], suffix=".tmp"
     ) as tmp:
-        yaml.safe_dump(
-            model_config,
-            tmp,
-            sort_keys=False,
-            allow_unicode=True
-        )
+        yaml.safe_dump(model_config, tmp, sort_keys=False, allow_unicode=True)
         tmp_path = tmp.name
 
     shutil.move(tmp_path, config_path)
@@ -301,12 +318,8 @@ def save_model(project_id: str, model_id: str, model_config: dict) -> None:
 
 def deep_update(original: dict, updates: dict) -> dict:
     for key, value in updates.items():
-        if (
-            isinstance(value, dict)
-            and isinstance(original.get(key), dict)
-        ):
+        if isinstance(value, dict) and isinstance(original.get(key), dict):
             deep_update(original[key], value)
         else:
             original[key] = value
     return original
-

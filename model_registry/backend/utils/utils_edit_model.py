@@ -2,10 +2,11 @@ import logging
 import uuid
 from datetime import datetime
 
-from dash import dcc, html
 import dash_bootstrap_components as dbc
+from dash import dcc, html
 
 logger = logging.getLogger(__name__)
+
 
 def normalize_date(value):
     if not value:
@@ -20,7 +21,8 @@ def normalize_date(value):
         return datetime.strptime(value, "%d-%m-%Y").date().isoformat()
     except ValueError:
         return None
-    
+
+
 def get_value_from_list_of_dicts(data, key, default=""):
     if not isinstance(data, list):
         return default
@@ -28,6 +30,7 @@ def get_value_from_list_of_dicts(data, key, default=""):
         if isinstance(item, dict) and key in item:
             return item[key]
     return default
+
 
 def package_row(index, package="", version=""):
     return dbc.Row(
@@ -77,32 +80,42 @@ def package_row(index, package="", version=""):
     )
 
 
-def _scaler_section(fid: str, kind: str, data: dict, scaler_opts: list | None = None) -> html.Div:
+def _scaler_section(
+    fid: str, kind: str, data: dict, scaler_opts: list | None = None
+) -> html.Div:
     """Scaler assignment block — picks from the shared Scaler Library.
 
     The Scaler Library lives in dcc.Store(id="scalers-store"); options are
     populated by a callback.  kind = 'feature' | 'output'.
     """
     selected_id = data.get("scaler_id") or None
-    return html.Div([
-        dbc.Row([
-            dbc.Col(
-                dbc.Label("Scaler", className="fw-semibold text-muted small text-uppercase mt-2"),
-                width="auto",
+    return html.Div(
+        [
+            dbc.Row(
+                [
+                    dbc.Col(
+                        dbc.Label(
+                            "Scaler",
+                            className="fw-semibold text-muted small text-uppercase mt-2",
+                        ),
+                        width="auto",
+                    ),
+                    dbc.Col(
+                        dcc.Dropdown(
+                            id={"type": f"{kind}-scaler-select", "fid": fid},
+                            options=scaler_opts
+                            or [],  # pre-populated; also updated by callback
+                            value=selected_id,
+                            placeholder="None — no scaler",
+                            clearable=True,
+                            className="mb-0",
+                        ),
+                    ),
+                ],
+                className="align-items-center border-top pt-2 mt-2",
             ),
-            dbc.Col(
-                dcc.Dropdown(
-                    id={"type": f"{kind}-scaler-select", "fid": fid},
-                    options=scaler_opts or [],  # pre-populated; also updated by callback
-                    value=selected_id,
-                    placeholder="None — no scaler",
-                    clearable=True,
-                    className="mb-0",
-                ),
-            ),
-        ], className="align-items-center border-top pt-2 mt-2"),
-    ])
-
+        ]
+    )
 
 
 def feature_card(feature, scaler_opts=None):
@@ -142,7 +155,6 @@ def feature_card(feature, scaler_opts=None):
                     ],
                     className="mb-3",
                 ),
-
                 dbc.Row(
                     [
                         dbc.Col(
@@ -189,14 +201,15 @@ def feature_card(feature, scaler_opts=None):
                             ),
                             md=3,
                         ),
-
                         dbc.Col(
                             dbc.FormFloating(
                                 [
                                     dbc.Input(
                                         id={"type": "feature-min", "fid": fid},
                                         type="number",
-                                        value=feature.get("expected_range", {}).get("min"),
+                                        value=feature.get("expected_range", {}).get(
+                                            "min"
+                                        ),
                                         placeholder="Min",
                                     ),
                                     dbc.Label("Min"),
@@ -210,7 +223,9 @@ def feature_card(feature, scaler_opts=None):
                                     dbc.Input(
                                         id={"type": "feature-max", "fid": fid},
                                         type="number",
-                                        value=feature.get("expected_range", {}).get("max"),
+                                        value=feature.get("expected_range", {}).get(
+                                            "max"
+                                        ),
                                         placeholder="Max",
                                     ),
                                     dbc.Label("Max"),
@@ -221,7 +236,6 @@ def feature_card(feature, scaler_opts=None):
                     ],
                     className="mb-3",
                 ),
-
                 dbc.FormFloating(
                     [
                         dbc.Textarea(
@@ -233,9 +247,7 @@ def feature_card(feature, scaler_opts=None):
                         dbc.Label("Description"),
                     ]
                 ),
-
                 _scaler_section(fid, "feature", feature, scaler_opts),
-
                 dbc.Button(
                     "🗑 Remove feature",
                     id={"type": "remove-feature", "fid": fid},
@@ -250,13 +262,14 @@ def feature_card(feature, scaler_opts=None):
         className="mb-3 shadow-sm",
     )
 
-        
+
 def feature_item(feature, scaler_opts=None):
     return dbc.AccordionItem(
         item_id=feature["id"],
         title=feature["name"] or "New feature",
         children=[feature_card(feature, scaler_opts)],
     )
+
 
 def new_feature():
     return {
@@ -273,6 +286,7 @@ def new_feature():
         "scaler_filename": "",
     }
 
+
 def normalize_features(features):
     normalized = []
 
@@ -283,6 +297,7 @@ def normalize_features(features):
         normalized.append(f)
 
     return normalized
+
 
 ###
 # outputs
@@ -324,7 +339,6 @@ def output_card(fid, output=None, scaler_opts=None):
                     ],
                     className="mb-3",
                 ),
-
                 dbc.Row(
                     [
                         dbc.Col(
@@ -364,7 +378,9 @@ def output_card(fid, output=None, scaler_opts=None):
                                     dbc.Input(
                                         id={"type": "output-min", "fid": fid},
                                         type="number",
-                                        value=output.get("expected_range", {}).get("min"),
+                                        value=output.get("expected_range", {}).get(
+                                            "min"
+                                        ),
                                         placeholder="Min",
                                     ),
                                     dbc.Label("Min"),
@@ -378,7 +394,9 @@ def output_card(fid, output=None, scaler_opts=None):
                                     dbc.Input(
                                         id={"type": "output-max", "fid": fid},
                                         type="number",
-                                        value=output.get("expected_range", {}).get("max"),
+                                        value=output.get("expected_range", {}).get(
+                                            "max"
+                                        ),
                                         placeholder="Max",
                                     ),
                                     dbc.Label("Max"),
@@ -389,7 +407,6 @@ def output_card(fid, output=None, scaler_opts=None):
                     ],
                     className="mb-3",
                 ),
-
                 dbc.FormFloating(
                     [
                         dbc.Textarea(
@@ -401,9 +418,7 @@ def output_card(fid, output=None, scaler_opts=None):
                         dbc.Label("Description"),
                     ]
                 ),
-
                 _scaler_section(fid, "output", output, scaler_opts),
-
                 dbc.Button(
                     "🗑 Remove output",
                     id={"type": "remove-output", "fid": fid},
@@ -417,6 +432,8 @@ def output_card(fid, output=None, scaler_opts=None):
         ),
         className="mb-3 shadow-sm",
     )
+
+
 def output_item(output, scaler_opts=None):
     fid = output["id"]
 
@@ -427,6 +444,7 @@ def output_item(output, scaler_opts=None):
         title=title,
         children=[output_card(fid, output, scaler_opts)],
     )
+
 
 def new_output():
     return {

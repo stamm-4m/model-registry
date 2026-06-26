@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 from uuid import UUID
 
 import joblib
@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _is_uuid(value: str) -> bool:
     try:
@@ -40,7 +41,7 @@ def _model_filter(model_id: str):
     return Model.slug == str(model_id)
 
 
-def _synthesize_yaml_shape(model_row: Model) -> Dict[str, Any]:
+def _synthesize_yaml_shape(model_row: Model) -> dict[str, Any]:
     """Build the ``ml_model_configuration`` dict the dashboard expects.
 
     Maps the ``models`` table columns (plus its ``config`` JSONB blob) onto
@@ -57,63 +58,85 @@ def _synthesize_yaml_shape(model_row: Model) -> Dict[str, Any]:
     # ``config`` JSONB may already be a full ml_model_configuration blob, or
     # just hold algo-specific bits (hyperparameters, packages, ...). Support
     # both shapes by treating any non-mlc keys as supplemental metadata.
-    base_config: Dict[str, Any] = {}
-    mlc: Dict[str, Any] = {}
+    base_config: dict[str, Any] = {}
+    mlc: dict[str, Any] = {}
     if isinstance(raw_config.get("ml_model_configuration"), dict):
-        base_config = {k: v for k, v in raw_config.items() if k != "ml_model_configuration"}
+        base_config = {
+            k: v for k, v in raw_config.items() if k != "ml_model_configuration"
+        }
         mlc = dict(raw_config["ml_model_configuration"])
-        supplemental: Dict[str, Any] = {}
+        supplemental: dict[str, Any] = {}
     else:
         supplemental = raw_config
 
     # ----- Identification ---------------------------------------------------
     mlc.setdefault("model_identification", {})
     ident_existing = mlc["model_identification"]
-    mlc["model_identification"].update({
-        "ID": model_row.slug or str(model_row.id),
-        "UUID": model_row.external_uuid or str(model_row.id),
-        "uuid": str(model_row.id),
-        "doi": model_row.doi or ident_existing.get("doi", "") or "",
-        "name": model_row.name,
-        "version": model_row.version,
-        # ``status`` is the textual lifecycle (draft / training / trained /
-        # deployed / archived). ``is_active`` is the runtime online/offline
-        # boolean. They are independent and both surfaced for the UI.
-        "status": model_row.status or "",
-        "is_active": bool(model_row.is_active),
-        "status_description": (
-            model_row.status_description
-            or model_row.validation_notes
-            or model_row.notes
-            or ident_existing.get("status_description", "")
-            or ""
-        ),
-        "author": model_row.authors or "",
-        "authors": model_row.authors or "",
-        "creation_date": (
-            model_row.creation_date
-            or (model_row.created_at.isoformat() if model_row.created_at else "")
-        ),
-        "created_at": (
-            model_row.created_at.isoformat() if model_row.created_at else None
-        ),
-        "algorithm": model_row.algorithm,
-        "description": model_row.description,
-    })
+    mlc["model_identification"].update(
+        {
+            "ID": model_row.slug or str(model_row.id),
+            "UUID": model_row.external_uuid or str(model_row.id),
+            "uuid": str(model_row.id),
+            "doi": model_row.doi or ident_existing.get("doi", "") or "",
+            "name": model_row.name,
+            "version": model_row.version,
+            # ``status`` is the textual lifecycle (draft / training / trained /
+            # deployed / archived). ``is_active`` is the runtime online/offline
+            # boolean. They are independent and both surfaced for the UI.
+            "status": model_row.status or "",
+            "is_active": bool(model_row.is_active),
+            "status_description": (
+                model_row.status_description
+                or model_row.validation_notes
+                or model_row.notes
+                or ident_existing.get("status_description", "")
+                or ""
+            ),
+            "author": model_row.authors or "",
+            "authors": model_row.authors or "",
+            "creation_date": (
+                model_row.creation_date
+                or (model_row.created_at.isoformat() if model_row.created_at else "")
+            ),
+            "created_at": (
+                model_row.created_at.isoformat() if model_row.created_at else None
+            ),
+            "algorithm": model_row.algorithm,
+            "description": model_row.description,
+        }
+    )
 
     # ----- Description ------------------------------------------------------
     mlc.setdefault("model_description", {})
     md = mlc["model_description"]
     md["learner"] = model_row.learner or md.get("learner") or model_row.algorithm or ""
-    md["model_type"] = model_row.model_type or md.get("model_type") or supplemental.get("model_type", "")
+    md["model_type"] = (
+        model_row.model_type
+        or md.get("model_type")
+        or supplemental.get("model_type", "")
+    )
     md.setdefault("model_name", model_row.name or "")
     md.setdefault("description", model_row.description or "")
-    md["language"] = list(model_row.language or []) or md.get("language") or supplemental.get("language", []) or []
-    md["packages"] = list(model_row.packages or []) or md.get("packages") or supplemental.get("packages", []) or []
+    md["language"] = (
+        list(model_row.language or [])
+        or md.get("language")
+        or supplemental.get("language", [])
+        or []
+    )
+    md["packages"] = (
+        list(model_row.packages or [])
+        or md.get("packages")
+        or supplemental.get("packages", [])
+        or []
+    )
     md["input_time_interval"] = (
         dict(model_row.input_time_interval)
         if model_row.input_time_interval
-        else (md.get("input_time_interval") or supplemental.get("input_time_interval", {}) or {})
+        else (
+            md.get("input_time_interval")
+            or supplemental.get("input_time_interval", {})
+            or {}
+        )
     )
     if model_row.model_architecture:
         md.setdefault("model_architecture", dict(model_row.model_architecture))
@@ -134,7 +157,9 @@ def _synthesize_yaml_shape(model_row: Model) -> Dict[str, Any]:
     ti = {**ti_existing, **ti_col}
     ti.setdefault("hyperparameters", supplemental.get("hyperparameters", {}) or {})
     ti.setdefault("number_of_instances", supplemental.get("number_of_instances", ""))
-    ti.setdefault("validation", supplemental.get("validation", model_row.validation_status or ""))
+    ti.setdefault(
+        "validation", supplemental.get("validation", model_row.validation_status or "")
+    )
     ti.setdefault("experiments_ID", supplemental.get("experiments_ID", []) or [])
     if model_row.training_dataset_hash:
         ti.setdefault("training_dataset_hash", model_row.training_dataset_hash)
@@ -195,7 +220,7 @@ def _synthesize_yaml_shape(model_row: Model) -> Dict[str, Any]:
     return base_config
 
 
-def _resolve_artifact_path(path: str) -> Optional[str]:
+def _resolve_artifact_path(path: str) -> str | None:
     """Locate an artifact file on disk.
 
     The DB sometimes stores paths with a leading ``model-registry/`` prefix
@@ -211,9 +236,9 @@ def _resolve_artifact_path(path: str) -> Optional[str]:
     # repo root = three levels up from this file (api/core/registry.py
     # -> api -> model_registry -> repo root).
     here = os.path.dirname(os.path.abspath(__file__))
-    api_dir = os.path.dirname(here)            # .../model_registry/api
-    pkg_dir = os.path.dirname(api_dir)         # .../model_registry
-    repo_root = os.path.dirname(pkg_dir)       # .../<repo>
+    api_dir = os.path.dirname(here)  # .../model_registry/api
+    pkg_dir = os.path.dirname(api_dir)  # .../model_registry
+    repo_root = os.path.dirname(pkg_dir)  # .../<repo>
 
     # Strip a leading "<repo-folder-name>/" if present (e.g. "model-registry/").
     # Also handle the Docker case where repo_folder resolves to "app" but the
@@ -222,7 +247,7 @@ def _resolve_artifact_path(path: str) -> Optional[str]:
     stripped = normalized
     for prefix in {repo_folder + "/", "model-registry/"}:
         if stripped.startswith(prefix):
-            stripped = stripped[len(prefix):]
+            stripped = stripped[len(prefix) :]
             break
 
     candidates = [
@@ -274,7 +299,7 @@ def _load_artifact(model_row: Model):
     return None
 
 
-def _load_scaler(scaler_path: Optional[str]):
+def _load_scaler(scaler_path: str | None):
     if not scaler_path:
         return None
     resolved = _resolve_artifact_path(scaler_path)
@@ -287,7 +312,7 @@ def _load_scaler(scaler_path: Optional[str]):
         return None
 
 
-def _build_entry(model_row: Model) -> Dict[str, Any]:
+def _build_entry(model_row: Model) -> dict[str, Any]:
     """Build the in-memory record kept under ``registry.projects[pid][mid]``."""
     config = _synthesize_yaml_shape(model_row)
     raw_config = dict(model_row.config or {})
@@ -306,6 +331,7 @@ def _build_entry(model_row: Model) -> Dict[str, Any]:
 # Registry
 # ---------------------------------------------------------------------------
 
+
 class ModelRegistry:
     """
     Central registry that mirrors the ``projects``, ``project_models`` and
@@ -318,7 +344,7 @@ class ModelRegistry:
 
     def __init__(self):
         # { project_slug: { model_slug: entry_dict } }
-        self.projects: Dict[str, Dict[str, Dict[str, Any]]] = {}
+        self.projects: dict[str, dict[str, dict[str, Any]]] = {}
 
     # ------------------------------------------------------------------
     # Loading
@@ -355,7 +381,7 @@ class ModelRegistry:
 
     def _load_project_row(self, db, project: Project):
         logger.info(f"Loading project '{project.project_id}' into registry")
-        models: Dict[str, Dict[str, Any]] = {}
+        models: dict[str, dict[str, Any]] = {}
 
         rows = (
             db.query(Model)
@@ -374,14 +400,18 @@ class ModelRegistry:
     # Read API (kept stable for existing callers)
     # ------------------------------------------------------------------
 
-    def _resolve_project_key(self, project_id: str) -> Optional[str]:
+    def _resolve_project_key(self, project_id: str) -> str | None:
         """Map either UUID or slug onto the slug key we store under."""
         if project_id in self.projects:
             return project_id
         if _is_uuid(project_id):
             db = SessionLocal()
             try:
-                project = db.query(Project).filter(Project.id == UUID(str(project_id))).first()
+                project = (
+                    db.query(Project)
+                    .filter(Project.id == UUID(str(project_id)))
+                    .first()
+                )
                 if project and project.project_id in self.projects:
                     return project.project_id
             finally:
@@ -400,12 +430,12 @@ class ModelRegistry:
         return [
             entry["config"]
             for entry in project.values()
-            if entry
-                .get("config", {})
-                .get("ml_model_configuration", {})
-                .get("model_identification", {})
-                .get("status", "")
-                .lower() == "online"
+            if entry.get("config", {})
+            .get("ml_model_configuration", {})
+            .get("model_identification", {})
+            .get("status", "")
+            .lower()
+            == "online"
         ]
 
     # ------------------------------------------------------------------
@@ -483,7 +513,12 @@ class ModelRegistry:
                         model_row.is_active = is_active_value
                     elif isinstance(is_active_value, str):
                         model_row.is_active = is_active_value.strip().lower() in {
-                            "true", "1", "yes", "on", "online", "active",
+                            "true",
+                            "1",
+                            "yes",
+                            "on",
+                            "online",
+                            "active",
                         }
                 if "version" in ident:
                     model_row.version = ident["version"]
@@ -545,7 +580,9 @@ class ModelRegistry:
                         else {}
                     )
                     if "information" in incoming_outputs:
-                        current_outputs["information"] = incoming_outputs["information"] or []
+                        current_outputs["information"] = (
+                            incoming_outputs["information"] or []
+                        )
                     if "scaler" in incoming_outputs:
                         current_outputs["scaler"] = incoming_outputs["scaler"]
                     model_row.outputs = current_outputs

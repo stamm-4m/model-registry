@@ -1,14 +1,13 @@
 """Callbacks for template selection and configuration in model upload."""
 
-import json
 import logging
-from dash import Input, Output, State, html, ALL
+
 import dash_bootstrap_components as dbc
+from dash import ALL, Input, Output, State, html
+
 from model_registry.backend.utils.utils_template_ui import (
     get_template_fields_by_algorithm,
-    STAMM_ALGORITHMS,
 )
-
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +32,11 @@ def register_template_callbacks(app):
         if not selected_algorithm:
             return (
                 {"display": "none"},
-                html.P("Select an algorithm to see template-specific fields.", 
-                       className="text-muted"),
-                {}
+                html.P(
+                    "Select an algorithm to see template-specific fields.",
+                    className="text-muted",
+                ),
+                {},
             )
 
         # Get template fields for this algorithm
@@ -43,9 +44,11 @@ def register_template_callbacks(app):
         if not fields:
             return (
                 {"display": "none"},
-                html.P(f"No template fields defined for {selected_algorithm}.", 
-                       className="text-muted"),
-                {}
+                html.P(
+                    f"No template fields defined for {selected_algorithm}.",
+                    className="text-muted",
+                ),
+                {},
             )
 
         # Build field components
@@ -85,15 +88,18 @@ def register_template_callbacks(app):
                     className="d-flex align-items-center mb-3",
                 )
             elif field_type == "textarea":
-                component = dbc.FormFloating([
-                    dbc.Textarea(
-                        id=pm_id,
-                        placeholder=field_placeholder or field_name,
-                        style=field.get("style", {}),
-                        value=field_value or "",
-                    ),
-                    dbc.Label(field_name),
-                ], className="mb-3")
+                component = dbc.FormFloating(
+                    [
+                        dbc.Textarea(
+                            id=pm_id,
+                            placeholder=field_placeholder or field_name,
+                            style=field.get("style", {}),
+                            value=field_value or "",
+                        ),
+                        dbc.Label(field_name),
+                    ],
+                    className="mb-3",
+                )
             else:
                 # Number, text, etc.
                 input_props = {
@@ -109,21 +115,25 @@ def register_template_callbacks(app):
                 if "max" in field:
                     input_props["max"] = field["max"]
 
-                component = dbc.FormFloating([
-                    dbc.Input(**input_props),
-                    dbc.Label(field_name),
-                ], className="mb-3")
+                component = dbc.FormFloating(
+                    [
+                        dbc.Input(**input_props),
+                        dbc.Label(field_name),
+                    ],
+                    className="mb-3",
+                )
 
             # Add required marker if needed
             if field_required:
                 field_components.append(
-                    html.Div([
-                        component,
-                        html.Small(
-                            "* Required field",
-                            className="text-danger ms-2 d-block"
-                        )
-                    ])
+                    html.Div(
+                        [
+                            component,
+                            html.Small(
+                                "* Required field", className="text-danger ms-2 d-block"
+                            ),
+                        ]
+                    )
                 )
             else:
                 field_components.append(component)
@@ -146,15 +156,16 @@ def register_template_callbacks(app):
         State({"type": _TEMPLATE_FIELD_TYPE, "index": ALL}, "id"),
         prevent_initial_call=True,
     )
-    def collect_template_config(n_clicks, selected_algorithm, current_store, field_values, field_ids):
+    def collect_template_config(
+        n_clicks, selected_algorithm, current_store, field_values, field_ids
+    ):
         """Collect currently-rendered template field values into the store."""
         if not selected_algorithm:
             return current_store or {}
 
         # Build {field_id_string: value} from the pattern-matched lists
         field_value_map = {
-            fid["index"]: val
-            for fid, val in zip(field_ids, field_values)
+            fid["index"]: val for fid, val in zip(field_ids, field_values)
         }
 
         fields = get_template_fields_by_algorithm(selected_algorithm)
@@ -165,14 +176,14 @@ def register_template_callbacks(app):
         }
 
         for field in fields:
-            field_id   = field.get("id")
+            field_id = field.get("id")
             field_name = field.get("name", "")
             field_type = field.get("type", "number")
-            field_val  = field_value_map.get(field_id)
+            field_val = field_value_map.get(field_id)
 
             config["fields"][field_id] = {
-                "name":     field_name,
-                "type":     field_type,
+                "name": field_name,
+                "type": field_type,
                 "required": field.get("required", False),
             }
             config["values"][field_id] = field_val
@@ -180,7 +191,9 @@ def register_template_callbacks(app):
 
         store = dict(current_store or {})
         store["config"] = config
-        logger.info("Template config collected for %s: %s", selected_algorithm, config["values"])
+        logger.info(
+            "Template config collected for %s: %s", selected_algorithm, config["values"]
+        )
         return store
 
     # Callback: Reset template config when algorithm is cleared
@@ -195,4 +208,3 @@ def register_template_callbacks(app):
         if not selected_algorithm:
             return {}
         return current_store
-

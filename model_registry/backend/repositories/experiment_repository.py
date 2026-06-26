@@ -1,9 +1,19 @@
 from model_registry.backend.models.experiment import Experiment
 from model_registry.backend.repositories.base_repository import BaseRepository
 
-class ExperimentRepository(BaseRepository):
 
-    def update_experiment(self, experiment_id, name=None, project_id=None, description=None, initial_conditions=None, set_points=None, start_time=None, end_time=None):
+class ExperimentRepository(BaseRepository):
+    def update_experiment(
+        self,
+        experiment_id,
+        name=None,
+        project_id=None,
+        description=None,
+        initial_conditions=None,
+        set_points=None,
+        start_time=None,
+        end_time=None,
+    ):
         exp = self.get_experiment_by_id(experiment_id)
         if not exp:
             return None

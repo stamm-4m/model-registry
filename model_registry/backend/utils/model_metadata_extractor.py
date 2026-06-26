@@ -17,7 +17,7 @@ class ModelMetadataExtractor:
         "h5": "keras",
         "keras": "keras",
         "rds": "r_model",
-        "r": "r_script"
+        "r": "r_script",
     }
 
     SAFE_EXTENSIONS = {"pkl", "joblib"}
@@ -76,10 +76,24 @@ class ModelMetadataExtractor:
 
     # Allowed values for the ``models.algorithm`` CHECK constraint.
     ALLOWED_ALGORITHMS = {
-        "decision_tree", "random_forest", "gradient_boosting", "ensemble",
-        "svm", "linear_regression", "logistic_regression", "neural_network",
-        "rnn", "cnn", "transformer", "gaussian_process", "pls", "pca",
-        "kmeans", "cubist", "m5", "custom",
+        "decision_tree",
+        "random_forest",
+        "gradient_boosting",
+        "ensemble",
+        "svm",
+        "linear_regression",
+        "logistic_regression",
+        "neural_network",
+        "rnn",
+        "cnn",
+        "transformer",
+        "gaussian_process",
+        "pls",
+        "pca",
+        "kmeans",
+        "cubist",
+        "m5",
+        "custom",
     }
 
     def extract(self) -> dict:
@@ -126,4 +140,3 @@ class ModelMetadataExtractor:
             if mapped and mapped in self.ALLOWED_ALGORITHMS:
                 return mapped
         return "custom"
-

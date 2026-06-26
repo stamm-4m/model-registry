@@ -5,11 +5,11 @@ import dash_ag_grid as dag
 # Mapping of action column -> required permission on the "Models" resource.
 # Columns whose required permission is not granted to the user are hidden.
 ACTION_PERMISSIONS = {
-    "register_to": "models:write",   # Register to IBISBA
-    "xai":         "models:read",    # Explainability
-    "details":     "models:read",    # Details
-    "edit":        "models:edit",    # Edit
-    "delete":      "models:edit",  # Delete
+    "register_to": "models:write",  # Register to IBISBA
+    "xai": "models:read",  # Explainability
+    "details": "models:read",  # Details
+    "edit": "models:edit",  # Edit
+    "delete": "models:edit",  # Delete
 }
 
 

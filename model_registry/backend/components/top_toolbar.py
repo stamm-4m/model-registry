@@ -16,7 +16,6 @@ def top_toolbar():
                                 html.H5("Configuration", className="mb-0"),
                                 width="auto",
                             ),
-
                             dbc.Col(
                                 dcc.Dropdown(
                                     id="combo-dataset",
@@ -35,7 +34,6 @@ def top_toolbar():
                                 ),
                                 width=3,
                             ),
-
                             dbc.Col(
                                 dcc.Dropdown(
                                     id="combo-model",
@@ -54,20 +52,22 @@ def top_toolbar():
                                 ),
                                 width=3,
                             ),
-
                             dbc.Col(
-                            [
-                                dbc.Button(
-                                    html.I(className="bi bi-gear",style={"fontSize": "1.2rem"},),
-                                    id="btn-settings",
-                                    color="secondary",
-                                    outline=True,
-                                ),
-                                dbc.Tooltip(
-                                    "Settings",
-                                    target="btn-settings",
-                                ),
-                            ],
+                                [
+                                    dbc.Button(
+                                        html.I(
+                                            className="bi bi-gear",
+                                            style={"fontSize": "1.2rem"},
+                                        ),
+                                        id="btn-settings",
+                                        color="secondary",
+                                        outline=True,
+                                    ),
+                                    dbc.Tooltip(
+                                        "Settings",
+                                        target="btn-settings",
+                                    ),
+                                ],
                                 width="auto",
                             ),
                         ],
@@ -77,7 +77,6 @@ def top_toolbar():
                 ),
                 className="mb-3 shadow-sm",
             ),
-
             dbc.Modal(
                 [
                     dbc.ModalHeader(dbc.ModalTitle("Advanced Settings")),

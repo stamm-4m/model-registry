@@ -12,13 +12,14 @@ referenced by the algorithm field in the model payload.
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     import jsonschema
     from jsonschema import Draft202012Validator, ValidationError
     from referencing import Registry, Resource
     from referencing.jsonschema import DRAFT202012 as _DRAFT202012_SPEC
+
     _referencing_available = True
 except ImportError:
     jsonschema = None
@@ -55,18 +56,20 @@ SUPPORTED_ALGORITHMS = {
 class TemplateValidationError(Exception):
     """Raised when model payload fails schema validation."""
 
-    def __init__(self, algorithm: str, errors: List[str]):
+    def __init__(self, algorithm: str, errors: list[str]):
         self.algorithm = algorithm
         self.errors = errors
-        message = f"Template validation failed for algorithm '{algorithm}':\n" + \
-                  "\n".join(f"  - {err}" for err in errors)
+        message = (
+            f"Template validation failed for algorithm '{algorithm}':\n"
+            + "\n".join(f"  - {err}" for err in errors)
+        )
         super().__init__(message)
 
 
 class TemplateValidator:
     """Validates model configurations against STAMM-compliant JSON schemas."""
 
-    def __init__(self, schemas_dir: Optional[str] = None):
+    def __init__(self, schemas_dir: str | None = None):
         """Initialize validator with path to schemas directory.
 
         Args:
@@ -75,14 +78,12 @@ class TemplateValidator:
         """
         if schemas_dir is None:
             # Auto-detect: assume this file is at backend/services/template_validator.py
-            backend_dir = os.path.dirname(
-                os.path.dirname(os.path.abspath(__file__))
-            )
+            backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             schemas_dir = os.path.join(backend_dir, "model_templates", "families")
 
         self.schemas_dir = schemas_dir
-        self._schemas: Dict[str, Dict[str, Any]] = {}
-        self._validators: Dict[str, Draft202012Validator] = {}
+        self._schemas: dict[str, dict[str, Any]] = {}
+        self._validators: dict[str, Draft202012Validator] = {}
         self._registry: Any = None  # cached local referencing.Registry
 
         if jsonschema is None:
@@ -108,16 +109,23 @@ class TemplateValidator:
             os.path.dirname(self.schemas_dir), "base.schema.json"
         )
         if not os.path.exists(base_schema_file):
-            logger.warning("base.schema.json not found at %s; $ref resolution may fail", base_schema_file)
+            logger.warning(
+                "base.schema.json not found at %s; $ref resolution may fail",
+                base_schema_file,
+            )
             return None
 
         try:
             with open(base_schema_file) as f:
                 base_schema = json.load(f)
 
-            resource = Resource.from_contents(base_schema, default_specification=_DRAFT202012_SPEC)
+            resource = Resource.from_contents(
+                base_schema, default_specification=_DRAFT202012_SPEC
+            )
             registry = Registry().with_resource(
-                uri=base_schema["$id"],  # "https://stamm.example/schemas/base.schema.json"
+                uri=base_schema[
+                    "$id"
+                ],  # "https://stamm.example/schemas/base.schema.json"
                 resource=resource,
             )
             self._registry = registry
@@ -127,7 +135,7 @@ class TemplateValidator:
             logger.warning("Failed to build local schema registry: %s", exc)
             return None
 
-    def _load_schema(self, algorithm: str) -> Optional[Dict[str, Any]]:
+    def _load_schema(self, algorithm: str) -> dict[str, Any] | None:
         """Load schema file for given algorithm (cached).
 
         Args:
@@ -148,15 +156,15 @@ class TemplateValidator:
             return None
 
         try:
-            with open(schema_file, "r") as f:
+            with open(schema_file) as f:
                 schema = json.load(f)
                 self._schemas[algorithm] = schema
                 return schema
-        except (IOError, json.JSONDecodeError) as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.error(f"Failed to load schema {schema_file}: {e}")
             return None
 
-    def _get_validator(self, algorithm: str) -> Optional[Draft202012Validator]:
+    def _get_validator(self, algorithm: str) -> Draft202012Validator | None:
         """Get or create validator for given algorithm.
 
         Args:
@@ -178,7 +186,7 @@ class TemplateValidator:
         self._validators[algorithm] = validator
         return validator
 
-    def validate(self, payload: Dict[str, Any]) -> None:
+    def validate(self, payload: dict[str, Any]) -> None:
         """Validate model payload against its algorithm's schema.
 
         Args:
@@ -211,7 +219,7 @@ class TemplateValidator:
             return
 
         # Collect all validation errors
-        errors: List[str] = []
+        errors: list[str] = []
         try:
             for error in validator.iter_errors(payload):
                 # Format error message with JSON path
@@ -224,14 +232,15 @@ class TemplateValidator:
             logger.warning(
                 "Schema resolution error during validation for algorithm '%s': %s. "
                 "Skipping template validation.",
-                algorithm, exc,
+                algorithm,
+                exc,
             )
             return
 
         if errors:
             raise TemplateValidationError(algorithm, errors)
 
-    def validate_batch(self, payloads: List[Dict[str, Any]]) -> Dict[int, List[str]]:
+    def validate_batch(self, payloads: list[dict[str, Any]]) -> dict[int, list[str]]:
         """Validate multiple payloads, collecting errors for each.
 
         Useful for batch operations where partial failures are acceptable.
@@ -243,7 +252,7 @@ class TemplateValidator:
             Dict mapping payload index to list of error messages.
             Empty dict if all payloads are valid.
         """
-        failures: Dict[int, List[str]] = {}
+        failures: dict[int, list[str]] = {}
 
         for i, payload in enumerate(payloads):
             try:
@@ -255,7 +264,7 @@ class TemplateValidator:
 
         return failures
 
-    def get_schema_info(self, algorithm: str) -> Optional[Dict[str, Any]]:
+    def get_schema_info(self, algorithm: str) -> dict[str, Any] | None:
         """Get schema info for given algorithm (for UI/documentation).
 
         Args:
@@ -266,7 +275,7 @@ class TemplateValidator:
         """
         return self._load_schema(algorithm)
 
-    def list_available_algorithms(self) -> List[str]:
+    def list_available_algorithms(self) -> list[str]:
         """List all supported algorithm families.
 
         Returns:
@@ -276,7 +285,7 @@ class TemplateValidator:
 
 
 # Module-level singleton instance
-_validator_instance: Optional[TemplateValidator] = None
+_validator_instance: TemplateValidator | None = None
 
 
 def get_validator() -> TemplateValidator:
@@ -287,7 +296,7 @@ def get_validator() -> TemplateValidator:
     return _validator_instance
 
 
-def validate_model_payload(payload: Dict[str, Any]) -> None:
+def validate_model_payload(payload: dict[str, Any]) -> None:
     """Convenience function to validate payload using module-level validator.
 
     Args:

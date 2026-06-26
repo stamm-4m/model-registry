@@ -1,34 +1,35 @@
-
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 from uuid import UUID
 
 from model_registry.backend.core.exceptions import DepartmentInUseException
 from model_registry.backend.services.api_clients import (
-    DepartmentsApiClient,
     DepartmentLaboratoryApiClient,
-    OrganizationsDepartmentsApiClient,
+    DepartmentsApiClient,
     LaboratoryUserApiClient,
+    OrganizationsDepartmentsApiClient,
 )
 from model_registry.backend.services.dtos import DepartmentDTO
 
-_SessionData = Dict[str, Any]
+_SessionData = dict[str, Any]
 
-def _coerce_id(value) -> Optional[str]:
+
+def _coerce_id(value) -> str | None:
     if value is None:
         return None
     if isinstance(value, UUID):
         return str(value)
     return str(value)
 
+
 class DepartmentService:
     """Department operations backed by /api/v1/departments/."""
 
     def __init__(
         self,
-        client: Optional[DepartmentsApiClient] = None,
-        dept_lab_client: Optional[DepartmentLaboratoryApiClient] = None,
-        org_dept_client: Optional[OrganizationsDepartmentsApiClient] = None,
-        lab_user_client: Optional[LaboratoryUserApiClient] = None,
+        client: DepartmentsApiClient | None = None,
+        dept_lab_client: DepartmentLaboratoryApiClient | None = None,
+        org_dept_client: OrganizationsDepartmentsApiClient | None = None,
+        lab_user_client: LaboratoryUserApiClient | None = None,
     ):
         self.client = client or DepartmentsApiClient()
         self.dept_lab_client = dept_lab_client or DepartmentLaboratoryApiClient()
@@ -41,7 +42,7 @@ class DepartmentService:
 
     def get_all_departments(
         self, session_data: _SessionData
-    ) -> Tuple[List[DepartmentDTO], Optional[_SessionData]]:
+    ) -> tuple[list[DepartmentDTO], _SessionData | None]:
         data, session_data = self.client.list(session_data)
         if data is None:
             return [], session_data
@@ -49,7 +50,7 @@ class DepartmentService:
 
     def get_all_departments_with_org(
         self, session_data: _SessionData
-    ) -> Tuple[List[Tuple[DepartmentDTO, Optional[str]]], Optional[_SessionData]]:
+    ) -> tuple[list[tuple[DepartmentDTO, str | None]], _SessionData | None]:
         """Return [(DepartmentDTO, organization_name), ...] for table rendering.
 
         Mirrors the legacy ``DepartmentRepository.get_all`` shape used by
@@ -62,7 +63,7 @@ class DepartmentService:
         # Build dept_id -> org_id map from link table
         org_depts, session_data = self.org_dept_client.list(session_data)
         org_depts = org_depts or []
-        dept_to_org: Dict[str, str] = {
+        dept_to_org: dict[str, str] = {
             str(link.get("department_id")): str(link.get("organization_id"))
             for link in org_depts
             if link.get("department_id") and link.get("organization_id")
@@ -70,13 +71,14 @@ class DepartmentService:
 
         # Build org_id -> org_name map
         from model_registry.backend.services.api_clients import OrganizationsApiClient
+
         orgs, session_data = OrganizationsApiClient().list(session_data)
         orgs = orgs or []
-        org_id_to_name: Dict[str, str] = {
+        org_id_to_name: dict[str, str] = {
             str(o.get("id")): o.get("name") for o in orgs if o.get("id")
         }
 
-        result: List[Tuple[DepartmentDTO, Optional[str]]] = []
+        result: list[tuple[DepartmentDTO, str | None]] = []
         for dept in depts:
             org_id = dept_to_org.get(str(dept.id))
             org_name = org_id_to_name.get(org_id) if org_id else None
@@ -85,7 +87,7 @@ class DepartmentService:
 
     def get_department(
         self, session_data: _SessionData, department_id
-    ) -> Tuple[Optional[DepartmentDTO], Optional[_SessionData]]:
+    ) -> tuple[DepartmentDTO | None, _SessionData | None]:
         data, session_data = self.client.get(_coerce_id(department_id), session_data)
         if data is None:
             return None, session_data
@@ -93,26 +95,29 @@ class DepartmentService:
 
     def get_organization_id_for_department(
         self, session_data: _SessionData, department_id
-    ) -> Tuple[Optional[str], Optional[_SessionData]]:
+    ) -> tuple[str | None, _SessionData | None]:
         """Return the organization_id linked to a department (via org-dept link)."""
         did = _coerce_id(department_id)
         org_depts, session_data = self.org_dept_client.list(session_data)
         org_depts = org_depts or []
         for link in org_depts:
             if str(link.get("department_id")) == did:
-                return str(link.get("organization_id")) if link.get("organization_id") else None, session_data
+                return str(link.get("organization_id")) if link.get(
+                    "organization_id"
+                ) else None, session_data
         return None, session_data
 
     def get_departments_by_organization(
         self, session_data: _SessionData, organization_id
-    ) -> Tuple[List[DepartmentDTO], Optional[_SessionData]]:
+    ) -> tuple[list[DepartmentDTO], _SessionData | None]:
         # Find all org-dept links for this org, then fetch each department
         org_depts, session_data = self.org_dept_client.list(session_data)
         org_depts = org_depts or []
         dept_ids = [
             str(d.get("department_id"))
             for d in org_depts
-            if str(d.get("organization_id")) == _coerce_id(organization_id) and d.get("department_id")
+            if str(d.get("organization_id")) == _coerce_id(organization_id)
+            and d.get("department_id")
         ]
         departments = []
         for dept_id in dept_ids:
@@ -122,9 +127,12 @@ class DepartmentService:
         return departments, session_data
 
     def create_department(
-        self, session_data: _SessionData, name: str, organization_id: Optional[str] = None
-    ) -> Tuple[Optional[DepartmentDTO], Optional[_SessionData]]:
-        payload: Dict[str, Any] = {"name": name}
+        self,
+        session_data: _SessionData,
+        name: str,
+        organization_id: str | None = None,
+    ) -> tuple[DepartmentDTO | None, _SessionData | None]:
+        payload: dict[str, Any] = {"name": name}
         # Optionally link to organization via org-dept client
         data, session_data = self.client.create(payload, session_data)
         if data is None:
@@ -133,7 +141,11 @@ class DepartmentService:
         if organization_id:
             # Create org-dept link
             self.org_dept_client.create(
-                {"organization_id": _coerce_id(organization_id), "department_id": dept_dto.id}, session_data
+                {
+                    "organization_id": _coerce_id(organization_id),
+                    "department_id": dept_dto.id,
+                },
+                session_data,
             )
         return dept_dto, session_data
 
@@ -141,15 +153,17 @@ class DepartmentService:
         self,
         session_data: _SessionData,
         department_id,
-        name: Optional[str] = None,
-        organization_id: Optional[str] = None,
-    ) -> Tuple[Optional[DepartmentDTO], Optional[_SessionData]]:
-        payload: Dict[str, Any] = {}
+        name: str | None = None,
+        organization_id: str | None = None,
+    ) -> tuple[DepartmentDTO | None, _SessionData | None]:
+        payload: dict[str, Any] = {}
         if name is not None:
             payload["name"] = name
         if not payload and not organization_id:
             return self.get_department(session_data, department_id)
-        data, session_data = self.client.update(_coerce_id(department_id), payload, session_data)
+        data, session_data = self.client.update(
+            _coerce_id(department_id), payload, session_data
+        )
         if data is None:
             return None, session_data
         # Optionally update org-dept link
@@ -160,7 +174,10 @@ class DepartmentService:
                 if str(link.get("department_id")) == _coerce_id(department_id):
                     self.org_dept_client.update(
                         link.get("id"),
-                        {"organization_id": _coerce_id(organization_id), "department_id": _coerce_id(department_id)},
+                        {
+                            "organization_id": _coerce_id(organization_id),
+                            "department_id": _coerce_id(department_id),
+                        },
                         session_data,
                     )
                     break
@@ -168,7 +185,7 @@ class DepartmentService:
 
     def delete_department(
         self, session_data: _SessionData, department_id
-    ) -> Tuple[bool, Optional[_SessionData]]:
+    ) -> tuple[bool, _SessionData | None]:
         """Delete a department, raising DepartmentInUseException if labs or users still reference it."""
         did = _coerce_id(department_id)
         deps, session_data = self._dependency_counts(session_data, did)
@@ -189,7 +206,7 @@ class DepartmentService:
 
     def _dependency_counts(
         self, session_data: _SessionData, department_id: str
-    ) -> Tuple[Dict[str, int], Optional[_SessionData]]:
+    ) -> tuple[dict[str, int], _SessionData | None]:
         did = str(department_id)
         # Count labs linked to this department
         dept_labs, session_data = self.dept_lab_client.list(session_data)

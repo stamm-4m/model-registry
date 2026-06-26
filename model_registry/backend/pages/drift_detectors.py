@@ -13,8 +13,9 @@ Airflow DAG later runs the pinned pack. See [[project_drift_detector_packs]].
 
 Component IDs are consumed by callbacks/callbacks_drift_detectors.py.
 """
-from dash import dcc, html
+
 import dash_bootstrap_components as dbc
+from dash import dcc, html
 
 from model_registry.backend.utils.utils_sidebar import get_user_role
 
@@ -43,30 +44,47 @@ def _upload_modal():
                         multiple=False,
                         className="dp-upload-box",
                         style={
-                            "width": "100%", "height": "90px", "lineHeight": "90px",
-                            "borderWidth": "1px", "borderStyle": "dashed",
-                            "borderRadius": "8px", "textAlign": "center",
+                            "width": "100%",
+                            "height": "90px",
+                            "lineHeight": "90px",
+                            "borderWidth": "1px",
+                            "borderStyle": "dashed",
+                            "borderRadius": "8px",
+                            "textAlign": "center",
                             "marginBottom": "1rem",
                         },
                     ),
-                    html.Div(id="dp-upload-filename", className="text-success mb-2",
-                             style={"fontSize": "0.85rem"}),
+                    html.Div(
+                        id="dp-upload-filename",
+                        className="text-success mb-2",
+                        style={"fontSize": "0.85rem"},
+                    ),
                     dbc.Label("Pack name (optional)"),
-                    dbc.Input(id="dp-upload-name", placeholder="stamm-drift-detectors",
-                              className="mb-2"),
+                    dbc.Input(
+                        id="dp-upload-name",
+                        placeholder="stamm-drift-detectors",
+                        className="mb-2",
+                    ),
                     dbc.Label("Notes (optional)"),
-                    dbc.Textarea(id="dp-upload-notes", placeholder="release notes…",
-                                 className="mb-2"),
-                    dbc.Checkbox(id="dp-upload-activate",
-                                 label="Activate (deploy) this pack after adding",
-                                 value=False, className="mb-2"),
+                    dbc.Textarea(
+                        id="dp-upload-notes",
+                        placeholder="release notes…",
+                        className="mb-2",
+                    ),
+                    dbc.Checkbox(
+                        id="dp-upload-activate",
+                        label="Activate (deploy) this pack after adding",
+                        value=False,
+                        className="mb-2",
+                    ),
                     html.Div(id="dp-upload-feedback"),
                 ]
             ),
             dbc.ModalFooter(
                 [
-                    dbc.Button("Cancel", id="dp-upload-cancel", color="secondary",
-                               outline=True),
+                    dbc.Button(
+                        "Cancel", id="dp-upload-cancel", color="secondary", outline=True
+                    ),
                     dbc.Button("Upload", id="dp-upload-submit", color="primary"),
                 ]
             ),
@@ -86,8 +104,9 @@ def _detectors_modal():
                 html.Div(id="dp-detectors-body"),
             ),
             dbc.ModalFooter(
-                dbc.Button("Close", id="dp-detectors-close", color="secondary",
-                           outline=True),
+                dbc.Button(
+                    "Close", id="dp-detectors-close", color="secondary", outline=True
+                ),
             ),
         ],
         id="dp-detectors-modal",
@@ -123,7 +142,8 @@ def drift_detectors_layout(session_data=None):
             html.Div(
                 dbc.Button(
                     [html.I(className="bi bi-upload me-2"), "Add pack"],
-                    id="btn-open-dp-upload", color="primary",
+                    id="btn-open-dp-upload",
+                    color="primary",
                 ),
                 className="ms-auto",
             ),
@@ -146,8 +166,12 @@ def drift_detectors_layout(session_data=None):
             # detector list without an extra round-trip.
             dcc.Store(id="dp-packs-store", data=[]),
             dbc.Toast(
-                id="dp-toast", header="Drift detectors", is_open=False,
-                dismissable=True, duration=4000, icon="primary",
+                id="dp-toast",
+                header="Drift detectors",
+                is_open=False,
+                dismissable=True,
+                duration=4000,
+                icon="primary",
                 style={"position": "fixed", "top": 20, "right": 20, "zIndex": 1999},
             ),
             header,

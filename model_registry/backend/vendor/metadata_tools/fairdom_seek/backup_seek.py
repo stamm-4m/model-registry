@@ -1,70 +1,61 @@
-""" backup_seek.py
+"""backup_seek.py
 
-        Backup content of a project from a FAIRDOM-SEEK instance
-
-        
-        AUTHOR:
-            Brett Metcalfe (0000-0002-5873-9815)
-            Laboratory of Systems and Synthetic Biology, Wageningen University & Research, 
-            Wageningen, The Netherlands
+Backup content of a project from a FAIRDOM-SEEK instance
 
 
-        FUNDED BY:
-            The authors disclose receipt of the following financial support for the research,
-            authorship, and publication of this article: European Union's Horizon 2020 research 
-            and innovation programme projects ‘RI services to promote deep digitalization of 
-            Industrial Biotechnology - towards smart biomanufacturing’ (BIOINDUSTRY 4.0, grant 
-            agreement n° 101094287 [https://doi.org/10.3030/101094287]).
+AUTHOR:
+    Brett Metcalfe (0000-0002-5873-9815)
+    Laboratory of Systems and Synthetic Biology, Wageningen University & Research,
+    Wageningen, The Netherlands
 
-        
-        REQUIREMENTS:
-            requests
-            json
-            os
-            getpass
 
-            
-        CONTAINS:
-            var:
-                None
+FUNDED BY:
+    The authors disclose receipt of the following financial support for the research,
+    authorship, and publication of this article: European Union's Horizon 2020 research
+    and innovation programme projects ‘RI services to promote deep digitalization of
+    Industrial Biotechnology - towards smart biomanufacturing’ (BIOINDUSTRY 4.0, grant
+    agreement n° 101094287 [https://doi.org/10.3030/101094287]).
 
-            func:
-                None
 
-            classes:
-                backupseek
+REQUIREMENTS:
+    requests
+    json
+    os
+    getpass
+
+
+CONTAINS:
+    var:
+        None
+
+    func:
+        None
+
+    classes:
+        backupseek
 
 
 """
-#------------------------------
+
+# ------------------------------
 #       PACKAGES
-#------------------------------
-import requests
-import json
-import os
-import getpass
+# ------------------------------
 
 
-#------------------------------
+# ------------------------------
 #       VARIABLES
-#------------------------------
+# ------------------------------
 
 
-#------------------------------
+# ------------------------------
 #       FUNCTIONS
-#------------------------------
+# ------------------------------
 
 
-#------------------------------
+# ------------------------------
 #       CLASSES
-#------------------------------
+# ------------------------------
 class backupseek:
-
     def __init__(self) -> None:
-        """ init: Initialise class
-        
-        
-        
-        """
+        """init: Initialise class"""
         pass
-

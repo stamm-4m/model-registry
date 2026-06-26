@@ -3,13 +3,15 @@ class ExperimentInUseException(Exception):
         if message is None:
             message = "Cannot delete experiment because it is in use."
         super().__init__(message)
-        
+
+
 class ProjectInUseException(Exception):
     def __init__(self, message=None):
         if message is None:
             message = "Cannot delete project because it is in use."
         super().__init__(message)
-        
+
+
 class OrganizationInUseException(Exception):
     def __init__(self, departments=0, users=0):
         self.departments = departments
@@ -27,6 +29,7 @@ class OrganizationInUseException(Exception):
 
         super().__init__(message)
 
+
 class DepartmentInUseException(Exception):
     def __init__(self, users=0):
         self.users = users
@@ -40,6 +43,7 @@ class DepartmentInUseException(Exception):
 
         super().__init__(message)
 
+
 class UserHasRolesException(Exception):
     def __init__(self, roles_count: int):
         self.roles_count = roles_count
@@ -47,10 +51,12 @@ class UserHasRolesException(Exception):
             f"Cannot delete user because it has {roles_count} role(s) assigned."
         )
 
+
 class UserEmailAlreadyExistsException(Exception):
     def __init__(self, email):
         super().__init__(f"User with email '{email}' already exists.")
         self.email = email
+
 
 class LaboratoryInUseException(Exception):
     def __init__(self, departments=0):

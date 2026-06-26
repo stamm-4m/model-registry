@@ -1,6 +1,7 @@
 import logging
 import sys
 from logging.handlers import RotatingFileHandler
+
 import colorlog
 
 
@@ -59,8 +60,7 @@ def setup_logging(
     )
 
     file_formatter = logging.Formatter(
-        "%(asctime)s | %(levelname)s | %(name)s | "
-        "%(message)s [func:%(funcName)s]"
+        "%(asctime)s | %(levelname)s | %(name)s | %(message)s [func:%(funcName)s]"
     )
 
     file_handler.setFormatter(file_formatter)

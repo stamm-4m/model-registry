@@ -1,11 +1,12 @@
-from sqlalchemy import Column, String, Boolean, DateTime, Text
+import uuid
+
+from sqlalchemy import Boolean, Column, DateTime, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-
-import uuid
 from model_registry.api.core.database import Base
+
 
 class User(Base):
     __tablename__ = "users"

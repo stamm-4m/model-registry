@@ -4,6 +4,7 @@ The Add/Edit/Details pages now share model_form_layout() and the
 callbacks in callbacks_model_upload.py. This file is kept so that
 existing imports in __init__.py do not break.
 """
+
 import logging
 
 logger = logging.getLogger(__name__)

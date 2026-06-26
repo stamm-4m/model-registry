@@ -21,6 +21,7 @@ pack lists its detectors, it does not edit them.
 Execution stays with the Airflow DAG: it runs the pinned (``is_active``) pack
 server-side and writes ``drift_results``. FermOps never imports detector code.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -30,12 +31,11 @@ import os
 import re
 import zipfile
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 from uuid import UUID, uuid4
 
 import yaml
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from model_registry.api.core.database import get_db
@@ -56,22 +56,27 @@ _VALID_KINDS = {"univariate", "multivariate", "model_based"}
 
 
 # ----------------------------------------------------------------- parsing
-def _extract_version(members: Dict[str, bytes]) -> str:
+def _extract_version(members: dict[str, bytes]) -> str:
     """Best-effort pack version: pyproject [project].version, else __version__."""
     for path, raw in members.items():
         if path.endswith("pyproject.toml"):
-            m = re.search(r'(?m)^\s*version\s*=\s*["\']([^"\']+)["\']', raw.decode("utf-8", "ignore"))
+            m = re.search(
+                r'(?m)^\s*version\s*=\s*["\']([^"\']+)["\']',
+                raw.decode("utf-8", "ignore"),
+            )
             if m:
                 return m.group(1)
     for path, raw in members.items():
         if path.endswith("drift_detectors/__init__.py"):
-            m = re.search(r'__version__\s*=\s*["\']([^"\']+)["\']', raw.decode("utf-8", "ignore"))
+            m = re.search(
+                r'__version__\s*=\s*["\']([^"\']+)["\']', raw.decode("utf-8", "ignore")
+            )
             if m:
                 return m.group(1)
     return "0.0.0+unknown"
 
 
-def _parse_metadata(members: Dict[str, bytes]) -> List[Dict[str, Any]]:
+def _parse_metadata(members: dict[str, bytes]) -> list[dict[str, Any]]:
     """Turn each detector's metadata.yaml into a catalog row.
 
     A folder counts as a detector only if it ships BOTH ``metadata.yaml`` and
@@ -81,9 +86,11 @@ def _parse_metadata(members: Dict[str, bytes]) -> List[Dict[str, Any]]:
     06 seed). Mirrors the seed's column mapping.
     """
     has_detector_py = {
-        os.path.dirname(p) for p in members if p.endswith("/detector.py") or p.endswith("\\detector.py")
+        os.path.dirname(p)
+        for p in members
+        if p.endswith("/detector.py") or p.endswith("\\detector.py")
     }
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     for path, raw in members.items():
         if not path.endswith("metadata.yaml"):
             continue
@@ -102,17 +109,19 @@ def _parse_metadata(members: Dict[str, bytes]) -> List[Dict[str, Any]]:
         if isinstance(params_meta, dict):
             for k, v in params_meta.items():
                 params[k] = v.get("description") if isinstance(v, dict) else str(v)
-        rows.append({
-            "detector_id": detector_id,
-            "name": meta.get("name") or detector_id,
-            "kind": kind if kind in _VALID_KINDS else kind,
-            "description": (meta.get("description") or "").strip() or None,
-            "params": params,
-        })
+        rows.append(
+            {
+                "detector_id": detector_id,
+                "name": meta.get("name") or detector_id,
+                "kind": kind if kind in _VALID_KINDS else kind,
+                "description": (meta.get("description") or "").strip() or None,
+                "params": params,
+            }
+        )
     return rows
 
 
-def _read_pack(blob: bytes) -> Tuple[Dict[str, bytes], str, List[Dict[str, Any]]]:
+def _read_pack(blob: bytes) -> tuple[dict[str, bytes], str, list[dict[str, Any]]]:
     """Validate the archive; return (members, version, catalog_rows)."""
     try:
         zf = zipfile.ZipFile(io.BytesIO(blob))
@@ -120,17 +129,17 @@ def _read_pack(blob: bytes) -> Tuple[Dict[str, bytes], str, List[Dict[str, Any]]
         raise HTTPException(400, "Uploaded file is not a valid .zip archive")
     members = {n: zf.read(n) for n in zf.namelist() if not n.endswith("/")}
     if not any("drift_detectors/" in p.replace("\\", "/") for p in members):
-        raise HTTPException(
-            400, "Archive does not contain a drift_detectors/ package")
+        raise HTTPException(400, "Archive does not contain a drift_detectors/ package")
     version = _extract_version(members)
     rows = _parse_metadata(members)
     if not rows:
         raise HTTPException(
-            400, "No detectors found (need folders with metadata.yaml + detector.py)")
+            400, "No detectors found (need folders with metadata.yaml + detector.py)"
+        )
     return members, version, rows
 
 
-def _build_slim_archive(members: Dict[str, bytes]) -> bytes:
+def _build_slim_archive(members: dict[str, bytes]) -> bytes:
     """Re-zip only the drift_detectors/ package (drop benchmarks/use_cases/tests)."""
     out = io.BytesIO()
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -143,7 +152,7 @@ def _build_slim_archive(members: Dict[str, bytes]) -> bytes:
     return out.getvalue()
 
 
-def _row_to_dict(row: DetectorPack) -> Dict[str, Any]:
+def _row_to_dict(row: DetectorPack) -> dict[str, Any]:
     return {
         "id": str(row.id),
         "name": row.name,
@@ -164,8 +173,8 @@ def _row_to_dict(row: DetectorPack) -> Dict[str, Any]:
 @router.post("/register")
 def register_pack(
     file: UploadFile = File(...),
-    name: Optional[str] = Form(None),
-    notes: Optional[str] = Form(None),
+    name: str | None = Form(None),
+    notes: str | None = Form(None),
     activate: bool = Form(False),
     db: Session = Depends(get_db),
     user=Depends(require_permission_resource("detector_packs:write", "detector_packs")),
@@ -238,8 +247,13 @@ def register_pack(
 
     db.commit()
     db.refresh(pack)
-    logger.info("Registered detector pack %s v%s (%d detectors, active=%s)",
-                pack_name, version, len(detectors), pack.is_active)
+    logger.info(
+        "Registered detector pack %s v%s (%d detectors, active=%s)",
+        pack_name,
+        version,
+        len(detectors),
+        pack.is_active,
+    )
     return {
         "pack": _row_to_dict(pack),
         "detectors": detectors,

@@ -6,17 +6,16 @@ conventions:
 * Every public method returns ``(result, session_data)``.
 """
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 from uuid import UUID
 
 from model_registry.backend.services.api_clients import ExperimentsApiClient
 from model_registry.backend.services.dtos import ExperimentDTO
 
+_SessionData = dict[str, Any]
 
-_SessionData = Dict[str, Any]
 
-
-def _coerce_id(value) -> Optional[str]:
+def _coerce_id(value) -> str | None:
     if value is None:
         return None
     if isinstance(value, UUID):
@@ -27,12 +26,12 @@ def _coerce_id(value) -> Optional[str]:
 class ExperimentService:
     """Experiment operations backed by ``/api/v1/experiments/``."""
 
-    def __init__(self, client: Optional[ExperimentsApiClient] = None):
+    def __init__(self, client: ExperimentsApiClient | None = None):
         self.client = client or ExperimentsApiClient()
 
     def get_all_experiments(
         self, session_data: _SessionData
-    ) -> Tuple[List[ExperimentDTO], Optional[_SessionData]]:
+    ) -> tuple[list[ExperimentDTO], _SessionData | None]:
         data, session_data = self.client.list(session_data)
         if data is None:
             return [], session_data
@@ -40,7 +39,7 @@ class ExperimentService:
 
     def get_experiment_by_id(
         self, session_data: _SessionData, experiment_id
-    ) -> Tuple[Optional[ExperimentDTO], Optional[_SessionData]]:
+    ) -> tuple[ExperimentDTO | None, _SessionData | None]:
         data, session_data = self.client.get(_coerce_id(experiment_id), session_data)
         if data is None:
             return None, session_data
@@ -48,7 +47,7 @@ class ExperimentService:
 
     def add_experiment(
         self, session_data: _SessionData, **kwargs
-    ) -> Tuple[Optional[ExperimentDTO], Optional[_SessionData]]:
+    ) -> tuple[ExperimentDTO | None, _SessionData | None]:
         payload = {k: v for k, v in kwargs.items() if v is not None}
         if "project_id" in payload:
             payload["project_id"] = _coerce_id(payload["project_id"])
@@ -61,15 +60,15 @@ class ExperimentService:
         self,
         session_data: _SessionData,
         experiment_id,
-        name: Optional[str] = None,
-        project_id: Optional[str] = None,
-        description: Optional[str] = None,
-        initial_conditions: Optional[Dict[str, Any]] = None,
-        set_points: Optional[Dict[str, Any]] = None,
-        start_time: Optional[str] = None,
-        end_time: Optional[str] = None,
-    ) -> Tuple[Optional[ExperimentDTO], Optional[_SessionData]]:
-        payload: Dict[str, Any] = {}
+        name: str | None = None,
+        project_id: str | None = None,
+        description: str | None = None,
+        initial_conditions: dict[str, Any] | None = None,
+        set_points: dict[str, Any] | None = None,
+        start_time: str | None = None,
+        end_time: str | None = None,
+    ) -> tuple[ExperimentDTO | None, _SessionData | None]:
+        payload: dict[str, Any] = {}
         if name is not None:
             payload["name"] = name
         if project_id is not None:
@@ -95,7 +94,7 @@ class ExperimentService:
 
     def delete_experiment(
         self, session_data: _SessionData, experiment_id
-    ) -> Tuple[bool, Optional[_SessionData]]:
+    ) -> tuple[bool, _SessionData | None]:
         status, session_data = self.client.delete(
             _coerce_id(experiment_id), session_data
         )

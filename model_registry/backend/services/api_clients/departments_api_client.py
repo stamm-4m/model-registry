@@ -9,4 +9,5 @@ class DepartmentsApiClient(BaseApiClient):
 
 class DepartmentLaboratoryApiClient(BaseApiClient):
     """Link table between departments and laboratories."""
+
     resource_path = "department_laboratory"

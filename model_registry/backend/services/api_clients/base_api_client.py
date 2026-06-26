@@ -9,13 +9,13 @@ back to the Dash session store -- the same convention used by
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from model_registry.backend.services.api_client import authenticated_request
 
 logger = logging.getLogger(__name__)
 
-_SessionData = Dict[str, Any]
+_SessionData = dict[str, Any]
 
 
 def _safe_json(response) -> Any:
@@ -33,7 +33,7 @@ class BaseApiClient:
     #: URL segment after ``/api/v1/`` (no surrounding slashes).
     resource_path: str = ""
 
-    def __init__(self, resource_path: Optional[str] = None):
+    def __init__(self, resource_path: str | None = None):
         if resource_path is not None:
             self.resource_path = resource_path
         if not self.resource_path:
@@ -54,7 +54,7 @@ class BaseApiClient:
         session_data: _SessionData,
         offset: int = 0,
         limit: int = 1000,
-    ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET",
             f"{self._base_url()}?offset={offset}&limit={limit}",
@@ -68,7 +68,7 @@ class BaseApiClient:
 
     def get(
         self, item_id: str, session_data: _SessionData
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET", self._item_url(item_id), session_data
         )
@@ -79,8 +79,8 @@ class BaseApiClient:
         return None, session_data
 
     def create(
-        self, payload: Dict[str, Any], session_data: _SessionData
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+        self, payload: dict[str, Any], session_data: _SessionData
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "POST", self._base_url(), session_data, json=payload
         )
@@ -90,16 +90,18 @@ class BaseApiClient:
             return response.json(), session_data
         logger.warning(
             "%s create failed status=%s body=%s",
-            self.resource_path, response.status_code, _safe_json(response),
+            self.resource_path,
+            response.status_code,
+            _safe_json(response),
         )
         return None, session_data
 
     def update(
         self,
         item_id: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         session_data: _SessionData,
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "PATCH", self._item_url(item_id), session_data, json=payload
         )
@@ -109,13 +111,15 @@ class BaseApiClient:
             return response.json(), session_data
         logger.warning(
             "%s update failed status=%s body=%s",
-            self.resource_path, response.status_code, _safe_json(response),
+            self.resource_path,
+            response.status_code,
+            _safe_json(response),
         )
         return None, session_data
 
     def delete(
         self, item_id: str, session_data: _SessionData
-    ) -> Tuple[Optional[int], Optional[_SessionData]]:
+    ) -> tuple[int | None, _SessionData | None]:
         """Returns the raw HTTP status code (204 on success)."""
         response, session_data = authenticated_request(
             "DELETE", self._item_url(item_id), session_data

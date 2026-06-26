@@ -17,10 +17,11 @@ the rest; the function never raises):
 PDP/SHAP run over a background sampled uniformly from each feature's declared
 `expected_range` unless the caller supplies real rows.
 """
+
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ _MAX_INSTANCES = 8
 # ---------------------------------------------------------------------------
 # Config helpers
 # ---------------------------------------------------------------------------
-def _inputs_block(config: Dict[str, Any]) -> Dict[str, Any]:
+def _inputs_block(config: dict[str, Any]) -> dict[str, Any]:
     mlc = (config or {}).get("ml_model_configuration")
     if isinstance(mlc, dict) and isinstance(mlc.get("inputs"), dict):
         return mlc["inputs"]
@@ -41,7 +42,7 @@ def _inputs_block(config: Dict[str, Any]) -> Dict[str, Any]:
     return {}
 
 
-def _feature_specs(config: Dict[str, Any]) -> List[Dict[str, Any]]:
+def _feature_specs(config: dict[str, Any]) -> list[dict[str, Any]]:
     feats = (_inputs_block(config) or {}).get("features", [])
     out = []
     for f in feats or []:
@@ -52,14 +53,15 @@ def _feature_specs(config: Dict[str, Any]) -> List[Dict[str, Any]]:
     return out
 
 
-def _names_and_ranges(config) -> Tuple[List[str], List[Tuple[float, float]]]:
+def _names_and_ranges(config) -> tuple[list[str], list[tuple[float, float]]]:
     names, ranges = [], []
     for f in _feature_specs(config):
         names.append(str(f.get("name", f"x[{len(names)}]")))
         er = f.get("expected_range") or {}
         lo, hi = er.get("min"), er.get("max")
         try:
-            lo = float(lo); hi = float(hi)
+            lo = float(lo)
+            hi = float(hi)
             if hi <= lo:
                 hi = lo + 1.0
         except (TypeError, ValueError):
@@ -70,6 +72,7 @@ def _names_and_ranges(config) -> Tuple[List[str], List[Tuple[float, float]]]:
 
 def _sample_background(ranges, n=_BG_N, seed=0):
     import numpy as np
+
     rng = np.random.default_rng(seed)
     cols = [rng.uniform(lo, hi, size=n) for (lo, hi) in ranges]
     return np.column_stack(cols) if cols else np.empty((n, 0))
@@ -116,16 +119,24 @@ def _extract_subtree(tree_est, names):
         nm = names[fi] if 0 <= fi < len(names) else f"x[{fi}]"
         return f"{nm} ≤ {thr[i]:.2f}"
 
-    out = {"n0": {"leaf": is_leaf(0),
-                  "label": (f"{leaf_val(0):.2f}" if is_leaf(0) else split_label(0))}}
+    out = {
+        "n0": {
+            "leaf": is_leaf(0),
+            "label": (f"{leaf_val(0):.2f}" if is_leaf(0) else split_label(0)),
+        }
+    }
     for nkey, lL, lR, child in (("n1", "l1", "l2", cl[0]), ("n2", "l3", "l4", cr[0])):
         if child == -1:
             out[nkey] = {"leaf": True, "label": ""}
             out[lL] = {"leaf": True, "label": ""}
             out[lR] = {"leaf": True, "label": ""}
             continue
-        out[nkey] = {"leaf": is_leaf(child),
-                     "label": (f"{leaf_val(child):.2f}" if is_leaf(child) else split_label(child))}
+        out[nkey] = {
+            "leaf": is_leaf(child),
+            "label": (
+                f"{leaf_val(child):.2f}" if is_leaf(child) else split_label(child)
+            ),
+        }
         gl, gr = cl[child], cr[child]
         out[lL] = {"leaf": True, "label": (f"{leaf_val(gl):.2f}" if gl != -1 else "")}
         out[lR] = {"leaf": True, "label": (f"{leaf_val(gr):.2f}" if gr != -1 else "")}
@@ -136,15 +147,19 @@ def _tree_caps(model, names, res, caps):
     importances = getattr(model, "feature_importances_", None)
     if importances is None:
         return
-    res["importances"] = sorted(zip(names, [float(v) for v in importances]),
-                                key=lambda p: p[1], reverse=True)
+    res["importances"] = sorted(
+        zip(names, [float(v) for v in importances]), key=lambda p: p[1], reverse=True
+    )
     caps.append("impurity")
     tree_est = _pick_tree(model)
     if tree_est is None:
         return
     try:
         from sklearn.tree import export_text
-        res["rules_text"] = export_text(tree_est, feature_names=list(names), max_depth=3)
+
+        res["rules_text"] = export_text(
+            tree_est, feature_names=list(names), max_depth=3
+        )
         caps.append("rules")
     except Exception as exc:
         logger.debug("export_text failed: %s", exc)
@@ -160,6 +175,7 @@ def _tree_caps(model, names, res, caps):
 # ---------------------------------------------------------------------------
 def _linear_caps(model, names, res, caps):
     import numpy as np
+
     coef = getattr(model, "coef_", None)
     if coef is None:
         return
@@ -174,8 +190,9 @@ def _linear_caps(model, names, res, caps):
     c = np.asarray(c).ravel()
     if len(c) != len(names):
         return
-    res["coef"] = sorted(zip(names, [float(v) for v in c]),
-                         key=lambda p: abs(p[1]), reverse=True)
+    res["coef"] = sorted(
+        zip(names, [float(v) for v in c]), key=lambda p: abs(p[1]), reverse=True
+    )
     ic = getattr(model, "intercept_", None)
     try:
         res["intercept"] = float(np.ravel(ic)[0]) if ic is not None else None
@@ -192,6 +209,7 @@ def _estimator_for_pdp(model, scaler):
         return model
     try:
         from sklearn.pipeline import Pipeline
+
         return Pipeline([("scaler", scaler), ("model", model)])
     except Exception:
         return model
@@ -199,14 +217,19 @@ def _estimator_for_pdp(model, scaler):
 
 def _pdp_caps(model, scaler, X, names, res, caps):
     from sklearn.inspection import partial_dependence
+
     est = _estimator_for_pdp(model, scaler)
     pdp = {}
     for i, nm in enumerate(names):
         try:
-            pd_ = partial_dependence(est, X, [i], grid_resolution=_PDP_GRID, kind="average")
+            pd_ = partial_dependence(
+                est, X, [i], grid_resolution=_PDP_GRID, kind="average"
+            )
             grid = pd_.get("grid_values", pd_.get("values"))
-            pdp[nm] = {"x": [float(v) for v in grid[0]],
-                       "y": [float(v) for v in pd_["average"][0]]}
+            pdp[nm] = {
+                "x": [float(v) for v in grid[0]],
+                "y": [float(v) for v in pd_["average"][0]],
+            }
         except Exception as exc:
             logger.debug("pdp failed for %s: %s", nm, exc)
     if pdp:
@@ -216,6 +239,7 @@ def _pdp_caps(model, scaler, X, names, res, caps):
 
 def _shap_caps(model, scaler, X, names, family, res, caps):
     import numpy as np
+
     try:
         import shap
     except Exception as exc:
@@ -242,27 +266,37 @@ def _shap_caps(model, scaler, X, names, family, res, caps):
     for j in order:
         col = X[:, j].astype(float)
         span = (col.max() - col.min()) or 1.0
-        points[names[j]] = {"shap": [float(v) for v in sv[:, j]],
-                            "fval": [float((v - col.min()) / span) for v in col]}
+        points[names[j]] = {
+            "shap": [float(v) for v in sv[:, j]],
+            "fval": [float((v - col.min()) / span) for v in col],
+        }
     res["shap_summary"] = {"features": [names[j] for j in order], "points": points}
 
     instances = {}
     for idx in range(1, min(_MAX_INSTANCES, sv.shape[0]) + 1):
         row = sv[idx - 1]
-        pairs = sorted(zip(names, [float(v) for v in row]),
-                       key=lambda p: abs(p[1]), reverse=True)[:8]
-        instances[str(idx)] = {"pairs": pairs, "base": base,
-                               "pred": float(base + float(row.sum()))}
+        pairs = sorted(
+            zip(names, [float(v) for v in row]), key=lambda p: abs(p[1]), reverse=True
+        )[:8]
+        instances[str(idx)] = {
+            "pairs": pairs,
+            "base": base,
+            "pred": float(base + float(row.sum())),
+        }
     res["shap_instances"] = instances
     caps.append("shap")
 
 
 def _perm_caps(model, scaler, X, y, names, res, caps):
     from sklearn.inspection import permutation_importance
+
     est = _estimator_for_pdp(model, scaler)
     r = permutation_importance(est, X, y, n_repeats=5, random_state=0)
-    res["perm_importance"] = sorted(zip(names, [float(v) for v in r.importances_mean]),
-                                    key=lambda p: p[1], reverse=True)
+    res["perm_importance"] = sorted(
+        zip(names, [float(v) for v in r.importances_mean]),
+        key=lambda p: p[1],
+        reverse=True,
+    )
     caps.append("permutation")
 
 
@@ -271,24 +305,40 @@ def _perm_caps(model, scaler, X, y, names, res, caps):
 # ---------------------------------------------------------------------------
 def _base_result(model, names, source, background):
     return {
-        "ok": True, "source": source, "model_class": type(model).__name__,
+        "ok": True,
+        "source": source,
+        "model_class": type(model).__name__,
         "feature_names": names,
         "n_estimators": int(getattr(model, "n_estimators", 0) or 0),
-        "max_depth": (int(model.max_depth) if getattr(model, "max_depth", None) is not None else None),
-        "background": background, "capabilities": [],
+        "max_depth": (
+            int(model.max_depth)
+            if getattr(model, "max_depth", None) is not None
+            else None
+        ),
+        "background": background,
+        "capabilities": [],
     }
 
 
-def explain(model, config, scaler=None, family=None) -> Dict[str, Any]:
+def explain(model, config, scaler=None, family=None) -> dict[str, Any]:
     if model is None:
-        return {"ok": False, "reason": "model not loaded (R model or unsupported artifact)"}
+        return {
+            "ok": False,
+            "reason": "model not loaded (R model or unsupported artifact)",
+        }
     names, ranges = _names_and_ranges(config)
-    res = _base_result(model, names, "sklearn",
-                       f"sampled uniformly from declared operating ranges (n={_BG_N})")
+    res = _base_result(
+        model,
+        names,
+        "sklearn",
+        f"sampled uniformly from declared operating ranges (n={_BG_N})",
+    )
     res["scaled"] = scaler is not None
     caps = res["capabilities"]
-    for fn in (lambda: _tree_caps(model, names, res, caps),
-               lambda: _linear_caps(model, names, res, caps)):
+    for fn in (
+        lambda: _tree_caps(model, names, res, caps),
+        lambda: _linear_caps(model, names, res, caps),
+    ):
         try:
             fn()
         except Exception as exc:
@@ -296,9 +346,12 @@ def explain(model, config, scaler=None, family=None) -> Dict[str, Any]:
     if names:
         try:
             import numpy as np  # noqa: F401
+
             X = _sample_background(ranges, seed=abs(hash(res["model_class"])) % (2**32))
-            for fn in (lambda: _pdp_caps(model, scaler, X, names, res, caps),
-                       lambda: _shap_caps(model, scaler, X, names, family or "", res, caps)):
+            for fn in (
+                lambda: _pdp_caps(model, scaler, X, names, res, caps),
+                lambda: _shap_caps(model, scaler, X, names, family or "", res, caps),
+            ):
                 try:
                     fn()
                 except Exception as exc:
@@ -308,10 +361,14 @@ def explain(model, config, scaler=None, family=None) -> Dict[str, Any]:
     return res
 
 
-def explain_with_data(model, config, scaler, family, X, y=None) -> Dict[str, Any]:
+def explain_with_data(model, config, scaler, family, X, y=None) -> dict[str, Any]:
     if model is None:
-        return {"ok": False, "reason": "model not loaded (R model or unsupported artifact)"}
+        return {
+            "ok": False,
+            "reason": "model not loaded (R model or unsupported artifact)",
+        }
     import numpy as np
+
     names, _ = _names_and_ranges(config)
     try:
         if hasattr(X, "columns"):
@@ -322,19 +379,26 @@ def explain_with_data(model, config, scaler, family, X, y=None) -> Dict[str, Any
         else:
             Xv = np.asarray(X, dtype=float)
         if Xv.ndim != 2 or Xv.shape[1] != len(names):
-            return {"ok": False, "reason": f"expected {len(names)} feature columns, got {Xv.shape}"}
+            return {
+                "ok": False,
+                "reason": f"expected {len(names)} feature columns, got {Xv.shape}",
+            }
     except Exception as exc:
         return {"ok": False, "reason": f"data shape: {exc}"}
 
     res = _base_result(model, names, "uploaded", f"uploaded data (n={Xv.shape[0]})")
     res["scaled"] = scaler is not None
     caps = res["capabilities"]
-    steps = [lambda: _tree_caps(model, names, res, caps),
-             lambda: _linear_caps(model, names, res, caps),
-             lambda: _pdp_caps(model, scaler, Xv, names, res, caps),
-             lambda: _shap_caps(model, scaler, Xv, names, family or "", res, caps)]
+    steps = [
+        lambda: _tree_caps(model, names, res, caps),
+        lambda: _linear_caps(model, names, res, caps),
+        lambda: _pdp_caps(model, scaler, Xv, names, res, caps),
+        lambda: _shap_caps(model, scaler, Xv, names, family or "", res, caps),
+    ]
     if y is not None:
-        steps.append(lambda: _perm_caps(model, scaler, Xv, np.asarray(y), names, res, caps))
+        steps.append(
+            lambda: _perm_caps(model, scaler, Xv, np.asarray(y), names, res, caps)
+        )
     for fn in steps:
         try:
             fn()

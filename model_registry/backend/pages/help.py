@@ -1,9 +1,8 @@
-import dash
-from dash import html
 import dash_bootstrap_components as dbc
+from dash import html
+
 
 def help_layout():
-
     sidebar = dbc.Card(
         [
             dbc.CardHeader(html.H5("Documentation")),
@@ -11,12 +10,24 @@ def help_layout():
                 dbc.Nav(
                     [
                         dbc.NavLink("Overview", href="#overview", external_link=True),
-                        dbc.NavLink("Architecture", href="#architecture", external_link=True),
-                        dbc.NavLink("Upload Workflow", href="#upload", external_link=True),
-                        dbc.NavLink("Prediction Workflow", href="#prediction", external_link=True),
+                        dbc.NavLink(
+                            "Architecture", href="#architecture", external_link=True
+                        ),
+                        dbc.NavLink(
+                            "Upload Workflow", href="#upload", external_link=True
+                        ),
+                        dbc.NavLink(
+                            "Prediction Workflow",
+                            href="#prediction",
+                            external_link=True,
+                        ),
                         dbc.NavLink("API Endpoints", href="#api", external_link=True),
-                        dbc.NavLink("Configuration Files", href="#config", external_link=True),
-                        dbc.NavLink("Error Handling", href="#errors", external_link=True),
+                        dbc.NavLink(
+                            "Configuration Files", href="#config", external_link=True
+                        ),
+                        dbc.NavLink(
+                            "Error Handling", href="#errors", external_link=True
+                        ),
                         dbc.NavLink("FAQ", href="#faq", external_link=True),
                     ],
                     vertical=True,
@@ -30,7 +41,6 @@ def help_layout():
     content = html.Div(
         [
             html.H2("Help & Documentation", className="mb-4"),
-
             # Overview
             html.H4("Overview", id="overview"),
             html.P(
@@ -41,9 +51,7 @@ def help_layout():
                 communication between components.
                 """
             ),
-
             html.Hr(),
-
             # Architecture
             html.H4("Architecture", id="architecture"),
             html.P("Main components of the system:"),
@@ -56,12 +64,8 @@ def help_layout():
                     html.Li("R Integration: External R scripts execution."),
                 ]
             ),
-            html.P(
-                "Workflow: Upload → Validate → Store → Predict → Save Results."
-            ),
-
+            html.P("Workflow: Upload → Validate → Store → Predict → Save Results."),
             html.Hr(),
-
             # Upload Workflow
             html.H4("Upload Workflow", id="upload"),
             dbc.Accordion(
@@ -78,9 +82,7 @@ def help_layout():
                 ],
                 start_collapsed=True,
             ),
-
             html.Hr(),
-
             # Prediction Workflow
             html.H4("Prediction Workflow", id="prediction"),
             dbc.Accordion(
@@ -97,9 +99,7 @@ def help_layout():
                 ],
                 start_collapsed=True,
             ),
-
             html.Hr(),
-
             # API Endpoints
             html.H4("API Endpoints", id="api"),
             dbc.Table(
@@ -137,9 +137,7 @@ def help_layout():
                 hover=True,
                 responsive=True,
             ),
-
             html.Hr(),
-
             # Configuration Files
             html.H4("Configuration Files", id="config"),
             html.P("YAML configuration must include:"),
@@ -152,9 +150,7 @@ def help_layout():
                 ]
             ),
             html.P("Ensure variable names match dataset columns."),
-
             html.Hr(),
-
             # Error Handling
             html.H4("Error Handling", id="errors"),
             html.Ul(
@@ -164,9 +160,7 @@ def help_layout():
                     html.Li("Server Error (500): Internal processing failure."),
                 ]
             ),
-
             html.Hr(),
-
             # FAQ
             html.H4("FAQ", id="faq"),
             dbc.Accordion(

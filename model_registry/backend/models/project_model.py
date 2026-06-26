@@ -5,9 +5,9 @@ base_path = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(base_path, "../", "data", "database.db")
 
 
-def insert_project(project_id, project_name, description,
-                   coordinator, start_date, end_date):
-
+def insert_project(
+    project_id, project_name, description, coordinator, start_date, end_date
+):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -19,8 +19,7 @@ def insert_project(project_id, project_name, description,
                 coordinator, start_date, end_date
             ) VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (project_id, project_name, description,
-             coordinator, start_date, end_date)
+            (project_id, project_name, description, coordinator, start_date, end_date),
         )
         conn.commit()
         return True

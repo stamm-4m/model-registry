@@ -4,9 +4,8 @@ Quick tests to verify JSON Schema validation works as expected
 before integrating with UI and callbacks.
 """
 
-import sys
-import os
 import json
+import sys
 from pathlib import Path
 
 # Add project root to path
@@ -15,9 +14,8 @@ sys.path.insert(0, str(project_root))
 
 from model_registry.backend.services.template_validator import (
     TemplateValidator,
-    TemplateValidationError,
-    validate_model_payload,
     get_validator,
+    validate_model_payload,
 )
 
 
@@ -47,10 +45,7 @@ def test_list_algorithms():
 def test_validate_without_algorithm():
     """Test validation fails gracefully without algorithm."""
     print("\nTEST 3: Validation without algorithm field...")
-    payload = {
-        "name": "Test Model",
-        "version": "1.0.0"
-    }
+    payload = {"name": "Test Model", "version": "1.0.0"}
     try:
         validate_model_payload(payload)
         print("✗ Should have raised ValueError")
@@ -62,10 +57,7 @@ def test_validate_without_algorithm():
 def test_validate_with_unsupported_algorithm():
     """Test validation fails with unsupported algorithm."""
     print("\nTEST 4: Validation with unsupported algorithm...")
-    payload = {
-        "algorithm": "unknown_algo",
-        "name": "Test Model"
-    }
+    payload = {"algorithm": "unknown_algo", "name": "Test Model"}
     try:
         validate_model_payload(payload)
         print("✗ Should have raised ValueError")
@@ -80,9 +72,7 @@ def test_validate_custom_algorithm():
     payload = {
         "algorithm": "custom",
         "name": "Test Custom Model",
-        "config": {
-            "any_param": "any_value"
-        }
+        "config": {"any_param": "any_value"},
     }
     try:
         validate_model_payload(payload)
@@ -111,7 +101,7 @@ def test_get_schema_info():
     """Test retrieving schema info for algorithms."""
     print("\nTEST 7: Get schema info...")
     validator = get_validator()
-    
+
     # Try getting custom schema (should exist or be skipped)
     custom_schema = validator.get_schema_info("custom")
     if custom_schema:
@@ -134,7 +124,7 @@ def run_all_tests():
     print("=" * 60)
     print("TEMPLATE VALIDATOR TEST SUITE")
     print("=" * 60)
-    
+
     tests = [
         test_validator_initialization,
         test_list_algorithms,
@@ -145,10 +135,10 @@ def run_all_tests():
         test_get_schema_info,
         test_validator_singleton,
     ]
-    
+
     passed = 0
     failed = 0
-    
+
     for test in tests:
         try:
             test()
@@ -159,11 +149,11 @@ def run_all_tests():
         except Exception as e:
             print(f"✗ Unexpected error: {e}")
             failed += 1
-    
+
     print("\n" + "=" * 60)
     print(f"RESULTS: {passed} passed, {failed} failed")
     print("=" * 60)
-    
+
     return failed == 0
 
 

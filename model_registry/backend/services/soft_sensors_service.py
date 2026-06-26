@@ -1,4 +1,7 @@
-from model_registry.backend.repositories.soft_sensors_repository import SoftSensorsRepository
+from model_registry.backend.repositories.soft_sensors_repository import (
+    SoftSensorsRepository,
+)
+
 
 class SoftSensorsService:
     def __init__(self):

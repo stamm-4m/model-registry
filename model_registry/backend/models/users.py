@@ -1,7 +1,8 @@
 # model_registry/api/models/user.py
 
 import uuid
-from sqlalchemy import Column, Text, Boolean, DateTime
+
+from sqlalchemy import Boolean, Column, DateTime, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 

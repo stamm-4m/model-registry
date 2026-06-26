@@ -20,13 +20,13 @@ refreshed tokens back into the Dash session store.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from model_registry.backend.services.api_client import authenticated_request
 
 logger = logging.getLogger(__name__)
 
-_SessionData = Dict[str, Any]
+_SessionData = dict[str, Any]
 
 
 def _safe_json(response) -> Any:
@@ -45,7 +45,7 @@ class ProjectsApiClient:
 
     def list_projects_for_user(
         self, session_data: _SessionData
-    ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         """``GET /list_projects/`` -- lab-filtered project list."""
         response, session_data = authenticated_request(
             "GET", "/list_projects/", session_data
@@ -61,7 +61,7 @@ class ProjectsApiClient:
         session_data: _SessionData,
         offset: int = 0,
         limit: int = 1000,
-    ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         """``GET /api/v1/projects/`` -- raw CRUD listing."""
         response, session_data = authenticated_request(
             "GET",
@@ -78,7 +78,7 @@ class ProjectsApiClient:
 
     def get_project(
         self, project_id: str, session_data: _SessionData
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET", f"/api/v1/projects/{project_id}", session_data
         )
@@ -89,8 +89,8 @@ class ProjectsApiClient:
         return None, session_data
 
     def create_project(
-        self, payload: Dict[str, Any], session_data: _SessionData
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+        self, payload: dict[str, Any], session_data: _SessionData
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "POST", "/api/v1/projects/", session_data, json=payload
         )
@@ -100,16 +100,17 @@ class ProjectsApiClient:
             return response.json(), session_data
         logger.warning(
             "create_project failed status=%s body=%s",
-            response.status_code, _safe_json(response),
+            response.status_code,
+            _safe_json(response),
         )
         return None, session_data
 
     def update_project(
         self,
         project_id: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         session_data: _SessionData,
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "PATCH",
             f"/api/v1/projects/{project_id}",
@@ -122,13 +123,14 @@ class ProjectsApiClient:
             return response.json(), session_data
         logger.warning(
             "update_project failed status=%s body=%s",
-            response.status_code, _safe_json(response),
+            response.status_code,
+            _safe_json(response),
         )
         return None, session_data
 
     def delete_project(
         self, project_id: str, session_data: _SessionData
-    ) -> Tuple[Optional[int], Optional[_SessionData]]:
+    ) -> tuple[int | None, _SessionData | None]:
         """``DELETE /api/v1/projects/{id}``. Returns the HTTP status code."""
         response, session_data = authenticated_request(
             "DELETE", f"/api/v1/projects/{project_id}", session_data
@@ -144,7 +146,7 @@ class ProjectsApiClient:
         session_data: _SessionData,
         offset: int = 0,
         limit: int = 1000,
-    ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET",
             f"/api/v1/laboratory_project/?offset={offset}&limit={limit}",
@@ -161,7 +163,7 @@ class ProjectsApiClient:
         project_id: str,
         laboratory_id: str,
         session_data: _SessionData,
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         payload = {
             "project_id": str(project_id),
             "laboratory_id": str(laboratory_id),
@@ -178,7 +180,8 @@ class ProjectsApiClient:
             return response.json(), session_data
         logger.warning(
             "create_laboratory_project failed status=%s body=%s",
-            response.status_code, _safe_json(response),
+            response.status_code,
+            _safe_json(response),
         )
         return None, session_data
 
@@ -187,7 +190,7 @@ class ProjectsApiClient:
         relation_id: str,
         laboratory_id: str,
         session_data: _SessionData,
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "PATCH",
             f"/api/v1/laboratory_project/{relation_id}",
@@ -200,13 +203,14 @@ class ProjectsApiClient:
             return response.json(), session_data
         logger.warning(
             "update_laboratory_project failed status=%s body=%s",
-            response.status_code, _safe_json(response),
+            response.status_code,
+            _safe_json(response),
         )
         return None, session_data
 
     def delete_laboratory_project(
         self, relation_id: str, session_data: _SessionData
-    ) -> Tuple[Optional[int], Optional[_SessionData]]:
+    ) -> tuple[int | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "DELETE",
             f"/api/v1/laboratory_project/{relation_id}",
@@ -220,7 +224,7 @@ class ProjectsApiClient:
 
     def get_laboratory(
         self, laboratory_id: str, session_data: _SessionData
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET", f"/api/v1/laboratories/{laboratory_id}", session_data
         )
@@ -237,7 +241,7 @@ class ProjectsApiClient:
         session_data: _SessionData,
         offset: int = 0,
         limit: int = 1000,
-    ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET",
             f"/api/v1/department_laboratory/?offset={offset}&limit={limit}",
@@ -254,7 +258,7 @@ class ProjectsApiClient:
         session_data: _SessionData,
         offset: int = 0,
         limit: int = 1000,
-    ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET",
             f"/api/v1/organizations_departments/?offset={offset}&limit={limit}",
@@ -268,7 +272,7 @@ class ProjectsApiClient:
 
     def get_department(
         self, department_id: str, session_data: _SessionData
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET", f"/api/v1/departments/{department_id}", session_data
         )
@@ -280,7 +284,7 @@ class ProjectsApiClient:
 
     def get_organization(
         self, organization_id: str, session_data: _SessionData
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET", f"/api/v1/organizations/{organization_id}", session_data
         )

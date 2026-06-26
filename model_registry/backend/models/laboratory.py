@@ -1,9 +1,11 @@
+import uuid
+
 from sqlalchemy import Column, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-import uuid
 
 from model_registry.api.core.database import Base
+
 
 class Laboratory(Base):
     __tablename__ = "laboratories"
@@ -12,7 +14,4 @@ class Laboratory(Base):
     name = Column(Text, nullable=False)
     location = Column(Text)
 
-    laboratory_projects = relationship(
-        "LaboratoryProject",
-        back_populates="laboratory"
-    )
+    laboratory_projects = relationship("LaboratoryProject", back_populates="laboratory")

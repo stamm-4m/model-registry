@@ -1,41 +1,37 @@
 import logging
-from dash import html
 
 import dash_bootstrap_components as dbc
+from dash import html
 
 logger = logging.getLogger(__name__)
+
 
 def package_row(index, package="", version=""):
     return dbc.Row(
         [
             dbc.Col(
-                html.Div([
-                        dbc.Label(
-                            "Package",
-                            className="fw-semibold"
-                            
-                        ),
-                        html.Div(children=package,className="fw-bold text-muted")
+                html.Div(
+                    [
+                        dbc.Label("Package", className="fw-semibold"),
+                        html.Div(children=package, className="fw-bold text-muted"),
                     ]
                 ),
                 md=5,
             ),
             dbc.Col(
-                html.Div([
-                        dbc.Label(
-                            "Version",
-                            className="fw-semibold"
-                        ),
-                        html.Div(children=version,className="fw-bold text-muted")
+                html.Div(
+                    [
+                        dbc.Label("Version", className="fw-semibold"),
+                        html.Div(children=version, className="fw-bold text-muted"),
                     ]
                 ),
                 md=5,
             ),
-            
         ],
         className="mb-2",
         align="center",
     )
+
 
 def feature_item(feature):
     return dbc.AccordionItem(
@@ -43,6 +39,7 @@ def feature_item(feature):
         title=feature["name"] or "New feature",
         children=[feature_card(feature)],
     )
+
 
 def feature_card(feature):
     fid = feature["id"]
@@ -59,7 +56,7 @@ def feature_card(feature):
                                         id={"type": "feature-name", "fid": fid},
                                         value=feature.get("name", ""),
                                         placeholder="Feature name",
-                                        disabled=True
+                                        disabled=True,
                                     ),
                                     dbc.Label("Name"),
                                 ]
@@ -73,7 +70,7 @@ def feature_card(feature):
                                         id={"type": "feature-type", "fid": fid},
                                         value=feature.get("type", ""),
                                         placeholder="Type",
-                                        disabled=True
+                                        disabled=True,
                                     ),
                                     dbc.Label("Type"),
                                 ]
@@ -83,7 +80,6 @@ def feature_card(feature):
                     ],
                     className="mb-3",
                 ),
-
                 dbc.Row(
                     [
                         dbc.Col(
@@ -93,7 +89,7 @@ def feature_card(feature):
                                         id={"type": "feature-units", "fid": fid},
                                         value=feature.get("units", ""),
                                         placeholder="Units",
-                                        disabled=True
+                                        disabled=True,
                                     ),
                                     dbc.Label("Units"),
                                 ]
@@ -108,7 +104,7 @@ def feature_card(feature):
                                         type="number",
                                         value=feature.get("lag", 0),
                                         placeholder="Lag",
-                                        disabled=True
+                                        disabled=True,
                                     ),
                                     dbc.Label("Lag"),
                                 ]
@@ -126,23 +122,24 @@ def feature_card(feature):
                                             {"label": "Min-Max", "value": "minmax"},
                                         ],
                                         value=feature.get("feature_scaling", "none"),
-                                        disabled=True
+                                        disabled=True,
                                     ),
                                     dbc.Label("Scaling"),
                                 ]
                             ),
                             md=3,
                         ),
-
                         dbc.Col(
                             dbc.FormFloating(
                                 [
                                     dbc.Input(
                                         id={"type": "feature-min", "fid": fid},
                                         type="number",
-                                        value=feature.get("expected_range", {}).get("min"),
+                                        value=feature.get("expected_range", {}).get(
+                                            "min"
+                                        ),
                                         placeholder="Min",
-                                        disabled=True
+                                        disabled=True,
                                     ),
                                     dbc.Label("Min"),
                                 ]
@@ -155,9 +152,11 @@ def feature_card(feature):
                                     dbc.Input(
                                         id={"type": "feature-max", "fid": fid},
                                         type="number",
-                                        value=feature.get("expected_range", {}).get("max"),
+                                        value=feature.get("expected_range", {}).get(
+                                            "max"
+                                        ),
                                         placeholder="Max",
-                                        disabled=True
+                                        disabled=True,
                                     ),
                                     dbc.Label("Max"),
                                 ]
@@ -167,7 +166,6 @@ def feature_card(feature):
                     ],
                     className="mb-3",
                 ),
-
                 dbc.FormFloating(
                     [
                         dbc.Textarea(
@@ -175,7 +173,7 @@ def feature_card(feature):
                             value=feature.get("description", ""),
                             placeholder="Description",
                             style={"height": "80px"},
-                            disabled=True
+                            disabled=True,
                         ),
                         dbc.Label("Description"),
                     ]
@@ -184,6 +182,7 @@ def feature_card(feature):
         ),
         className="mb-3 shadow-sm",
     )
+
 
 ###
 # outputs
@@ -203,7 +202,7 @@ def output_card(fid, output=None):
                                         id={"type": "output-name", "fid": fid},
                                         value=output.get("name", ""),
                                         placeholder="Output name",
-                                        disabled=True
+                                        disabled=True,
                                     ),
                                     dbc.Label("Name"),
                                 ]
@@ -217,7 +216,7 @@ def output_card(fid, output=None):
                                         id={"type": "output-units", "fid": fid},
                                         value=output.get("units", ""),
                                         placeholder="Units",
-                                        disabled=True
+                                        disabled=True,
                                     ),
                                     dbc.Label("Units"),
                                 ]
@@ -227,7 +226,6 @@ def output_card(fid, output=None):
                     ],
                     className="mb-3",
                 ),
-
                 dbc.Row(
                     [
                         dbc.Col(
@@ -238,7 +236,7 @@ def output_card(fid, output=None):
                                         type="number",
                                         value=output.get("forecast_horizon", 0),
                                         placeholder="Forecast horizon",
-                                        disabled=True
+                                        disabled=True,
                                     ),
                                     dbc.Label("Forecast horizon"),
                                 ]
@@ -256,7 +254,7 @@ def output_card(fid, output=None):
                                             {"label": "Min-Max", "value": "minmax"},
                                         ],
                                         value=output.get("feature_scaling", "none"),
-                                        disabled=True
+                                        disabled=True,
                                     ),
                                     dbc.Label("Scaling"),
                                 ]
@@ -269,9 +267,11 @@ def output_card(fid, output=None):
                                     dbc.Input(
                                         id={"type": "output-min", "fid": fid},
                                         type="number",
-                                        value=output.get("expected_range", {}).get("min"),
+                                        value=output.get("expected_range", {}).get(
+                                            "min"
+                                        ),
                                         placeholder="Min",
-                                        disabled=True
+                                        disabled=True,
                                     ),
                                     dbc.Label("Min"),
                                 ]
@@ -284,9 +284,11 @@ def output_card(fid, output=None):
                                     dbc.Input(
                                         id={"type": "output-max", "fid": fid},
                                         type="number",
-                                        value=output.get("expected_range", {}).get("max"),
+                                        value=output.get("expected_range", {}).get(
+                                            "max"
+                                        ),
                                         placeholder="Max",
-                                        disabled=True
+                                        disabled=True,
                                     ),
                                     dbc.Label("Max"),
                                 ]
@@ -296,7 +298,6 @@ def output_card(fid, output=None):
                     ],
                     className="mb-3",
                 ),
-
                 dbc.FormFloating(
                     [
                         dbc.Textarea(
@@ -304,17 +305,17 @@ def output_card(fid, output=None):
                             value=output.get("description", ""),
                             placeholder="Description",
                             style={"height": "80px"},
-                            disabled=True
+                            disabled=True,
                         ),
                         dbc.Label("Description"),
                     ]
                 ),
-
-                
             ]
         ),
         className="mb-3 shadow-sm",
     )
+
+
 def output_item(output):
     fid = output["id"]
 

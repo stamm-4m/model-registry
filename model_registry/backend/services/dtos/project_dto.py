@@ -7,22 +7,22 @@ an attribute, mirroring the SQLAlchemy ORM objects the legacy
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
 class ProjectDTO:
     """Single project as exposed by ``/api/v1/projects/`` endpoints."""
 
-    id: Optional[str] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
-    project_id: Optional[str] = None
-    created_at: Optional[str] = None
-    extra: Dict[str, Any] = field(default_factory=dict)
+    id: str | None = None
+    name: str | None = None
+    description: str | None = None
+    project_id: str | None = None
+    created_at: str | None = None
+    extra: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ProjectDTO":
+    def from_dict(cls, data: dict[str, Any]) -> "ProjectDTO":
         if not data:
             return cls()
         known = {"id", "name", "description", "project_id", "created_at"}
@@ -36,8 +36,8 @@ class ProjectDTO:
             extra=extras,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
-        out: Dict[str, Any] = {
+    def to_dict(self) -> dict[str, Any]:
+        out: dict[str, Any] = {
             "id": self.id,
             "name": self.name,
             "description": self.description,
@@ -50,33 +50,33 @@ class ProjectDTO:
 
 @dataclass
 class LaboratoryRefDTO:
-    id: Optional[str] = None
-    name: Optional[str] = None
+    id: str | None = None
+    name: str | None = None
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "LaboratoryRefDTO":
+    def from_dict(cls, data: dict[str, Any]) -> "LaboratoryRefDTO":
         data = data or {}
         return cls(id=data.get("id"), name=data.get("name"))
 
 
 @dataclass
 class DepartmentRefDTO:
-    id: Optional[str] = None
-    name: Optional[str] = None
+    id: str | None = None
+    name: str | None = None
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "DepartmentRefDTO":
+    def from_dict(cls, data: dict[str, Any]) -> "DepartmentRefDTO":
         data = data or {}
         return cls(id=data.get("id"), name=data.get("name"))
 
 
 @dataclass
 class OrganizationRefDTO:
-    id: Optional[str] = None
-    name: Optional[str] = None
+    id: str | None = None
+    name: str | None = None
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "OrganizationRefDTO":
+    def from_dict(cls, data: dict[str, Any]) -> "OrganizationRefDTO":
         data = data or {}
         return cls(id=data.get("id"), name=data.get("name"))
 
@@ -91,7 +91,7 @@ class ProjectFullDTO:
     organization: OrganizationRefDTO
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ProjectFullDTO":
+    def from_dict(cls, data: dict[str, Any]) -> "ProjectFullDTO":
         data = data or {}
         return cls(
             project=ProjectDTO.from_dict(data.get("project") or {}),
@@ -110,12 +110,12 @@ class ProjectFullDTO:
 
 @dataclass
 class LaboratoryProjectDTO:
-    id: Optional[str] = None
-    project_id: Optional[str] = None
-    laboratory_id: Optional[str] = None
+    id: str | None = None
+    project_id: str | None = None
+    laboratory_id: str | None = None
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "LaboratoryProjectDTO":
+    def from_dict(cls, data: dict[str, Any]) -> "LaboratoryProjectDTO":
         data = data or {}
         return cls(
             id=data.get("id"),

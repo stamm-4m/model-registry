@@ -1,4 +1,7 @@
-from model_registry.backend.repositories.project_soft_sensors_repository import ProjectSoftSensorsRepository
+from model_registry.backend.repositories.project_soft_sensors_repository import (
+    ProjectSoftSensorsRepository,
+)
+
 
 class ProjectSoftSensorsService:
     def __init__(self):

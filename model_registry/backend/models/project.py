@@ -1,10 +1,12 @@
-from sqlalchemy import Column, Text, DateTime
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 import uuid
 
+from sqlalchemy import Column, DateTime, Text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
 from model_registry.api.core.database import Base
+
 
 class Project(Base):
     __tablename__ = "projects"
@@ -16,7 +18,4 @@ class Project(Base):
     stamm_modules_id = Column(UUID(as_uuid=True), nullable=True)
     project_id = Column(Text, nullable=True)
     experiments = relationship("Experiment", back_populates="project")
-    laboratory_projects = relationship(
-        "LaboratoryProject",
-        back_populates="project"
-    )
+    laboratory_projects = relationship("LaboratoryProject", back_populates="project")

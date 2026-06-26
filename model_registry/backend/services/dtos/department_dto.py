@@ -1,18 +1,18 @@
 """DTOs for department-related entities (department + relations)."""
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 @dataclass
 class DepartmentDTO:
-    id: Optional[str] = None
-    name: Optional[str] = None
-    created_at: Optional[str] = None
-    extra: Dict[str, Any] = field(default_factory=dict)
+    id: str | None = None
+    name: str | None = None
+    created_at: str | None = None
+    extra: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "DepartmentDTO":
+    def from_dict(cls, data: dict[str, Any]) -> "DepartmentDTO":
         if not data:
             return cls()
         known = {"id", "name", "created_at"}
@@ -24,7 +24,7 @@ class DepartmentDTO:
             extra=extras,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         out = {
             "id": self.id,
             "name": self.name,
@@ -36,12 +36,12 @@ class DepartmentDTO:
 
 @dataclass
 class DepartmentLaboratoryDTO:
-    id: Optional[str] = None
-    department_id: Optional[str] = None
-    laboratory_id: Optional[str] = None
+    id: str | None = None
+    department_id: str | None = None
+    laboratory_id: str | None = None
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "DepartmentLaboratoryDTO":
+    def from_dict(cls, data: dict[str, Any]) -> "DepartmentLaboratoryDTO":
         data = data or {}
         return cls(
             id=data.get("id"),

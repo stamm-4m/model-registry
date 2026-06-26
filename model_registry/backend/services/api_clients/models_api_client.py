@@ -8,13 +8,13 @@ All requests use ``authenticated_request`` to preserve token refresh behavior.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from model_registry.backend.services.api_client import authenticated_request
 
 logger = logging.getLogger(__name__)
 
-_SessionData = Dict[str, Any]
+_SessionData = dict[str, Any]
 
 
 def _safe_json(response) -> Any:
@@ -33,7 +33,7 @@ class ModelsApiClient:
 
     def list_models_for_project(
         self, project_id: str, session_data: _SessionData
-    ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET", f"/{project_id}/list_models/", session_data
         )
@@ -48,7 +48,7 @@ class ModelsApiClient:
         project_id: str,
         model_id: str,
         session_data: _SessionData,
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET", f"/{project_id}/metadata/{model_id}", session_data
         )
@@ -60,7 +60,7 @@ class ModelsApiClient:
 
     def reload_project(
         self, project_id: str, session_data: _SessionData
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         """``POST /<project_id>/reload/`` -- force in-memory registry refresh."""
         response, session_data = authenticated_request(
             "POST", f"/{project_id}/reload/", session_data
@@ -75,16 +75,16 @@ class ModelsApiClient:
             _safe_json(response),
         )
         return None, session_data
-    
+
     def explain(
         self,
         project_id: str,
         model_id: str,
         session_data: _SessionData,
-        family: Optional[str] = None,
-        rows: Optional[List[Dict[str, Any]]] = None,
-        target_column: Optional[str] = None,
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+        family: str | None = None,
+        rows: list[dict[str, Any]] | None = None,
+        target_column: str | None = None,
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         """``POST /<project_id>/explain/<model_id>`` -- protected XAI endpoint.
 
         With no ``rows`` the API explains over a sampled background; pass
@@ -100,13 +100,16 @@ class ModelsApiClient:
             return None, None
         if response.status_code == 200:
             return response.json(), session_data
-        logger.warning("explain failed status=%s body=%s",
-                       response.status_code, _safe_json(response))
+        logger.warning(
+            "explain failed status=%s body=%s",
+            response.status_code,
+            _safe_json(response),
+        )
         return {"ok": False, "reason": f"HTTP {response.status_code}"}, session_data
 
     def list_models_full(
         self, project_id: str, session_data: _SessionData
-    ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET", f"/{project_id}/models_full/", session_data
         )
@@ -120,9 +123,9 @@ class ModelsApiClient:
         self,
         project_id: str,
         model_id: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         session_data: _SessionData,
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "PUT",
             f"/{project_id}/update/{model_id}",
@@ -147,7 +150,7 @@ class ModelsApiClient:
         session_data: _SessionData,
         offset: int = 0,
         limit: int = 1000,
-    ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET",
             f"/api/v1/models/?offset={offset}&limit={limit}",
@@ -161,7 +164,7 @@ class ModelsApiClient:
 
     def get_model_row(
         self, model_row_id: str, session_data: _SessionData
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET", f"/api/v1/models/{model_row_id}", session_data
         )
@@ -173,9 +176,9 @@ class ModelsApiClient:
 
     def create_model_row(
         self,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         session_data: _SessionData,
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "POST", "/api/v1/models/", session_data, json=payload
         )
@@ -193,9 +196,9 @@ class ModelsApiClient:
     def update_model_row(
         self,
         model_row_id: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         session_data: _SessionData,
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "PATCH",
             f"/api/v1/models/{model_row_id}",
@@ -217,7 +220,7 @@ class ModelsApiClient:
         self,
         model_row_id: str,
         session_data: _SessionData,
-    ) -> Tuple[Optional[int], Optional[_SessionData]]:
+    ) -> tuple[int | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "DELETE", f"/api/v1/models/{model_row_id}", session_data
         )
@@ -232,7 +235,7 @@ class ModelsApiClient:
         session_data: _SessionData,
         offset: int = 0,
         limit: int = 1000,
-    ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET",
             f"/api/v1/project_models/?offset={offset}&limit={limit}",
@@ -246,9 +249,9 @@ class ModelsApiClient:
 
     def create_project_model(
         self,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         session_data: _SessionData,
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "POST", "/api/v1/project_models/", session_data, json=payload
         )
@@ -266,9 +269,9 @@ class ModelsApiClient:
     def update_project_model(
         self,
         relation_id: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         session_data: _SessionData,
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "PATCH",
             f"/api/v1/project_models/{relation_id}",
@@ -290,7 +293,7 @@ class ModelsApiClient:
         self,
         relation_id: str,
         session_data: _SessionData,
-    ) -> Tuple[Optional[int], Optional[_SessionData]]:
+    ) -> tuple[int | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "DELETE", f"/api/v1/project_models/{relation_id}", session_data
         )

@@ -17,7 +17,8 @@ that imported it from ``project_api_service`` keep working with a tiny
 import change.
 """
 
-from typing import Any, Dict, List, Optional, Tuple
+from datetime import UTC
+from typing import Any
 from uuid import UUID
 
 from model_registry.backend.core.exceptions import ProjectInUseException
@@ -31,11 +32,10 @@ from model_registry.backend.services.dtos import (
     ProjectFullDTO,
 )
 
+_SessionData = dict[str, Any]
 
-_SessionData = Dict[str, Any]
 
-
-def _coerce_id(value) -> Optional[str]:
+def _coerce_id(value) -> str | None:
     if value is None:
         return None
     if isinstance(value, UUID):
@@ -46,7 +46,7 @@ def _coerce_id(value) -> Optional[str]:
 class ProjectService:
     """Project operations backed by the FastAPI ``/projects`` endpoints."""
 
-    def __init__(self, client: Optional[ProjectsApiClient] = None):
+    def __init__(self, client: ProjectsApiClient | None = None):
         self.client = client or ProjectsApiClient()
 
     # ------------------------------------------------------------------
@@ -55,7 +55,7 @@ class ProjectService:
 
     def list_projects(
         self, session_data: _SessionData
-    ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         """Return the lab-filtered project list (raw dicts).
 
         Kept as raw dicts because the existing UI consumes the
@@ -66,7 +66,7 @@ class ProjectService:
 
     def get_all_projects(
         self, session_data: _SessionData
-    ) -> Tuple[List[ProjectDTO], Optional[_SessionData]]:
+    ) -> tuple[list[ProjectDTO], _SessionData | None]:
         """Return every project the API exposes as ``ProjectDTO`` instances."""
         data, session_data = self.client.list_all_projects(session_data)
         if data is None:
@@ -79,7 +79,7 @@ class ProjectService:
 
     def get_project(
         self, session_data: _SessionData, project_id
-    ) -> Tuple[Optional[ProjectDTO], Optional[_SessionData]]:
+    ) -> tuple[ProjectDTO | None, _SessionData | None]:
         data, session_data = self.client.get_project(
             _coerce_id(project_id), session_data
         )
@@ -89,7 +89,7 @@ class ProjectService:
 
     def get_full_project(
         self, session_data: _SessionData, project_id
-    ) -> Tuple[Optional[ProjectFullDTO], Optional[_SessionData]]:
+    ) -> tuple[ProjectFullDTO | None, _SessionData | None]:
         """Return project + laboratory + department + organization.
 
         Composes the hierarchy by chaining the existing CRUD endpoints:
@@ -111,9 +111,9 @@ class ProjectService:
                 None,
             )
 
-        lab_data: Dict[str, Any] = {}
-        dept_data: Dict[str, Any] = {}
-        org_data: Dict[str, Any] = {}
+        lab_data: dict[str, Any] = {}
+        dept_data: dict[str, Any] = {}
+        org_data: dict[str, Any] = {}
 
         if relation and relation.get("laboratory_id"):
             lab_id = str(relation["laboratory_id"])
@@ -121,7 +121,9 @@ class ProjectService:
             lab_data = lab_payload or {}
 
             # laboratory -> department_laboratory -> department
-            dept_links, session_data = self.client.list_department_laboratory(session_data)
+            dept_links, session_data = self.client.list_department_laboratory(
+                session_data
+            )
             dept_link = None
             if dept_links:
                 dept_link = next(
@@ -143,7 +145,11 @@ class ProjectService:
                 org_link = None
                 if org_links:
                     org_link = next(
-                        (o for o in org_links if str(o.get("department_id")) == dept_id),
+                        (
+                            o
+                            for o in org_links
+                            if str(o.get("department_id")) == dept_id
+                        ),
                         None,
                     )
                 if org_link and org_link.get("organization_id"):
@@ -168,16 +174,16 @@ class ProjectService:
         self,
         session_data: _SessionData,
         name: str,
-        description: Optional[str] = None,
-        project_id: Optional[str] = None,
-    ) -> Tuple[Optional[ProjectDTO], Optional[_SessionData]]:
-        from datetime import datetime, timezone
+        description: str | None = None,
+        project_id: str | None = None,
+    ) -> tuple[ProjectDTO | None, _SessionData | None]:
+        from datetime import datetime
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "name": name,
             # ``Project.created_at`` is a NOT NULL string column, so we set
             # it client-side until the API gains a server-side default.
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         }
         if description is not None:
             payload["description"] = description
@@ -195,11 +201,11 @@ class ProjectService:
         self,
         session_data: _SessionData,
         project_id,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
-        external_id: Optional[str] = None,
-    ) -> Tuple[Optional[ProjectDTO], Optional[_SessionData]]:
-        payload: Dict[str, Any] = {}
+        name: str | None = None,
+        description: str | None = None,
+        external_id: str | None = None,
+    ) -> tuple[ProjectDTO | None, _SessionData | None]:
+        payload: dict[str, Any] = {}
         if name is not None:
             payload["name"] = name
         if description is not None:
@@ -221,7 +227,7 @@ class ProjectService:
 
     def _find_relation_for_project(
         self, session_data: _SessionData, project_id: str
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         relations, session_data = self.client.list_laboratory_projects(session_data)
         if not relations:
             return None, session_data
@@ -236,7 +242,7 @@ class ProjectService:
         session_data: _SessionData,
         project_id,
         lab_id,
-    ) -> Tuple[Optional[LaboratoryProjectDTO], Optional[_SessionData]]:
+    ) -> tuple[LaboratoryProjectDTO | None, _SessionData | None]:
         """Create a brand-new ``laboratory_project`` link."""
         data, session_data = self.client.create_laboratory_project(
             _coerce_id(project_id), _coerce_id(lab_id), session_data
@@ -250,7 +256,7 @@ class ProjectService:
         session_data: _SessionData,
         project_id,
         lab_id,
-    ) -> Tuple[Optional[LaboratoryProjectDTO], Optional[_SessionData]]:
+    ) -> tuple[LaboratoryProjectDTO | None, _SessionData | None]:
         """Update the project's laboratory.
 
         Mirrors the legacy semantic: PATCH the existing ``laboratory_project``
@@ -277,7 +283,7 @@ class ProjectService:
 
     def delete_project(
         self, session_data: _SessionData, project_id
-    ) -> Tuple[bool, Optional[_SessionData]]:
+    ) -> tuple[bool, _SessionData | None]:
         """Delete a project, removing its ``laboratory_project`` link first.
 
         Raises ``ProjectInUseException`` when the API answers with HTTP 409
@@ -315,9 +321,10 @@ class ProjectService:
 # Module-level shims (backwards-compat with project_api_service.list_projects)
 # ---------------------------------------------------------------------------
 
+
 def list_projects(
     session_data: _SessionData,
-) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:
+) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
     """Convenience wrapper kept so callbacks importing the legacy helper
     keep working with a single import path.
 

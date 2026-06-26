@@ -1,7 +1,7 @@
 import logging
 
 import dash_bootstrap_components as dbc
-from dash import html, dcc
+from dash import dcc, html
 
 from model_registry.backend.services.model_service import get_model_metadata
 
@@ -29,8 +29,9 @@ def _info_item(label, value, *, mono=False):
     )
 
 
-def _section_card(title, icon, body, *, subtitle=None, header_image=None,
-                  header_color=None):
+def _section_card(
+    title, icon, body, *, subtitle=None, header_image=None, header_color=None
+):
     header_content = []
     if header_image:
         header_content.append(
@@ -44,17 +45,13 @@ def _section_card(title, icon, body, *, subtitle=None, header_image=None,
             )
         )
     else:
-        header_content.append(
-            html.I(className=f"bi {icon} me-2 text-primary")
-        )
+        header_content.append(html.I(className=f"bi {icon} me-2 text-primary"))
     title_style = {"color": header_color} if header_color else None
     header_content.append(
         html.Span(title, className="details-section-title", style=title_style)
     )
     if subtitle:
-        header_content.append(
-            html.Small(subtitle, className="text-muted ms-3")
-        )
+        header_content.append(html.Small(subtitle, className="text-muted ms-3"))
     return dbc.Card(
         [
             dbc.CardHeader(
@@ -93,7 +90,9 @@ def add_upload_model_ibisba_layout(project_id, model_id, session_data=None):
                         [
                             html.Div(
                                 [
-                                    html.I(className="bi bi-cloud-upload-fill text-primary me-2"),
+                                    html.I(
+                                        className="bi bi-cloud-upload-fill text-primary me-2"
+                                    ),
                                     html.Span(
                                         "Publish to IBISBA Hub",
                                         className="text-muted small text-uppercase fw-semibold letter-spaced",
@@ -181,15 +180,12 @@ def add_upload_model_ibisba_layout(project_id, model_id, session_data=None):
                         md=6,
                     ),
                     dbc.Col(
-                        _info_item(
-                            "Version", model_information.get("version", "")
-                        ),
+                        _info_item("Version", model_information.get("version", "")),
                         md=6,
                     ),
                 ],
                 className="g-3 mt-1",
             ),
-
             # Hidden inputs preserve the IDs that callbacks read with State()
             html.Div(
                 [
@@ -231,7 +227,6 @@ def add_upload_model_ibisba_layout(project_id, model_id, session_data=None):
                 ],
                 style={"display": "none"},
             ),
-
             html.Hr(className="my-4"),
             html.Div(
                 [
@@ -377,9 +372,7 @@ def add_upload_model_ibisba_layout(project_id, model_id, session_data=None):
             dcc.Store(id="metadata-yaml-path"),
             dcc.Store(id="model-file-name"),
             dcc.Store(id="model-file-path"),
-
             hero,
-
             dbc.Row(
                 [
                     dbc.Col(
@@ -404,9 +397,7 @@ def add_upload_model_ibisba_layout(project_id, model_id, session_data=None):
                 ],
                 className="g-4",
             ),
-
             action_bar,
-
             # =========================
             # Modal confirmation
             # =========================
@@ -440,4 +431,3 @@ def add_upload_model_ibisba_layout(project_id, model_id, session_data=None):
         fluid=True,
         className="details-page p-4",
     )
-

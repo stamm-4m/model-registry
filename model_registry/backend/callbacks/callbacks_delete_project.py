@@ -1,18 +1,21 @@
-from dash import Output, Input, State, ALL
-import dash
-from dash.exceptions import PreventUpdate
-from model_registry.backend.core.exceptions import ProjectInUseException
 import logging
 
+import dash
+from dash import ALL, Input, Output, State
+from dash.exceptions import PreventUpdate
+
+from model_registry.backend.core.exceptions import ProjectInUseException
 from model_registry.backend.services.project_service import ProjectService
+
 logger = logging.getLogger(__name__)
+
 
 def register_delete_project_modal_callbacks(app):
     @app.callback(
-        Output("delete-proj-modal", "is_open"), 
+        Output("delete-proj-modal", "is_open"),
         Output("proj-delete-id", "data"),
         Input({"type": "btn-delete-proj", "index": ALL}, "n_clicks"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
     )
     def open_delete_modal_project(n_clicks_list):
         ctx = dash.callback_context
@@ -26,9 +29,9 @@ def register_delete_project_modal_callbacks(app):
         proj_id = ctx.triggered_id["index"]
 
         return True, proj_id
-    
+
     @app.callback(
-        Output("delete-proj-modal", "is_open",allow_duplicate=True),
+        Output("delete-proj-modal", "is_open", allow_duplicate=True),
         Output("proj-refresh-trigger", "data", allow_duplicate=True),
         Output("proj-toast", "is_open", allow_duplicate=True),
         Output("proj-toast", "children", allow_duplicate=True),
@@ -37,7 +40,7 @@ def register_delete_project_modal_callbacks(app):
         Input("btn-confirm-delete_project", "n_clicks"),
         State("proj-delete-id", "data"),
         State("user-session", "data"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
     )
     def confirm_delete_project(n_clicks, proj_id, session_data):
         if not n_clicks or not proj_id:
@@ -49,20 +52,20 @@ def register_delete_project_modal_callbacks(app):
             _, session_data = service.delete_project(session_data, proj_id)
 
             return (
-                False,              # cerrar modal
-                n_clicks,           # refresh tabla
-                True,               # mostrar toast
+                False,  # cerrar modal
+                n_clicks,  # refresh tabla
+                True,  # mostrar toast
                 "Project deleted successfully",
                 "success",
                 session_data,
             )
-        
+
         except ProjectInUseException as e:
             return (
                 False,
                 dash.no_update,
                 True,
-                str(e),  
+                str(e),
                 "warning",
                 session_data,
             )
@@ -76,11 +79,11 @@ def register_delete_project_modal_callbacks(app):
                 "danger",
                 session_data,
             )
-    
+
     @app.callback(
         Output("delete-proj-modal", "is_open", allow_duplicate=True),
         Input("btn-cancel-delete_project", "n_clicks"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
     )
     def cancel_delete(n):
         return False

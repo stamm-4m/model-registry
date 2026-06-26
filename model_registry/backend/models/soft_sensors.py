@@ -1,7 +1,10 @@
+import uuid
+
 from sqlalchemy import Column, Text
 from sqlalchemy.dialects.postgresql import UUID
-import uuid
+
 from model_registry.api.core.database import Base
+
 
 class SoftSensor(Base):
     __tablename__ = "soft_sensors"

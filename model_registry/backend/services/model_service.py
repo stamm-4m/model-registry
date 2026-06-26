@@ -11,16 +11,15 @@ Conventions (same as other unified services):
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from model_registry.backend.services.api_clients import ModelsApiClient
 from model_registry.backend.services.template_validator import (
-    validate_model_payload,
     TemplateValidationError,
+    validate_model_payload,
 )
 
-
-_SessionData = Dict[str, Any]
+_SessionData = dict[str, Any]
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +27,7 @@ logger = logging.getLogger(__name__)
 class ModelService:
     """Model operations backed by model-specific and CRUD endpoints."""
 
-    def __init__(self, client: Optional[ModelsApiClient] = None):
+    def __init__(self, client: ModelsApiClient | None = None):
         self.client = client or ModelsApiClient()
 
     # ------------------------------------------------------------------
@@ -37,17 +36,17 @@ class ModelService:
 
     def list_models(
         self, session_data: _SessionData, project_id: str
-    ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         return self.client.list_models_for_project(project_id, session_data)
 
     def get_model_metadata(
         self, session_data: _SessionData, project_id: str, model_id: str
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         return self.client.get_model_metadata(project_id, model_id, session_data)
 
     def list_models_full(
         self, session_data: _SessionData, project_id: str
-    ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         return self.client.list_models_full(project_id, session_data)
 
     def update_registry_model(
@@ -55,8 +54,8 @@ class ModelService:
         session_data: _SessionData,
         project_id: str,
         model_id: str,
-        payload: Dict[str, Any],
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+        payload: dict[str, Any],
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         return self.client.update_registry_model(
             project_id, model_id, payload, session_data
         )
@@ -66,7 +65,7 @@ class ModelService:
         session_data: _SessionData,
         project_id: str,
         model_id: str,
-    ) -> Tuple[Optional[str], Optional[str], Optional[_SessionData]]:
+    ) -> tuple[str | None, str | None, _SessionData | None]:
         """Return model file name/path extracted from model metadata."""
         metadata, session_data = self.get_model_metadata(
             session_data, project_id, model_id
@@ -75,9 +74,9 @@ class ModelService:
             return None, None, session_data
 
         model_identification = metadata.get("model_identification") or {}
-        config_files = (
-            (metadata.get("model_description") or {}).get("config_files") or {}
-        )
+        config_files = (metadata.get("model_description") or {}).get(
+            "config_files"
+        ) or {}
 
         model_file_name = model_identification.get("ID") or ""
         model_file_relative = config_files.get("model_file") or ""
@@ -89,7 +88,7 @@ class ModelService:
 
     def get_all_model_rows(
         self, session_data: _SessionData
-    ) -> Tuple[List[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]], _SessionData | None]:
         data, session_data = self.client.list_models_table(session_data)
         if data is None:
             return [], session_data
@@ -97,25 +96,25 @@ class ModelService:
 
     def get_model_row(
         self, session_data: _SessionData, model_row_id: str
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         return self.client.get_model_row(model_row_id, session_data)
 
     def create_model_row(
-        self, session_data: _SessionData, payload: Dict[str, Any]
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+        self, session_data: _SessionData, payload: dict[str, Any]
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         return self.client.create_model_row(payload, session_data)
 
     def update_model_row(
         self,
         session_data: _SessionData,
         model_row_id: str,
-        payload: Dict[str, Any],
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+        payload: dict[str, Any],
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         return self.client.update_model_row(model_row_id, payload, session_data)
 
     def delete_model_row(
         self, session_data: _SessionData, model_row_id: str
-    ) -> Tuple[bool, Optional[_SessionData]]:
+    ) -> tuple[bool, _SessionData | None]:
         status, session_data = self.client.delete_model_row(model_row_id, session_data)
         if status is None:
             return False, session_data
@@ -123,7 +122,7 @@ class ModelService:
 
     def list_project_models(
         self, session_data: _SessionData
-    ) -> Tuple[List[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]], _SessionData | None]:
         data, session_data = self.client.list_project_models(session_data)
         if data is None:
             return [], session_data
@@ -137,8 +136,8 @@ class ModelService:
         self,
         session_data: _SessionData,
         project_external_id: str,
-        payload: Dict[str, Any],
-    ) -> Tuple[Optional[Dict[str, Any]], Optional[_SessionData]]:
+        payload: dict[str, Any],
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         """Create a model row in Postgres and link it to ``project_external_id``.
 
         ``project_external_id`` is the human-readable code stored in
@@ -173,7 +172,8 @@ class ModelService:
             return None, session_data
         match = next(
             (
-                p for p in projects
+                p
+                for p in projects
                 if str(p.get("project_id")) == str(project_external_id)
             ),
             None,
@@ -193,9 +193,7 @@ class ModelService:
             "model_id": model.get("id"),
             "role": "primary",
         }
-        _, session_data = self.client.create_project_model(
-            link_payload, session_data
-        )
+        _, session_data = self.client.create_project_model(link_payload, session_data)
 
         # Refresh the in-memory registry so subsequent reads (list / metadata)
         # see the new model without waiting for an API restart.
@@ -206,7 +204,8 @@ class ModelService:
         except Exception as exc:  # non-fatal: read endpoints have a fallback
             logger.warning(
                 "Registry reload failed for project %s: %s",
-                project_external_id, exc,
+                project_external_id,
+                exc,
             )
 
         return model, session_data
@@ -215,7 +214,7 @@ class ModelService:
         self,
         session_data: _SessionData,
         project_external_id: str,
-    ) -> Tuple[List[Dict[str, Any]], Optional[_SessionData]]:
+    ) -> tuple[list[dict[str, Any]], _SessionData | None]:
         """Return Postgres-backed models linked to ``project_external_id``.
 
         Output dicts mimic the legacy ``/list_models/`` shape so they can be
@@ -233,7 +232,8 @@ class ModelService:
             return [], session_data
         match = next(
             (
-                p for p in projects
+                p
+                for p in projects
                 if str(p.get("project_id")) == str(project_external_id)
             ),
             None,
@@ -257,29 +257,34 @@ class ModelService:
         if not all_rows:
             return [], session_data
 
-        formatted: List[Dict[str, Any]] = []
+        formatted: list[dict[str, Any]] = []
         for row in all_rows:
             if str(row.get("id")) not in model_ids:
                 continue
-            formatted.append({
-                "model_name": row.get("name") or row.get("slug"),
-                "model_ID": row.get("slug"),
-                "metadata": {
-                    "ID": row.get("slug"),
-                    "db_uuid": row.get("id"),   # Postgres UUID — used for API delete/edit
-                    "authors": row.get("authors"),
-                    "created_at": row.get("creation_date")
-                    or row.get("created_at"),
-                    "version": row.get("version"),
-                    "status": row.get("status"),
-                    "is_active": bool(row.get("is_active")),
-                },
-            })
+            formatted.append(
+                {
+                    "model_name": row.get("name") or row.get("slug"),
+                    "model_ID": row.get("slug"),
+                    "metadata": {
+                        "ID": row.get("slug"),
+                        "db_uuid": row.get(
+                            "id"
+                        ),  # Postgres UUID — used for API delete/edit
+                        "authors": row.get("authors"),
+                        "created_at": row.get("creation_date") or row.get("created_at"),
+                        "version": row.get("version"),
+                        "status": row.get("status"),
+                        "is_active": bool(row.get("is_active")),
+                    },
+                }
+            )
         return formatted, session_data
+
 
 # ---------------------------------------------------------------------------
 # Module-level shims (backwards-compat with existing imports)
 # ---------------------------------------------------------------------------
+
 
 def list_models(project_id, session_data):
     """Backward-compatible helper used by existing callbacks/pages."""

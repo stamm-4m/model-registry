@@ -1,9 +1,12 @@
-from jose import jwt
 import logging
+
+from jose import jwt
+
 logger = logging.getLogger(__name__)
 
+
 def get_user_role(session_data):
-    logger.debug(f"Getting user role from session data: session_data")
+    logger.debug("Getting user role from session data: session_data")
     if not session_data or "access_token" not in session_data:
         return None, None
     try:
@@ -13,13 +16,14 @@ def get_user_role(session_data):
             options={
                 "verify_signature": False,
                 "verify_exp": False,
-            }
+            },
         )
         logger.debug("Decoded JWT payload: %s", payload)
         return payload.get("roles"), payload.get("sub")
     except Exception as e:
         logger.error(f"JWT decode error: {e}")
         return None, None
+
 
 def get_user_permissions(session_data):
     if not session_data or "access_token" not in session_data:
@@ -31,7 +35,7 @@ def get_user_permissions(session_data):
             options={
                 "verify_signature": False,
                 "verify_exp": False,
-            }
+            },
         )
         return set(payload.get("permissions", []))
     except Exception as e:

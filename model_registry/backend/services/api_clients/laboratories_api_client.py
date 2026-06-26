@@ -13,4 +13,5 @@ class LaboratoryUserApiClient(BaseApiClient):
     Note: the API exposes the table at ``/api/v1/laboratory_user/``
     (singular ``user``, matching the SQLAlchemy ``__tablename__``).
     """
+
     resource_path = "laboratory_user"

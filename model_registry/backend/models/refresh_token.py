@@ -1,8 +1,11 @@
-from sqlalchemy import Column, String, DateTime, Boolean, ForeignKey
+from uuid import uuid4
+
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from uuid import uuid4
+
 from model_registry.api.core.database import Base
+
 
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"

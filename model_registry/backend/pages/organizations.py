@@ -24,8 +24,8 @@ keep working without any modification:
     btn-open-lab-modal,  laboratories-table
 """
 
-from dash import dcc, html
 import dash_bootstrap_components as dbc
+from dash import dcc, html
 
 from model_registry.backend.pages.add_organization import organization_modal
 from model_registry.backend.pages.department_modal import department_modal
@@ -35,8 +35,8 @@ from model_registry.backend.utils.utils_laboratory import toast_confirm_delete_l
 from model_registry.backend.utils.utils_organization import toast_confirm_delete
 from model_registry.backend.utils.utils_sidebar import get_user_role
 
-
 # --------------------------------------------------------------------- column
+
 
 def _tree_column(title, btn_label, btn_id, table_div_id, toast):
     """
@@ -76,6 +76,7 @@ def _tree_column(title, btn_label, btn_id, table_div_id, toast):
 
 
 # --------------------------------------------------------------------- layout
+
 
 def organizations_layout(session_data=None):
     role, _ = get_user_role(session_data)
@@ -135,7 +136,8 @@ def organizations_layout(session_data=None):
                     table_div_id="organizations-table",
                     toast=toast_confirm_delete(),
                 ),
-                xs=12, md=4,
+                xs=12,
+                md=4,
             ),
             dbc.Col(
                 _tree_column(
@@ -145,7 +147,8 @@ def organizations_layout(session_data=None):
                     table_div_id="departments-table",
                     toast=toast_confirm_delete_dept(),
                 ),
-                xs=12, md=4,
+                xs=12,
+                md=4,
             ),
             dbc.Col(
                 _tree_column(
@@ -155,7 +158,8 @@ def organizations_layout(session_data=None):
                     table_div_id="laboratories-table",
                     toast=toast_confirm_delete_lab(),
                 ),
-                xs=12, md=4,
+                xs=12,
+                md=4,
             ),
         ],
         className="g-3",
@@ -170,10 +174,8 @@ def organizations_layout(session_data=None):
             dcc.Store(id="dept-delete-id"),
             dcc.Store(id="lab-edit-id"),
             dcc.Store(id="lab-delete-id"),
-
             header,
             columns,
-
             # Modals (unchanged, in their own files for modularity).
             organization_modal(),
             department_modal(),

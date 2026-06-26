@@ -1,15 +1,18 @@
 import logging
+
 import dash
-import requests
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from model_registry.backend.config.settings import settings
 from model_registry.backend.services.model_service import ModelService
 from model_registry.backend.services.project_service import list_projects
-from model_registry.backend.utils.utils_home import delete_model_from_registry, _format_date_ddmmyyyy
+from model_registry.backend.utils.utils_home import (
+    _format_date_ddmmyyyy,
+    delete_model_from_registry,
+)
 
 logger = logging.getLogger(__name__)
+
 
 def register_home_callbacks(app):
     @app.callback(
@@ -24,11 +27,13 @@ def register_home_callbacks(app):
         """
         Fetch all models from the API and filter based on dropdowns.
         """
-        logger.debug(f"Updating models table for project_id={project_id} with session session_data")
+        logger.debug(
+            f"Updating models table for project_id={project_id} with session session_data"
+        )
         projects = []
         if project_id:
             projects = [project_id]
-        # List all projects si no hay filtro    
+        # List all projects si no hay filtro
         else:
             try:
                 projects_response, session_data = list_projects(session_data)
@@ -42,10 +47,12 @@ def register_home_callbacks(app):
         model_service = ModelService()
         for pid in projects:
             try:
-                models_response, session_data = model_service.list_db_models_for_project(
-                    session_data, pid
+                models_response, session_data = (
+                    model_service.list_db_models_for_project(session_data, pid)
                 )
-                logger.debug(f"count DB models for project {pid}: {len(models_response)}")
+                logger.debug(
+                    f"count DB models for project {pid}: {len(models_response)}"
+                )
             except Exception as e:
                 logger.warning(f"Error fetching DB models for project {pid}: {e}")
                 continue
@@ -59,14 +66,14 @@ def register_home_callbacks(app):
                     "version": meta.get("version"),
                     "status": meta.get("is_active", False),
                     "project_id": pid,
-                    "model_id": meta.get("ID"),        # slug — used for routing
-                    "db_uuid":  meta.get("db_uuid"),   # Postgres UUID — used for API ops
-                    "actions": "edit"
+                    "model_id": meta.get("ID"),  # slug — used for routing
+                    "db_uuid": meta.get("db_uuid"),  # Postgres UUID — used for API ops
+                    "actions": "edit",
                 }
                 # Aplicar filtros de dropdown
                 if project_id and project_id != row["project_id"]:
                     continue
-               
+
                 table_data.append(row)
 
         return table_data, table_data, session_data
@@ -77,7 +84,7 @@ def register_home_callbacks(app):
         Output("model-to-delete", "data"),
         Input("models-grid", "cellClicked"),
         State("models-grid-data", "data"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
     )
     def on_grid_click(event, rows_data):
         logger.debug(f"Grid cell clicked: {event}")
@@ -85,47 +92,40 @@ def register_home_callbacks(app):
             raise PreventUpdate
 
         col_id = event.get("colId")
-        row_id = event.get("rowId") 
+        row_id = event.get("rowId")
         logger.debug(f"Grid click event: {event}")
         if not row_id:
             raise PreventUpdate
 
         # Find model_id real
-        row = next(
-            (r for r in rows_data if str(r["model_id"]) == str(row_id)),
-            None
-        )
+        row = next((r for r in rows_data if str(r["model_id"]) == str(row_id)), None)
 
         if not row:
             raise PreventUpdate
         logger.debug(f"Grid clicked: row_index={row_id} col={col_id}, row={row}")
         # ===== EDIT =====
         if col_id == "edit":
-            return (
-                f"/edit-model/{row['project_id']}/{row['model_id']}",
-                False,
-                None
-            )
+            return (f"/edit-model/{row['project_id']}/{row['model_id']}", False, None)
         if col_id == "details":
             return (
                 f"/details-model/{row['project_id']}/{row['model_id']}",
                 False,
-                None
+                None,
             )
-    
+
         if col_id == "xai":
             return (
                 f"/model-explainability/{row['project_id']}/{row['model_id']}",
                 False,
-                None
+                None,
             )
-        
+
         # ===== REGISTER TO =====
         if col_id == "register_to":
             return (
                 f"/model-upload-ibisba/{row['project_id']}/{row['model_id']}",
                 False,
-                None
+                None,
             )
 
         # ===== DELETE =====
@@ -135,13 +135,13 @@ def register_home_callbacks(app):
                 True,
                 {
                     "project_id": row["project_id"],
-                    "model_id":   row["model_id"],
-                    "db_uuid":    row.get("db_uuid"),  # UUID for API delete
-                }
+                    "model_id": row["model_id"],
+                    "db_uuid": row.get("db_uuid"),  # UUID for API delete
+                },
             )
 
         raise PreventUpdate
-    
+
     @app.callback(
         Output("url", "pathname", allow_duplicate=True),
         Output("models-grid-data", "data", allow_duplicate=True),
@@ -150,24 +150,33 @@ def register_home_callbacks(app):
         State("model-to-delete", "data"),
         State("models-grid-data", "data"),
         State("user-session", "data"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
     )
     def delete_model(submit, model_info, rows_data, session_data):
-        logger.debug(f"Delete model submit clicked {submit} with model_info={model_info}")
+        logger.debug(
+            f"Delete model submit clicked {submit} with model_info={model_info}"
+        )
         if not submit or not model_info:
             raise PreventUpdate
 
         project_id = model_info["project_id"]
-        model_id   = model_info["model_id"]
-        db_uuid    = model_info.get("db_uuid")
+        model_id = model_info["model_id"]
+        db_uuid = model_info.get("db_uuid")
 
         # --- DB delete via API (use UUID if available, slug as fallback) ---
         delete_id = db_uuid or model_id
         try:
-            from model_registry.backend.services.api_clients.models_api_client import ModelsApiClient
-            status_code, session_data = ModelsApiClient().delete_model_row(delete_id, session_data)
+            from model_registry.backend.services.api_clients.models_api_client import (
+                ModelsApiClient,
+            )
+
+            status_code, session_data = ModelsApiClient().delete_model_row(
+                delete_id, session_data
+            )
             if status_code not in (200, 204, None):
-                logger.warning("API delete returned %s for model %s", status_code, delete_id)
+                logger.warning(
+                    "API delete returned %s for model %s", status_code, delete_id
+                )
             else:
                 logger.info("Model %s deleted via API (id=%s)", model_id, delete_id)
         except Exception as exc:
@@ -181,13 +190,13 @@ def register_home_callbacks(app):
 
         # Remove from grid immediately so the UI reflects the deletion
         updated_rows = [
-            r for r in (rows_data or [])
+            r
+            for r in (rows_data or [])
             if not (r.get("project_id") == project_id and r.get("model_id") == model_id)
         ]
 
         return "/home", updated_rows, session_data
 
-    
     @app.callback(
         Output("project-required-modal", "is_open", allow_duplicate=True),
         Output("url", "pathname", allow_duplicate=True),
@@ -197,7 +206,9 @@ def register_home_callbacks(app):
         prevent_initial_call=True,
     )
     def go_back_to_list(n_clicks, project_id, is_open):
-        logger.debug(f"Add model clicked {n_clicks} times with project_id={project_id} and modal open={is_open}")
+        logger.debug(
+            f"Add model clicked {n_clicks} times with project_id={project_id} and modal open={is_open}"
+        )
         if not n_clicks:
             raise PreventUpdate
 
@@ -205,7 +216,7 @@ def register_home_callbacks(app):
             return True, dash.no_update
 
         return False, f"/model-upload/{project_id}"
-    
+
     @app.callback(
         Output("project-required-modal", "is_open", allow_duplicate=True),
         Input("close-project-modal", "n_clicks"),
@@ -213,7 +224,7 @@ def register_home_callbacks(app):
         prevent_initial_call=True,
     )
     def close_modal(n_clicks, is_open):
-        logger.debug(f"Close project modal clicked {n_clicks} times with modal open={is_open}")
+        logger.debug(
+            f"Close project modal clicked {n_clicks} times with modal open={is_open}"
+        )
         return not is_open
-    
-

@@ -1,9 +1,11 @@
-from sqlalchemy import Column, String, Boolean
+import uuid
+
+from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-import uuid
-from model_registry.api.models.role_permission import RolePermission
+
 from model_registry.api.core.database import Base
+
 
 class Role(Base):
     __tablename__ = "roles"

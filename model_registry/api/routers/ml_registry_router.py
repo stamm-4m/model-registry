@@ -1,35 +1,32 @@
-from typing import Optional
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 
-from model_registry.api.models import user
-from model_registry.api.models.prediction_request import PredictionRequest
 from model_registry.api.models.explain_request import ExplainRequest
-from model_registry.api.services import explainability
 from model_registry.api.models.laboratory_project import LaboratoryProject
-from fastapi import Request
+from model_registry.api.models.prediction_request import PredictionRequest
 from model_registry.api.models.project import Project
+from model_registry.api.services import explainability
 
 router = APIRouter(prefix="", tags=["ML"])
 
 import logging
-from model_registry.api.core.dependencies import require_permission_resource
-from fastapi import Depends, HTTPException
-from model_registry.api.models.user import User
+
+from fastapi import Depends
 from sqlalchemy.orm import Session
+
 from model_registry.api.core.database import get_db
+from model_registry.api.core.dependencies import require_permission_resource
 from model_registry.api.models.predictor import ModelPredictor
-from model_registry.api.utils.project_loader import (
-    load_project_info
-)
+from model_registry.api.utils.project_loader import load_project_info
 
 logger = logging.getLogger(__name__)
 
 # ---------------- Project Metadata ----------------
 
+
 @router.get("/list_projects/")
 def list_projects(
     user=Depends(require_permission_resource("project:read", "Projects")),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     List all projects with their ID and basic information from project_info.yaml
@@ -48,9 +45,12 @@ def list_projects(
             return []
 
         # get project IDs from laboratory_project table based on user's lab access
-        project_ids = db.query(LaboratoryProject.project_id).filter(
-            LaboratoryProject.laboratory_id.in_(user_lab_ids)
-        ).distinct().all()
+        project_ids = (
+            db.query(LaboratoryProject.project_id)
+            .filter(LaboratoryProject.laboratory_id.in_(user_lab_ids))
+            .distinct()
+            .all()
+        )
         project_ids = [p[0] for p in project_ids]
 
         if not project_ids:
@@ -63,23 +63,27 @@ def list_projects(
         for project in projects_db:
             try:
                 info = load_project_info(project.project_id) or {}
-                projects.append({
-                    "project_ID": info.get("project_ID", project.project_id),
-                    "name": info.get("project_name", project.name),
-                    "description": info.get("description", project.description),
-                    "create_at": info.get("create_at", project.created_at),
-                })
+                projects.append(
+                    {
+                        "project_ID": info.get("project_ID", project.project_id),
+                        "name": info.get("project_name", project.name),
+                        "description": info.get("description", project.description),
+                        "create_at": info.get("create_at", project.created_at),
+                    }
+                )
             except Exception as exc:
                 # A single corrupt project must not break the listing.
                 logger.warning(
                     "Skipping project_id=%s due to error: %s",
-                    project.project_id, exc,
+                    project.project_id,
+                    exc,
                 )
                 continue
         return projects
     except Exception as e:
         logger.exception("list_projects failed")
         raise HTTPException(status_code=500, detail=f"Error listing projects: {e}")
+
 
 @router.get("/{project_id}/project_info/")
 def get_project_info(
@@ -101,8 +105,11 @@ def get_project_info(
     """
     info = load_project_info(project_id)
     if not info:
-        raise HTTPException(status_code=404, detail=f"No info for project ID {project_id}")
+        raise HTTPException(
+            status_code=404, detail=f"No info for project ID {project_id}"
+        )
     return info
+
 
 @router.get("/{project_id}/db_config/")
 def get_db_config(
@@ -112,6 +119,7 @@ def get_db_config(
     info = load_project_info(project_id)
     return info.get("db_config", {})
 
+
 @router.get("/{project_id}/references/")
 def get_references(
     project_id: str,
@@ -119,6 +127,7 @@ def get_references(
 ):
     info = load_project_info(project_id)
     return info.get("references", [])
+
 
 @router.get("/{project_id}/variables/")
 def get_variables(
@@ -128,7 +137,9 @@ def get_variables(
     info = load_project_info(project_id)
     return info.get("variables", [])
 
+
 # ---------------- Model Endpoints ----------------
+
 
 @router.get("/{project_id}/list_models/")
 def list_models_endpoint(
@@ -141,12 +152,14 @@ def list_models_endpoint(
     """
     try:
         registry = request.app.state.registry
-        models = registry.get_project(project_id)        
+        models = registry.get_project(project_id)
         return [
             {
                 "model_ID": model_id,
                 "model_name": info["name"],
-                "metadata": info["config"]["ml_model_configuration"]["model_identification"]
+                "metadata": info["config"]["ml_model_configuration"][
+                    "model_identification"
+                ],
             }
             for model_id, info in models.items()
         ]
@@ -172,13 +185,14 @@ def reload_project_endpoint(
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+
 @router.get("/{project_id}/metadata/{model_id}")
 def get_model_metadata(
-    project_id: str, 
-    model_id: str, 
+    project_id: str,
+    model_id: str,
     request: Request,
-    user=Depends(require_permission_resource("models:read", "Models"))
-    ):
+    user=Depends(require_permission_resource("models:read", "Models")),
+):
     """Return model metadata using model ID."""
     try:
         registry = request.app.state.registry
@@ -193,11 +207,12 @@ def get_model_metadata(
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+
 @router.get("/{project_id}/models_full/")
 def list_models_full(
     project_id: str,
     request: Request,
-    user=Depends(require_permission_resource("models:read", "Models"))
+    user=Depends(require_permission_resource("models:read", "Models")),
 ):
     """List all models in a project with full metadata, but only for models with status "online".
 
@@ -219,15 +234,16 @@ def list_models_full(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # ---  ------------- Model update ----------------
 @router.put("/{project_id}/update/{model_id}")
 def update_model(
-    project_id: str, 
-    model_id: str, 
-    payload: dict, 
+    project_id: str,
+    model_id: str,
+    payload: dict,
     request: Request,
-    user=Depends(require_permission_resource("models:edit", "Models"))
-    ):
+    user=Depends(require_permission_resource("models:edit", "Models")),
+):
     try:
         registry = request.app.state.registry
         registry.update_model(project_id, model_id, payload)
@@ -235,7 +251,9 @@ def update_model(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
 # ---------------- Prediction Endpoint ----------------
+
 
 @router.post("/{project_id}/predict/{model_id}")
 def predict(
@@ -243,7 +261,7 @@ def predict(
     model_id: str,
     request: PredictionRequest,
     req: Request,
-    user=Depends(require_permission_resource("models:deploy", "Models"))
+    user=Depends(require_permission_resource("models:deploy", "Models")),
 ):
     """
     Predict using a model identified by its ID.
@@ -262,8 +280,10 @@ def predict(
         input_scaler = model_info["input_scaler"]
         output_scaler = model_info["output_scaler"]
         outputs = config["ml_model_configuration"]["outputs"]
-        
-        logger.info(f"Model and scalers loaded for project '{project_id}', model '{model}'")
+
+        logger.info(
+            f"Model and scalers loaded for project '{project_id}', model '{model}'"
+        )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -282,18 +302,21 @@ def predict(
         return ModelPredictor._proxy_to_r_api(project_id, model_id, request)
 
     # Otherwise -> run Python prediction
-    logger.info(f"Running prediction for project '{project_id}', model '{model}' using Python model.")
+    logger.info(
+        f"Running prediction for project '{project_id}', model '{model}' using Python model."
+    )
     return ModelPredictor(model, input_scaler, output_scaler, outputs).predict(request)
 
 
 # ---------------- Explainability Endpoint ----------------
+
 
 @router.post("/{project_id}/explain/{model_id}")
 def explain_model(
     project_id: str,
     model_id: str,
     req: Request,
-    body: Optional[ExplainRequest] = None,
+    body: ExplainRequest | None = None,
     user=Depends(require_permission_resource("models:read", "Models")),
 ):
     """Return XAI explanations for a model. Loads nothing — uses the model the
@@ -316,6 +339,7 @@ def explain_model(
     if body and body.rows:
         try:
             import pandas as pd
+
             df = pd.DataFrame(body.rows)
         except Exception as e:
             return {"ok": False, "reason": f"could not parse rows: {e}"}

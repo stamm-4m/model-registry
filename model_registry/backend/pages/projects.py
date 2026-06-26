@@ -1,5 +1,5 @@
-from dash import dcc, html
 import dash_bootstrap_components as dbc
+from dash import dcc, html
 
 from model_registry.backend.pages.experiment_modal import experiment_modal
 from model_registry.backend.pages.modal_project import project_modal
@@ -111,9 +111,7 @@ def projects_layout(session_data=None):
             dcc.Store(id="proj-delete-id"),
             dcc.Store(id="exp-edit-id"),
             dcc.Store(id="exp-delete-id"),
-
             header,
-
             dbc.Row(
                 [
                     dbc.Col(projects_col, xs=12, md=6),
@@ -121,7 +119,6 @@ def projects_layout(session_data=None):
                 ],
                 className="g-3",
             ),
-
             # Modals (unchanged, in their own files)
             project_modal(),
             experiment_modal(),

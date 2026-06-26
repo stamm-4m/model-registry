@@ -5,25 +5,24 @@ integrating JSON Schema validation based on algorithm templates.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from model_registry.api.core.database import get_db
 from model_registry.api.core.dependencies import require_permission_resource
-from model_registry.api.scaffold.crud import _row_to_dict, _coerce_pk
 from model_registry.api.models import Model
+from model_registry.api.scaffold.crud import _coerce_pk, _row_to_dict
 from model_registry.backend.services.template_validator import (
-    validate_model_payload,
     TemplateValidationError,
+    validate_model_payload,
 )
-
 
 logger = logging.getLogger(__name__)
 
 
-def _flatten_model_payload(body: Dict[str, Any]) -> Dict[str, Any]:
+def _flatten_model_payload(body: dict[str, Any]) -> dict[str, Any]:
     """Map the JSON-schema–shaped payload from the form to flat DB columns.
 
     The form (and JSON schema) use nested convenience objects:
@@ -39,10 +38,10 @@ def _flatten_model_payload(body: Dict[str, Any]) -> Dict[str, Any]:
     # artifact block
     artifact = flat.pop("artifact", None)
     if isinstance(artifact, dict):
-        flat.setdefault("artifact_path",       artifact.get("path"))
-        flat.setdefault("artifact_format",     artifact.get("format"))
+        flat.setdefault("artifact_path", artifact.get("path"))
+        flat.setdefault("artifact_format", artifact.get("format"))
         flat.setdefault("artifact_size_bytes", artifact.get("size_bytes"))
-        flat.setdefault("artifact_sha256",     artifact.get("sha256"))
+        flat.setdefault("artifact_sha256", artifact.get("sha256"))
 
     # training block
     training = flat.pop("training", None)
@@ -57,8 +56,10 @@ def _flatten_model_payload(body: Dict[str, Any]) -> Dict[str, Any]:
     # governance block
     governance = flat.pop("governance", None)
     if isinstance(governance, dict):
-        flat.setdefault("validation_status", governance.get("validation_status", "pending"))
-        flat.setdefault("validation_notes",  governance.get("validation_notes"))
+        flat.setdefault(
+            "validation_status", governance.get("validation_status", "pending")
+        )
+        flat.setdefault("validation_notes", governance.get("validation_notes"))
 
     # config must be a dict, never None
     if flat.get("config") is None:
@@ -73,8 +74,8 @@ def _flatten_model_payload(body: Dict[str, Any]) -> Dict[str, Any]:
 
 def register_model_crud(
     router: APIRouter,
-    read_perms: Optional[List[str]] = None,
-    write_perms: Optional[List[str]] = None,
+    read_perms: list[str] | None = None,
+    write_perms: list[str] | None = None,
 ) -> None:
     """Register validated CRUD endpoints for Model table.
 
@@ -95,7 +96,7 @@ def register_model_crud(
 
     @router.post(f"{base}/", tags=[tag], status_code=201)
     def create_model(
-        body: Dict[str, Any],
+        body: dict[str, Any],
         db: Session = Depends(get_db),
         user=Depends(require_permission_resource(write_perms, Model.__tablename__)),
     ):
@@ -123,13 +124,15 @@ def register_model_crud(
             return _row_to_dict(row)
         except Exception as exc:
             db.rollback()
-            logger.error("Failed to create model: %s | payload keys: %s", exc, list(flat.keys()))
+            logger.error(
+                "Failed to create model: %s | payload keys: %s", exc, list(flat.keys())
+            )
             raise HTTPException(500, f"Failed to create model: {exc}")
 
     @router.patch(f"{base}/{{model_id}}", tags=[tag])
     def update_model(
         model_id: str,
-        body: Dict[str, Any],
+        body: dict[str, Any],
         db: Session = Depends(get_db),
         user=Depends(require_permission_resource(write_perms, Model.__tablename__)),
     ):
@@ -148,7 +151,9 @@ def register_model_crud(
                 merged = {**_row_to_dict(row), **flat}
                 validate_model_payload(merged)
             except TemplateValidationError as e:
-                logger.warning("Template validation warnings on update (proceeding): %s", e)
+                logger.warning(
+                    "Template validation warnings on update (proceeding): %s", e
+                )
             except ValueError as e:
                 logger.debug("Template validation skipped: %s", e)
 

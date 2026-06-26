@@ -1,17 +1,21 @@
-from dash import Output, Input, State, ALL
+import logging
+
 import dash
+from dash import ALL, Input, Output, State
 from dash.exceptions import PreventUpdate
+
 from model_registry.backend.core.exceptions import DepartmentInUseException
 from model_registry.backend.services.department_service import DepartmentService
-import logging
+
 logger = logging.getLogger(__name__)
+
 
 def register_delete_department_modal_callbacks(app):
     @app.callback(
         Output("delete-dept-modal", "is_open"),
         Output("dept-delete-id", "data"),
         Input({"type": "btn-delete-dept", "index": ALL}, "n_clicks"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
     )
     def open_delete_modal_dept(n_clicks_list):
         ctx = dash.callback_context
@@ -25,9 +29,9 @@ def register_delete_department_modal_callbacks(app):
         dept_id = ctx.triggered_id["index"]
 
         return True, dept_id
-    
+
     @app.callback(
-        Output("delete-dept-modal", "is_open",allow_duplicate=True),
+        Output("delete-dept-modal", "is_open", allow_duplicate=True),
         Output("dept-refresh-trigger", "data", allow_duplicate=True),
         Output("dept-toast", "is_open", allow_duplicate=True),
         Output("dept-toast", "children", allow_duplicate=True),
@@ -36,7 +40,7 @@ def register_delete_department_modal_callbacks(app):
         Input("btn-confirm-delete-dept", "n_clicks"),
         State("dept-delete-id", "data"),
         State("user-session", "data"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
     )
     def confirm_delete_dept(n_clicks, dept_id, session_data):
         if not n_clicks or not dept_id:
@@ -46,9 +50,9 @@ def register_delete_department_modal_callbacks(app):
         try:
             _, session_data = service.delete_department(session_data, dept_id)
             return (
-                False,              # cerrar modal
-                n_clicks,           # refresh tabla
-                True,               # mostrar toast
+                False,  # cerrar modal
+                n_clicks,  # refresh tabla
+                True,  # mostrar toast
                 "Department deleted successfully",
                 "success",
                 session_data,
@@ -72,11 +76,11 @@ def register_delete_department_modal_callbacks(app):
                 "danger",
                 session_data,
             )
-    
+
     @app.callback(
         Output("delete-dept-modal", "is_open", allow_duplicate=True),
         Input("btn-cancel-delete-dept", "n_clicks"),
-        prevent_initial_call=True
+        prevent_initial_call=True,
     )
     def cancel_delete(n):
         return False

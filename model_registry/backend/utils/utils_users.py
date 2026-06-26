@@ -1,5 +1,5 @@
-from dash import html
 import dash_bootstrap_components as dbc
+from dash import html
 
 _DASH = "\u2014"
 
@@ -22,8 +22,13 @@ def _role_class(role_name: str) -> str:
     # ml, qa, user. Anything else falls back to the generic ``role-user``
     # pill so it still looks consistent.
     if slug in {
-        "super_admin", "admin", "operator", "engineer",
-        "ml", "qa", "user",
+        "super_admin",
+        "admin",
+        "operator",
+        "engineer",
+        "ml",
+        "qa",
+        "user",
     }:
         return f"role-{slug}"
     if "admin" in slug:
@@ -98,8 +103,7 @@ def build_table_users(users):
                         "\u2713" if user.is_active else _DASH,
                         style={
                             "color": (
-                                "var(--green)" if user.is_active
-                                else "var(--ink-faint)"
+                                "var(--green)" if user.is_active else "var(--ink-faint)"
                             ),
                             "fontWeight": 700,
                             "textAlign": "center",
@@ -168,28 +172,40 @@ def build_table_users(users):
 
 
 def toast_confirm_delete_user():
-    return html.Div([
-        dbc.Toast(
-            id="user-toast",
-            header="Notification",
-            is_open=False,
-            dismissable=True,
-            duration=4000,
-            icon="primary",
-            style={
-                "position": "fixed",
-                "top": 10,
-                "right": 10,
-                "width": 350,
-                "zIndex": 9999
-            }
-        ),
-        dbc.Modal([
-            dbc.ModalHeader(dbc.ModalTitle("Confirm Delete")),
-            dbc.ModalBody("Are you sure you want to delete this user?"),
-            dbc.ModalFooter([
-                dbc.Button("Cancel", id="btn-cancel-delete-user", color="secondary"),
-                dbc.Button("Delete", id="btn-confirm-delete-user", color="danger")
-            ])
-        ], id="delete-user-modal", is_open=False),
-    ])
+    return html.Div(
+        [
+            dbc.Toast(
+                id="user-toast",
+                header="Notification",
+                is_open=False,
+                dismissable=True,
+                duration=4000,
+                icon="primary",
+                style={
+                    "position": "fixed",
+                    "top": 10,
+                    "right": 10,
+                    "width": 350,
+                    "zIndex": 9999,
+                },
+            ),
+            dbc.Modal(
+                [
+                    dbc.ModalHeader(dbc.ModalTitle("Confirm Delete")),
+                    dbc.ModalBody("Are you sure you want to delete this user?"),
+                    dbc.ModalFooter(
+                        [
+                            dbc.Button(
+                                "Cancel", id="btn-cancel-delete-user", color="secondary"
+                            ),
+                            dbc.Button(
+                                "Delete", id="btn-confirm-delete-user", color="danger"
+                            ),
+                        ]
+                    ),
+                ],
+                id="delete-user-modal",
+                is_open=False,
+            ),
+        ]
+    )

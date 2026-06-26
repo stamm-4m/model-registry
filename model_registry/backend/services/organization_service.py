@@ -11,7 +11,7 @@ Conventions (mirroring ``model_service`` / ``ProjectService``):
   are propagated back to the Dash session store.
 """
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 from uuid import UUID
 
 from model_registry.backend.core.exceptions import OrganizationInUseException
@@ -23,11 +23,10 @@ from model_registry.backend.services.api_clients import (
 )
 from model_registry.backend.services.dtos import OrganizationDTO
 
+_SessionData = dict[str, Any]
 
-_SessionData = Dict[str, Any]
 
-
-def _coerce_id(value) -> Optional[str]:
+def _coerce_id(value) -> str | None:
     if value is None:
         return None
     if isinstance(value, UUID):
@@ -40,10 +39,10 @@ class OrganizationService:
 
     def __init__(
         self,
-        client: Optional[OrganizationsApiClient] = None,
-        org_dept_client: Optional[OrganizationsDepartmentsApiClient] = None,
-        dept_lab_client: Optional[DepartmentLaboratoryApiClient] = None,
-        lab_user_client: Optional[LaboratoryUserApiClient] = None,
+        client: OrganizationsApiClient | None = None,
+        org_dept_client: OrganizationsDepartmentsApiClient | None = None,
+        dept_lab_client: DepartmentLaboratoryApiClient | None = None,
+        lab_user_client: LaboratoryUserApiClient | None = None,
     ):
         self.client = client or OrganizationsApiClient()
         self.org_dept_client = org_dept_client or OrganizationsDepartmentsApiClient()
@@ -56,7 +55,7 @@ class OrganizationService:
 
     def get_all_organizations(
         self, session_data: _SessionData
-    ) -> Tuple[List[OrganizationDTO], Optional[_SessionData]]:
+    ) -> tuple[list[OrganizationDTO], _SessionData | None]:
         data, session_data = self.client.list(session_data)
         if data is None:
             return [], session_data
@@ -64,18 +63,16 @@ class OrganizationService:
 
     def get_organization(
         self, session_data: _SessionData, organization_id
-    ) -> Tuple[Optional[OrganizationDTO], Optional[_SessionData]]:
-        data, session_data = self.client.get(
-            _coerce_id(organization_id), session_data
-        )
+    ) -> tuple[OrganizationDTO | None, _SessionData | None]:
+        data, session_data = self.client.get(_coerce_id(organization_id), session_data)
         if data is None:
             return None, session_data
         return OrganizationDTO.from_dict(data), session_data
 
     def create_organization(
-        self, session_data: _SessionData, name: str, location: Optional[str] = None
-    ) -> Tuple[Optional[OrganizationDTO], Optional[_SessionData]]:
-        payload: Dict[str, Any] = {"name": name}
+        self, session_data: _SessionData, name: str, location: str | None = None
+    ) -> tuple[OrganizationDTO | None, _SessionData | None]:
+        payload: dict[str, Any] = {"name": name}
         if location is not None:
             payload["location"] = location
         data, session_data = self.client.create(payload, session_data)
@@ -87,10 +84,10 @@ class OrganizationService:
         self,
         session_data: _SessionData,
         organization_id,
-        name: Optional[str] = None,
-        location: Optional[str] = None,
-    ) -> Tuple[Optional[OrganizationDTO], Optional[_SessionData]]:
-        payload: Dict[str, Any] = {}
+        name: str | None = None,
+        location: str | None = None,
+    ) -> tuple[OrganizationDTO | None, _SessionData | None]:
+        payload: dict[str, Any] = {}
         if name is not None:
             payload["name"] = name
         if location is not None:
@@ -106,7 +103,7 @@ class OrganizationService:
 
     def delete_organization(
         self, session_data: _SessionData, organization_id
-    ) -> Tuple[bool, Optional[_SessionData]]:
+    ) -> tuple[bool, _SessionData | None]:
         """Delete an organization, raising ``OrganizationInUseException``
         when departments or downstream users still reference it.
 
@@ -144,7 +141,7 @@ class OrganizationService:
 
     def _dependency_counts(
         self, session_data: _SessionData, organization_id: str
-    ) -> Tuple[Dict[str, int], Optional[_SessionData]]:
+    ) -> tuple[dict[str, int], _SessionData | None]:
         """Replicates ``OrganizationRepository.get_dependency_counts`` over HTTP."""
         oid = str(organization_id)
 
@@ -158,7 +155,7 @@ class OrganizationService:
 
         lab_count = 0
         user_count = 0
-        lab_ids: List[str] = []
+        lab_ids: list[str] = []
 
         if dept_ids:
             dept_labs, session_data = self.dept_lab_client.list(session_data)
@@ -166,8 +163,7 @@ class OrganizationService:
             lab_ids = [
                 str(d.get("laboratory_id"))
                 for d in dept_labs
-                if str(d.get("department_id")) in dept_ids
-                and d.get("laboratory_id")
+                if str(d.get("department_id")) in dept_ids and d.get("laboratory_id")
             ]
             lab_count = len(lab_ids)
 

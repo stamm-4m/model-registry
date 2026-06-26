@@ -7,10 +7,11 @@ Schema reminder:
     soft_sensors(id uuid PK, path_metadata text, path_model text)
     UNIQUE (path_metadata, path_model)
 """
+
 from uuid import uuid4
+
 from sqlalchemy import Column, Text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
 
 from model_registry.api.core.database import Base
 

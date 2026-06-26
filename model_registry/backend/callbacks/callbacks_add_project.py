@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 def register_add_project_callbacks(app):
-
     @app.callback(
         Output("assigned-users", "options"),
         Input("assigned-users", "id"),
@@ -68,11 +67,16 @@ def register_add_project_callbacks(app):
             return (
                 "You must assign the project to a laboratory so it appears "
                 "in the project list.",
-                True, False, "", "",
+                True,
+                False,
+                "",
+                "",
             )
 
         return (
-            "", False, True,
+            "",
+            False,
+            True,
             "Confirm Project Creation",
             "Are you sure you want to create this project?",
         )
@@ -98,7 +102,10 @@ def register_add_project_callbacks(app):
         if not session_data or not session_data.get("authenticated"):
             return (
                 "Your session expired. Please log in again.",
-                True, False, no_update, no_update,
+                True,
+                False,
+                no_update,
+                no_update,
             )
 
         if not pid or not name or not lab_id:
@@ -108,30 +115,42 @@ def register_add_project_callbacks(app):
 
         # 1) Persist in the API database (Postgres via FastAPI).
         project_dto, session_data = service.create_project(
-            session_data, name=name, description=desc, project_id=pid,
+            session_data,
+            name=name,
+            description=desc,
+            project_id=pid,
         )
         if project_dto is None:
             logger.error("create_project failed for pid=%s name=%s", pid, name)
             return (
                 f"Failed to create project '{pid}' in the registry. "
                 "Check that the Project ID is unique.",
-                True, False, no_update, session_data or no_update,
+                True,
+                False,
+                no_update,
+                session_data or no_update,
             )
 
         # 2) Link the project to the chosen laboratory so it shows up in
         #    /list_projects/ (which filters by user lab access).
         link, session_data = service.assign_project_to_lab(
-            session_data, project_dto.id, lab_id,
+            session_data,
+            project_dto.id,
+            lab_id,
         )
         if link is None:
             logger.error(
                 "assign_project_to_lab failed for project=%s lab=%s",
-                project_dto.id, lab_id,
+                project_dto.id,
+                lab_id,
             )
             return (
                 "Project saved, but assigning it to the laboratory failed. "
                 "Edit the project to fix the laboratory link.",
-                True, False, no_update, session_data or no_update,
+                True,
+                False,
+                no_update,
+                session_data or no_update,
             )
 
         # 3) Materialize the on-disk folder structure + project_info.yaml
@@ -143,8 +162,10 @@ def register_add_project_callbacks(app):
             return (
                 "Project registered in the database, but the on-disk folder "
                 f"could not be created: {exc}",
-                True, False, no_update, session_data or no_update,
+                True,
+                False,
+                no_update,
+                session_data or no_update,
             )
 
         return "", False, False, "/", session_data or no_update
-

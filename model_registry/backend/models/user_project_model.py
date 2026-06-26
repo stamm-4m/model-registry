@@ -15,7 +15,7 @@ def assign_user_to_project(user_id, project_id):
         (user_id, project_id, can_access)
         VALUES (?, ?, 1)
         """,
-        (user_id, project_id)
+        (user_id, project_id),
     )
 
     conn.commit()
@@ -34,7 +34,7 @@ def list_projects_for_user(user_id):
         JOIN user_projects up ON p.project_id = up.project_id
         WHERE up.user_id = ? AND up.can_access = 1
         """,
-        (user_id,)
+        (user_id,),
     )
 
     rows = cursor.fetchall()

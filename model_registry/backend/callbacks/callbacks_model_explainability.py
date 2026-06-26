@@ -9,16 +9,17 @@ When the explainer service computed real values, they are stashed in
 figure for the chosen feature / instance. Otherwise they fall back to the
 deterministic placeholder builders. IDs never change.
 """
+
 import logging
 
 from dash import Input, Output, State, html, no_update
 from dash.exceptions import PreventUpdate
 
 from model_registry.backend.pages.model_explainability import (
-    build_pdp_fig,
-    build_pdp_fig_real,
     build_local_waterfall_fig,
     build_local_waterfall_fig_real,
+    build_pdp_fig,
+    build_pdp_fig_real,
 )
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ def register_model_explainability_callbacks(app):
     def _update_pdp(feature, store):
         if not feature or not store:
             raise PreventUpdate
-        pdp = (store.get("pdp") or {})
+        pdp = store.get("pdp") or {}
         if feature in pdp:
             d = pdp[feature]
             return build_pdp_fig_real(feature, d["x"], d["y"])
@@ -49,16 +50,20 @@ def register_model_explainability_callbacks(app):
     def _update_local(instance, store):
         if instance is None or not store:
             raise PreventUpdate
-        inst = (store.get("shap_instances") or {})
+        inst = store.get("shap_instances") or {}
         key = str(instance)
         if key in inst:
             d = inst[key]
             out_name = (store.get("outputs") or ["output"])[0]
             return build_local_waterfall_fig_real(
-                d["pairs"], d.get("base", 0.0), d.get("pred", 0.0), out_name)
+                d["pairs"], d.get("base", 0.0), d.get("pred", 0.0), out_name
+            )
         return build_local_waterfall_fig(
-            store.get("features", []), store.get("outputs", []),
-            store.get("seed_key", "x"), instance)
+            store.get("features", []),
+            store.get("outputs", []),
+            store.get("seed_key", "x"),
+            instance,
+        )
 
     @app.callback(
         Output("xai-core-container", "children"),
@@ -75,13 +80,16 @@ def register_model_explainability_callbacks(app):
             raise PreventUpdate
 
         def _err(msg):
-            return html.Span([html.I(className="bi bi-x-circle me-1"), msg],
-                             className="text-danger")
+            return html.Span(
+                [html.I(className="bi bi-x-circle me-1"), msg], className="text-danger"
+            )
 
         try:
             import base64
             import io
+
             import pandas as pd
+
             _, b64 = contents.split(",", 1)
             df = pd.read_csv(io.BytesIO(base64.b64decode(b64)))
         except Exception as exc:
@@ -90,8 +98,11 @@ def register_model_explainability_callbacks(app):
         features = store.get("features") or []
         missing = [f for f in features if f not in df.columns]
         if missing:
-            return no_update, no_update, _err(
-                f"Missing required input column(s): {', '.join(missing)}")
+            return (
+                no_update,
+                no_update,
+                _err(f"Missing required input column(s): {', '.join(missing)}"),
+            )
 
         outputs = store.get("outputs") or []
         target_column = outputs[0] if (outputs and outputs[0] in df.columns) else None
@@ -104,26 +115,52 @@ def register_model_explainability_callbacks(app):
 
         try:
             from model_registry.backend.services import xai_service
+
             live = xai_service.explain_with_data(
-                store.get("project_id"), store.get("model_id"),
-                store.get("profile"), rows,
-                target_column=target_column, session_data=session_data)
+                store.get("project_id"),
+                store.get("model_id"),
+                store.get("profile"),
+                rows,
+                target_column=target_column,
+                session_data=session_data,
+            )
         except Exception as exc:
             return no_update, no_update, _err(f"Explainer error: {exc}")
 
         if not live.get("ok"):
-            return no_update, no_update, _err(
-                f"Could not explain on this data: {live.get('reason', 'unknown')}")
+            return (
+                no_update,
+                no_update,
+                _err(
+                    f"Could not explain on this data: {live.get('reason', 'unknown')}"
+                ),
+            )
 
         from model_registry.backend.pages.model_explainability import _core_section
-        new_core = _core_section(features, outputs, store.get("seed_key", "x"),
-                                 bool(store.get("supervised", True)), live)
-        new_store = {**store, "pdp": live.get("pdp"),
-                     "shap_instances": live.get("shap_instances")}
-        target_note = "" if target_column else " (no target column → permutation importance skipped)"
-        msg = html.Span([
-            html.I(className="bi bi-check-circle me-1"),
-            f"Loaded {len(df)} rows from {filename}. Recomputed: "
-            f"{', '.join(live.get('capabilities', [])) or 'nothing'}.{target_note}",
-        ], className="text-success")
+
+        new_core = _core_section(
+            features,
+            outputs,
+            store.get("seed_key", "x"),
+            bool(store.get("supervised", True)),
+            live,
+        )
+        new_store = {
+            **store,
+            "pdp": live.get("pdp"),
+            "shap_instances": live.get("shap_instances"),
+        }
+        target_note = (
+            ""
+            if target_column
+            else " (no target column → permutation importance skipped)"
+        )
+        msg = html.Span(
+            [
+                html.I(className="bi bi-check-circle me-1"),
+                f"Loaded {len(df)} rows from {filename}. Recomputed: "
+                f"{', '.join(live.get('capabilities', [])) or 'nothing'}.{target_note}",
+            ],
+            className="text-success",
+        )
         return new_core, new_store, msg

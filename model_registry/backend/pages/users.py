@@ -26,14 +26,14 @@ Preserved IDs::
     roles-modal and all role-modal IDs (rendered by ``roles_modal()``)
 """
 
-from dash import dcc, html
 import dash_bootstrap_components as dbc
+from dash import dcc, html
 
 from model_registry.backend.pages.user_modal import user_modal
 from model_registry.backend.pages.user_modal_roles import roles_modal
 from model_registry.backend.services.user_service import UserService
-from model_registry.backend.utils.utils_users import toast_confirm_delete_user
 from model_registry.backend.utils.utils_sidebar import get_user_role
+from model_registry.backend.utils.utils_users import toast_confirm_delete_user
 
 
 def _role_filter_options(session_data):
@@ -150,11 +150,9 @@ def users_layout(session_data=None):
             # Page-local stores
             dcc.Store(id="user-edit-id"),
             dcc.Store(id="user-delete-id"),
-
             header,
             filter_bar,
             users_panel,
-
             # Modals (unchanged, in their own files for modularity).
             user_modal(),
             roles_modal(),
@@ -162,4 +160,3 @@ def users_layout(session_data=None):
         fluid=True,
         style={"padding": "20px 28px"},
     )
-

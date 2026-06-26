@@ -1,16 +1,16 @@
-from .project_dto import (
-    ProjectDTO,
-    LaboratoryRefDTO,
-    DepartmentRefDTO,
-    OrganizationRefDTO,
-    ProjectFullDTO,
-    LaboratoryProjectDTO,
-)
-from .organization_dto import OrganizationDTO, OrganizationDepartmentDTO
 from .department_dto import DepartmentDTO, DepartmentLaboratoryDTO
-from .laboratory_dto import LaboratoryDTO, LaboratoryUserDTO
-from .user_dto import UserDTO, UserRoleDTO
 from .experiment_dto import ExperimentDTO
+from .laboratory_dto import LaboratoryDTO, LaboratoryUserDTO
+from .organization_dto import OrganizationDepartmentDTO, OrganizationDTO
+from .project_dto import (
+    DepartmentRefDTO,
+    LaboratoryProjectDTO,
+    LaboratoryRefDTO,
+    OrganizationRefDTO,
+    ProjectDTO,
+    ProjectFullDTO,
+)
+from .user_dto import UserDTO, UserRoleDTO
 
 __all__ = [
     # project

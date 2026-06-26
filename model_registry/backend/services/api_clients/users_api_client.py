@@ -9,9 +9,11 @@ class UsersApiClient(BaseApiClient):
 
 class UserRolesApiClient(BaseApiClient):
     """Per-user role / permission assignments."""
+
     resource_path = "user_role"
 
 
 class RolesApiClient(BaseApiClient):
     """Catalogue of available roles."""
+
     resource_path = "roles"

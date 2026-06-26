@@ -22,7 +22,6 @@ def login_form():
     return html.Div(
         [
             dcc.Location(id="url-login", refresh=True),
-
             html.Div(
                 [
                     # ── Brand pane (left) ────────────────────────────────
@@ -59,7 +58,6 @@ def login_form():
                                 ],
                                 className="login-brand-top",
                             ),
-
                             html.Div(
                                 [
                                     html.Br(),
@@ -94,7 +92,6 @@ def login_form():
                                 ],
                                 className="login-pitch",
                             ),
-
                             html.Div(
                                 [
                                     html.Div(
@@ -151,7 +148,6 @@ def login_form():
                         ],
                         className="login-brand-pane",
                     ),
-
                     # ── Form pane (right) ────────────────────────────────
                     html.Div(
                         [
@@ -160,7 +156,6 @@ def login_form():
                                 "Welcome back. Enter your credentials to continue.",
                                 className="login-sub",
                             ),
-
                             # Username
                             html.Div(
                                 [
@@ -175,7 +170,6 @@ def login_form():
                                 ],
                                 className="login-field",
                             ),
-
                             # Password (with show/hide toggle)
                             html.Div(
                                 [
@@ -202,7 +196,6 @@ def login_form():
                                 ],
                                 className="login-field",
                             ),
-
                             # Remember me + register link
                             html.Div(
                                 [
@@ -227,7 +220,6 @@ def login_form():
                                 ],
                                 className="login-row",
                             ),
-
                             # Submit
                             html.Button(
                                 "Sign in →",
@@ -235,14 +227,12 @@ def login_form():
                                 n_clicks=0,
                                 className="login-submit",
                             ),
-
                             # Error / status message
                             html.Div(
                                 id="login-message",
                                 className="login-error",
                                 style={"minHeight": "16px"},
                             ),
-
                             html.Div(
                                 [
                                     html.Span("Need access? "),

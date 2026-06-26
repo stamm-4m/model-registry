@@ -1,23 +1,30 @@
-from model_registry.backend.repositories.base_repository import BaseRepository
-from model_registry.backend.models.organization_departament import OrganizationDepartment
 from model_registry.backend.models.department import Department
 from model_registry.backend.models.organization import Organization
+from model_registry.backend.models.organization_departament import (
+    OrganizationDepartment,
+)
+from model_registry.backend.repositories.base_repository import BaseRepository
+
 
 class DepartmentRepository(BaseRepository):
     def get_by_organization(self, organization_id):
-            return (
-                self.db.query(Department)
-                .join(OrganizationDepartment, OrganizationDepartment.department_id == Department.id)
-                .filter(OrganizationDepartment.organization_id == organization_id)
-                .all()
+        return (
+            self.db.query(Department)
+            .join(
+                OrganizationDepartment,
+                OrganizationDepartment.department_id == Department.id,
             )
+            .filter(OrganizationDepartment.organization_id == organization_id)
+            .all()
+        )
+
     def get_with_organization(self, dept_id):
         result = (
-            self.db.query(
-                Department,
-                OrganizationDepartment.organization_id
+            self.db.query(Department, OrganizationDepartment.organization_id)
+            .join(
+                OrganizationDepartment,
+                OrganizationDepartment.department_id == Department.id,
             )
-            .join(OrganizationDepartment, OrganizationDepartment.department_id == Department.id)
             .filter(Department.id == dept_id)
             .first()
         )
@@ -27,24 +34,22 @@ class DepartmentRepository(BaseRepository):
             return dept, org_id
 
         return None, None
-    
+
     def get_all(self):
         return (
-            self.db.query(
-                Department,
-                Organization.name.label("organization_name")
+            self.db.query(Department, Organization.name.label("organization_name"))
+            .join(
+                OrganizationDepartment,
+                OrganizationDepartment.department_id == Department.id,
             )
-            .join(OrganizationDepartment, OrganizationDepartment.department_id == Department.id)
-            .join(Organization, Organization.id == OrganizationDepartment.organization_id)
+            .join(
+                Organization, Organization.id == OrganizationDepartment.organization_id
+            )
             .all()
         )
 
     def get_by_id(self, department_id):
-        return (
-            self.db.query(Department)
-            .filter(Department.id == department_id)
-            .first()
-        )
+        return self.db.query(Department).filter(Department.id == department_id).first()
 
     def create(self, name, organization_id):
         department = Department(name=name)
@@ -53,8 +58,7 @@ class DepartmentRepository(BaseRepository):
         self.db.refresh(department)
 
         org_dept = OrganizationDepartment(
-            organization_id=organization_id,
-            department_id=department.id
+            organization_id=organization_id, department_id=department.id
         )
         self.db.add(org_dept)
         self.db.commit()

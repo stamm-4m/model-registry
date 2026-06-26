@@ -1,10 +1,11 @@
-from datetime import datetime
-from sqlalchemy import Column, Text, DateTime
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql import func
 import uuid
 
+from sqlalchemy import Column, DateTime, Text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.sql import func
+
 from model_registry.api.core.database import Base
+
 
 class Organization(Base):
     __tablename__ = "organizations"

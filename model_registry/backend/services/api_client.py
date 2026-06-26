@@ -1,10 +1,11 @@
-import requests
 import logging
-from model_registry.backend.services.auth_service import refresh_token
+
+import requests
+
 from model_registry.backend.config.settings import settings
+from model_registry.backend.services.auth_service import refresh_token
 
 logger = logging.getLogger(__name__)
-
 
 
 def authenticated_request(method, endpoint, session_data, **kwargs):

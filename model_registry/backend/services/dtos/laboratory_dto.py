@@ -1,18 +1,18 @@
 """DTOs for laboratory-related entities (laboratory + user link)."""
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 @dataclass
 class LaboratoryDTO:
-    id: Optional[str] = None
-    name: Optional[str] = None
-    location: Optional[str] = None
-    extra: Dict[str, Any] = field(default_factory=dict)
+    id: str | None = None
+    name: str | None = None
+    location: str | None = None
+    extra: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "LaboratoryDTO":
+    def from_dict(cls, data: dict[str, Any]) -> "LaboratoryDTO":
         if not data:
             return cls()
         known = {"id", "name", "location"}
@@ -24,7 +24,7 @@ class LaboratoryDTO:
             extra=extras,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         out = {"id": self.id, "name": self.name, "location": self.location}
         out.update(self.extra)
         return {k: v for k, v in out.items() if v is not None}
@@ -32,12 +32,12 @@ class LaboratoryDTO:
 
 @dataclass
 class LaboratoryUserDTO:
-    id: Optional[str] = None
-    laboratory_id: Optional[str] = None
-    user_id: Optional[str] = None
+    id: str | None = None
+    laboratory_id: str | None = None
+    user_id: str | None = None
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "LaboratoryUserDTO":
+    def from_dict(cls, data: dict[str, Any]) -> "LaboratoryUserDTO":
         data = data or {}
         return cls(
             id=data.get("id"),
