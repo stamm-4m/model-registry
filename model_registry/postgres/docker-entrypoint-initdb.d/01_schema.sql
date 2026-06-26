@@ -27,21 +27,20 @@
 --     catalog-version mismatch doesn't abort the init script. Without this,
 --     02_fermops_compat.sql would never run.
 --
+-- 1. schema: 
+ALTER SCHEMA public OWNER TO CURRENT_USER;
+COMMENT ON SCHEMA public IS '';
+
+-- 2. extensions: timescaledb, uuid-ossp, pgcrypto
 CREATE EXTENSION IF NOT EXISTS timescaledb;
-SELECT public.timescaledb_pre_restore();
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 
+COMMENT ON EXTENSION timescaledb IS 'Enables scalable inserts and complex queries for time-series data (Community Edition)';
 
---
--- PostgreSQL database dump
---
+COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
 
--- \restrict ytMqSjh7ZX5whfcGHQhAQGswQeYPuDOtKG6JqLgoLTpyQb5ZmUTMQLkf5ZS6lrL  [stripped: psql-18 directive]
-
--- Dumped from database version 17.9
--- Dumped by pg_dump version 18.1
-
--- Started on 2026-05-13 09:06:48
-
+-- 3. session configuration
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -53,64 +52,10 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
-
---
--- TOC entry 7 (class 2615 OID 33568)
--- Name: public; Type: SCHEMA; Schema: -; Owner: postgres
---
-
--- *not* creating schema, since initdb creates it
-
-
-ALTER SCHEMA public OWNER TO CURRENT_USER;
-
---
--- TOC entry 5827 (class 0 OID 0)
--- Dependencies: 7
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
---
-
-COMMENT ON SCHEMA public IS '';
-
-
---
--- TOC entry 3 (class 3079 OID 33580)
--- Name: timescaledb; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS timescaledb WITH SCHEMA public;
-
-
---
--- TOC entry 5829 (class 0 OID 0)
--- Dependencies: 3
--- Name: EXTENSION timescaledb; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION timescaledb IS 'Enables scalable inserts and complex queries for time-series data (Community Edition)';
-
-
---
--- TOC entry 2 (class 3079 OID 33569)
--- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
-
-
---
--- TOC entry 5830 (class 0 OID 0)
--- Dependencies: 2
--- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
-
-
 SET default_tablespace = '';
-
 SET default_table_access_method = heap;
 
+-- 4  tables core
 --
 -- TOC entry 316 (class 1259 OID 34607)
 -- Name: access_requests; Type: TABLE; Schema: public; Owner: postgres
@@ -813,597 +758,9 @@ CREATE TABLE public.users (
     is_active boolean DEFAULT true
 );
 
-
 ALTER TABLE public.users OWNER TO CURRENT_USER;
 
---
--- TOC entry 5246 (class 0 OID 33605)
--- Dependencies: 227
--- Data for Name: hypertable; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.hypertable (id, schema_name, table_name, associated_schema_name, associated_table_prefix, num_dimensions, chunk_sizing_func_schema, chunk_sizing_func_name, chunk_target_size, compression_state, compressed_hypertable_id, status) FROM stdin;
-1	public	sensor_readings	_timescaledb_internal	_hyper_1	1	_timescaledb_functions	calculate_chunk_interval	0	0	\N	0
-2	public	actuator_states	_timescaledb_internal	_hyper_2	1	_timescaledb_functions	calculate_chunk_interval	0	0	\N	0
-3	public	predictions	_timescaledb_internal	_hyper_3	1	_timescaledb_functions	calculate_chunk_interval	0	0	\N	0
-\.
-
-
---
--- TOC entry 5259 (class 0 OID 33737)
--- Dependencies: 241
--- Data for Name: bgw_job; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.bgw_job (id, application_name, schedule_interval, max_runtime, max_retries, retry_period, proc_schema, proc_name, owner, scheduled, fixed_schedule, initial_start, hypertable_id, config, check_schema, check_name, timezone) FROM stdin;
-\.
-
-
---
--- TOC entry 5252 (class 0 OID 33675)
--- Dependencies: 235
--- Data for Name: chunk; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.chunk (id, hypertable_id, schema_name, table_name, compressed_chunk_id, status, osm_chunk, creation_time) FROM stdin;
-\.
-
-
---
--- TOC entry 5256 (class 0 OID 33717)
--- Dependencies: 239
--- Data for Name: chunk_column_stats; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.chunk_column_stats (id, hypertable_id, chunk_id, column_name, range_start, range_end, valid) FROM stdin;
-\.
-
-
---
--- TOC entry 5248 (class 0 OID 33641)
--- Dependencies: 231
--- Data for Name: dimension; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.dimension (id, hypertable_id, column_name, column_type, aligned, num_slices, partitioning_func_schema, partitioning_func, interval_length, compress_interval_length, integer_now_func_schema, integer_now_func) FROM stdin;
-1	1	time	timestamp with time zone	t	\N	\N	\N	604800000000	\N	\N	\N
-2	2	time	timestamp with time zone	t	\N	\N	\N	604800000000	\N	\N	\N
-3	3	time	timestamp with time zone	t	\N	\N	\N	604800000000	\N	\N	\N
-\.
-
-
---
--- TOC entry 5250 (class 0 OID 33660)
--- Dependencies: 233
--- Data for Name: dimension_slice; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.dimension_slice (id, dimension_id, range_start, range_end) FROM stdin;
-\.
-
-
---
--- TOC entry 5254 (class 0 OID 33699)
--- Dependencies: 236
--- Data for Name: chunk_constraint; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.chunk_constraint (chunk_id, dimension_slice_id, constraint_name, hypertable_constraint_name) FROM stdin;
-\.
-
-
---
--- TOC entry 5269 (class 0 OID 33905)
--- Dependencies: 257
--- Data for Name: compression_chunk_size; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.compression_chunk_size (chunk_id, compressed_chunk_id, uncompressed_heap_size, uncompressed_toast_size, uncompressed_index_size, compressed_heap_size, compressed_toast_size, compressed_index_size, numrows_pre_compression, numrows_post_compression, numrows_frozen_immediately) FROM stdin;
-\.
-
-
---
--- TOC entry 5268 (class 0 OID 33894)
--- Dependencies: 256
--- Data for Name: compression_settings; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.compression_settings (relid, compress_relid, segmentby, orderby, orderby_desc, orderby_nullsfirst, index) FROM stdin;
-\.
-
-
---
--- TOC entry 5261 (class 0 OID 33806)
--- Dependencies: 248
--- Data for Name: continuous_agg; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.continuous_agg (mat_hypertable_id, raw_hypertable_id, parent_mat_hypertable_id, user_view_schema, user_view_name, partial_view_schema, partial_view_name, direct_view_schema, direct_view_name, materialized_only) FROM stdin;
-\.
-
-
---
--- TOC entry 5262 (class 0 OID 33832)
--- Dependencies: 249
--- Data for Name: continuous_aggs_bucket_function; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.continuous_aggs_bucket_function (mat_hypertable_id, bucket_func, bucket_width, bucket_origin, bucket_offset, bucket_timezone, bucket_fixed_width) FROM stdin;
-\.
-
-
---
--- TOC entry 5265 (class 0 OID 33865)
--- Dependencies: 252
--- Data for Name: continuous_aggs_hypertable_invalidation_log; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.continuous_aggs_hypertable_invalidation_log (hypertable_id, lowest_modified_value, greatest_modified_value) FROM stdin;
-\.
-
-
---
--- TOC entry 5263 (class 0 OID 33845)
--- Dependencies: 250
--- Data for Name: continuous_aggs_invalidation_threshold; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.continuous_aggs_invalidation_threshold (hypertable_id, watermark) FROM stdin;
-\.
-
-
---
--- TOC entry 5266 (class 0 OID 33869)
--- Dependencies: 253
--- Data for Name: continuous_aggs_materialization_invalidation_log; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.continuous_aggs_materialization_invalidation_log (materialization_id, lowest_modified_value, greatest_modified_value) FROM stdin;
-\.
-
-
---
--- TOC entry 5267 (class 0 OID 33878)
--- Dependencies: 254
--- Data for Name: continuous_aggs_materialization_ranges; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.continuous_aggs_materialization_ranges (materialization_id, lowest_modified_value, greatest_modified_value) FROM stdin;
-\.
-
-
---
--- TOC entry 5264 (class 0 OID 33855)
--- Dependencies: 251
--- Data for Name: continuous_aggs_watermark; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.continuous_aggs_watermark (mat_hypertable_id, watermark) FROM stdin;
-\.
-
-
---
--- TOC entry 5260 (class 0 OID 33793)
--- Dependencies: 246
--- Data for Name: metadata; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.metadata (key, value, include_in_telemetry) FROM stdin;
-install_timestamp	2026-04-30 18:28:25.798777+02	t
-timescaledb_version	2.26.2	f
-exported_uuid	0525b704-b8f5-490b-95e4-29e44be8bf00	t
-\.
-
-
---
--- TOC entry 5247 (class 0 OID 33627)
--- Dependencies: 229
--- Data for Name: tablespace; Type: TABLE DATA; Schema: _timescaledb_catalog; Owner: postgres
---
-
-COPY _timescaledb_catalog.tablespace (id, hypertable_id, tablespace_name) FROM stdin;
-\.
-
-
---
--- TOC entry 5817 (class 0 OID 34607)
--- Dependencies: 316
--- Data for Name: access_requests; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5782 (class 0 OID 34302)
--- Dependencies: 281
--- Data for Name: actuator_states; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5781 (class 0 OID 34291)
--- Dependencies: 280
--- Data for Name: actuators; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5813 (class 0 OID 34561)
--- Dependencies: 312
--- Data for Name: alert_rules; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5801 (class 0 OID 34463)
--- Dependencies: 300
--- Data for Name: alerts; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5804 (class 0 OID 34488)
--- Dependencies: 303
--- Data for Name: annotations; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5818 (class 0 OID 34618)
--- Dependencies: 317
--- Data for Name: audit_events; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5820 (class 0 OID 34640)
--- Dependencies: 319
--- Data for Name: bioreactor_instruments; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5810 (class 0 OID 34536)
--- Dependencies: 309
--- Data for Name: department_laboratory; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5807 (class 0 OID 34513)
--- Dependencies: 306
--- Data for Name: departments; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5814 (class 0 OID 34573)
--- Dependencies: 313
--- Data for Name: drift_detectors; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5792 (class 0 OID 34381)
--- Dependencies: 291
--- Data for Name: dynamic_model; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5780 (class 0 OID 34285)
--- Dependencies: 279
--- Data for Name: equipment_components; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5785 (class 0 OID 34326)
--- Dependencies: 284
--- Data for Name: equipments; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5784 (class 0 OID 34313)
--- Dependencies: 283
--- Data for Name: experiments; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5805 (class 0 OID 34496)
--- Dependencies: 304
--- Data for Name: experiments_equipments; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5819 (class 0 OID 34629)
--- Dependencies: 318
--- Data for Name: instruments; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5795 (class 0 OID 34403)
--- Dependencies: 294
--- Data for Name: laboratories; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5794 (class 0 OID 34395)
--- Dependencies: 293
--- Data for Name: laboratory_project; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5809 (class 0 OID 34530)
--- Dependencies: 308
--- Data for Name: laboratory_user; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5806 (class 0 OID 34504)
--- Dependencies: 305
--- Data for Name: organizations; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5808 (class 0 OID 34522)
--- Dependencies: 307
--- Data for Name: organizations_departments; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5799 (class 0 OID 34441)
--- Dependencies: 298
--- Data for Name: permissions; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5815 (class 0 OID 34586)
--- Dependencies: 314
--- Data for Name: phase_notes; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5816 (class 0 OID 34596)
--- Dependencies: 315
--- Data for Name: phase_overrides; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5789 (class 0 OID 34362)
--- Dependencies: 288
--- Data for Name: predictions; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5791 (class 0 OID 34375)
--- Dependencies: 290
--- Data for Name: project_dynamic_models; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5787 (class 0 OID 34346)
--- Dependencies: 286
--- Data for Name: project_soft_sensors; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5786 (class 0 OID 34335)
--- Dependencies: 285
--- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5812 (class 0 OID 34550)
--- Dependencies: 311
--- Data for Name: refresh_tokens; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5811 (class 0 OID 34542)
--- Dependencies: 310
--- Data for Name: resources; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5798 (class 0 OID 34433)
--- Dependencies: 297
--- Data for Name: role_permission; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5797 (class 0 OID 34423)
--- Dependencies: 296
--- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5783 (class 0 OID 34307)
--- Dependencies: 282
--- Data for Name: runs; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5802 (class 0 OID 34471)
--- Dependencies: 301
--- Data for Name: sensor_readings; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5803 (class 0 OID 34476)
--- Dependencies: 302
--- Data for Name: sensors; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5793 (class 0 OID 34389)
--- Dependencies: 292
--- Data for Name: simulations; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5790 (class 0 OID 34367)
--- Dependencies: 289
--- Data for Name: soft_sensor_metrics; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5788 (class 0 OID 34352)
--- Dependencies: 287
--- Data for Name: soft_sensors; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5821 (class 0 OID 34980)
--- Dependencies: 320
--- Data for Name: streaming_jobs; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5796 (class 0 OID 34413)
--- Dependencies: 295
--- Data for Name: user_role; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5800 (class 0 OID 34451)
--- Dependencies: 299
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
-
---
--- TOC entry 5831 (class 0 OID 0)
--- Dependencies: 240
--- Name: bgw_job_id_seq; Type: SEQUENCE SET; Schema: _timescaledb_catalog; Owner: postgres
---
-
-SELECT pg_catalog.setval('_timescaledb_catalog.bgw_job_id_seq', 1000, false);
-
-
---
--- TOC entry 5832 (class 0 OID 0)
--- Dependencies: 238
--- Name: chunk_column_stats_id_seq; Type: SEQUENCE SET; Schema: _timescaledb_catalog; Owner: postgres
---
-
-SELECT pg_catalog.setval('_timescaledb_catalog.chunk_column_stats_id_seq', 1, false);
-
-
---
--- TOC entry 5833 (class 0 OID 0)
--- Dependencies: 237
--- Name: chunk_constraint_name; Type: SEQUENCE SET; Schema: _timescaledb_catalog; Owner: postgres
---
-
-SELECT pg_catalog.setval('_timescaledb_catalog.chunk_constraint_name', 1, false);
-
-
---
--- TOC entry 5834 (class 0 OID 0)
--- Dependencies: 234
--- Name: chunk_id_seq; Type: SEQUENCE SET; Schema: _timescaledb_catalog; Owner: postgres
---
-
-SELECT pg_catalog.setval('_timescaledb_catalog.chunk_id_seq', 1, false);
-
-
---
--- TOC entry 5835 (class 0 OID 0)
--- Dependencies: 230
--- Name: dimension_id_seq; Type: SEQUENCE SET; Schema: _timescaledb_catalog; Owner: postgres
---
-
-SELECT pg_catalog.setval('_timescaledb_catalog.dimension_id_seq', 3, true);
-
-
---
--- TOC entry 5836 (class 0 OID 0)
--- Dependencies: 232
--- Name: dimension_slice_id_seq; Type: SEQUENCE SET; Schema: _timescaledb_catalog; Owner: postgres
---
-
-SELECT pg_catalog.setval('_timescaledb_catalog.dimension_slice_id_seq', 1, false);
-
-
---
--- TOC entry 5837 (class 0 OID 0)
--- Dependencies: 226
--- Name: hypertable_id_seq; Type: SEQUENCE SET; Schema: _timescaledb_catalog; Owner: postgres
---
-
-SELECT pg_catalog.setval('_timescaledb_catalog.hypertable_id_seq', 3, true);
-
-
+-- 5. constraints primary keys, unique
 --
 -- TOC entry 5551 (class 2606 OID 34616)
 -- Name: access_requests access_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
@@ -2047,7 +1404,7 @@ CREATE INDEX predictions_time_idx ON public.predictions USING btree ("time" DESC
 
 CREATE INDEX sensor_readings_time_idx ON public.sensor_readings USING btree ("time" DESC);
 
-
+-- 6. constraints foreign keys
 --
 -- TOC entry 5604 (class 2606 OID 34883)
 -- Name: department_laboratory FK_department_laboratory_department_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
@@ -2488,51 +1845,33 @@ ALTER TABLE ONLY public.phase_overrides
 ALTER TABLE ONLY public.refresh_tokens
     ADD CONSTRAINT refresh_tokens_user_fk FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
+-- 7. Create hypertables for TimescaleDB (if not already created)
 
---
--- TOC entry 5828 (class 0 OID 0)
--- Dependencies: 7
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
---
+SELECT public.create_hypertable(
+    'public.sensor_readings'::regclass,
+    'time'::name,
+    if_not_exists => TRUE
+);
 
-REVOKE USAGE ON SCHEMA public FROM PUBLIC;
-GRANT ALL ON SCHEMA public TO PUBLIC;
+SELECT public.create_hypertable(
+    'public.actuator_states'::regclass,
+    'time'::name,
+    if_not_exists => TRUE
+);
+
+SELECT public.create_hypertable(
+    'public.predictions'::regclass,
+    'time'::name,
+    if_not_exists => TRUE
+);
 
 
--- Completed on 2026-05-13 09:07:16
-
---
--- PostgreSQL database dump complete
---
-
--- \unrestrict ytMqSjh7ZX5whfcGHQhAQGswQeYPuDOtKG6JqLgoLTpyQb5ZmUTMQLkf5ZS6lrL  [stripped: psql-18 directive]
-
-
-
--- Tolerant post_restore. A TimescaleDB minor-version mismatch between
--- Carlos's source DB and our docker image (e.g. 2.26.4 vs 2.26.2) makes
--- post_restore() raise. We log and continue so 02_fermops_compat.sql
--- still runs; the background worker scheduler may need a manual restart.
-DO $$
-BEGIN
-    PERFORM public.timescaledb_post_restore();
-EXCEPTION WHEN OTHERS THEN
-    RAISE WARNING 'timescaledb_post_restore() failed: %', SQLERRM;
-    RAISE WARNING 'continuing init; background workers may need manual restart';
-END
-$$;
-
--- end of sanitized volcado --
-
+-- 8. FermOps additions: projects widening, model registry, FL
 
 -- ============================================================
 -- FermOps additions: projects widening, model registry, FL
 -- ============================================================
 BEGIN;
-
--- pgcrypto: required by 02_seed.sql crypt() password hashing.;
-
-CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 
 -- 9. Model registry + federated learning (proposal 2026-05-22) ----------
 -- Replaces YAML-on-disk + path-only soft_sensors with proper relational
@@ -2541,7 +1880,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 -- Idempotent: CREATE TABLE IF NOT EXISTS + ALTER ... ADD COLUMN IF NOT
 -- EXISTS, so re-running this script after a partial migration is safe.
 
--- 9.1 Projects: promote YAML fields to columns ---------------------------
+-- 8.1 Projects: promote YAML fields to columns ---------------------------
 -- 2026-05-22 (later same day): lead changed from free text to FK on
 -- users.id (one PI per project). `lead text` if present from an older
 -- init is left untouched here; the lift script in
@@ -2564,7 +1903,7 @@ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
--- 9.2 Federations (top-level FL collaboration) ---------------------------
+-- 8.2 Federations (top-level FL collaboration) ---------------------------
 CREATE TABLE IF NOT EXISTS public.federations (
     id                    uuid PRIMARY KEY DEFAULT public.uuid_generate_v4(),
     slug                  text NOT NULL UNIQUE,
@@ -2594,7 +1933,7 @@ CREATE TABLE IF NOT EXISTS public.federations (
     ))
 );
 
--- 9.3 Models (replaces path-only soft_sensors) ---------------------------
+-- 8.3 Models (replaces path-only soft_sensors) ---------------------------
 CREATE TABLE IF NOT EXISTS public.models (
     id                       uuid PRIMARY KEY DEFAULT public.uuid_generate_v4(),
     slug                     text NOT NULL UNIQUE,
@@ -2700,7 +2039,7 @@ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
--- 9.4 Project ↔ Model link table -----------------------------------------
+-- 8.4 Project ↔ Model link table -----------------------------------------
 CREATE TABLE IF NOT EXISTS public.project_models (
     id          uuid PRIMARY KEY DEFAULT public.uuid_generate_v4(),
     project_id  uuid NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
@@ -2710,7 +2049,7 @@ CREATE TABLE IF NOT EXISTS public.project_models (
     CONSTRAINT project_models_pmr_uq UNIQUE (project_id, model_id, role)
 );
 
--- 9.5 Federation ↔ Project link table -----------------------------------
+-- 8.5 Federation ↔ Project link table -----------------------------------
 CREATE TABLE IF NOT EXISTS public.federation_participants (
     id              uuid PRIMARY KEY DEFAULT public.uuid_generate_v4(),
     federation_id   uuid NOT NULL REFERENCES public.federations(id) ON DELETE CASCADE,
@@ -2727,7 +2066,7 @@ CREATE TABLE IF NOT EXISTS public.federation_participants (
     CONSTRAINT federation_participants_fp_uq UNIQUE (federation_id, project_id)
 );
 
--- 9.6 Multi-parent lineage (federated aggregation edges) ----------------
+-- 8.6 Multi-parent lineage (federated aggregation edges) ----------------
 CREATE TABLE IF NOT EXISTS public.model_contributions (
     id                      uuid PRIMARY KEY DEFAULT public.uuid_generate_v4(),
     aggregated_model_id     uuid NOT NULL REFERENCES public.models(id) ON DELETE CASCADE,
@@ -2750,7 +2089,7 @@ CREATE INDEX IF NOT EXISTS model_contributions_contrib_idx
 CREATE INDEX IF NOT EXISTS model_contributions_round_idx
     ON public.model_contributions (federation_id, round_number);
 
--- 3. Update projects with real metadata ----------------------------------
+-- 8.7 Update projects with real metadata ----------------------------------
 -- UUIDs from the volcado seed:
 --   P0001 = ccccccc1-cccc-cccc-cccc-cccccccccccc
 --   P0002 = ccccccc2-cccc-cccc-cccc-cccccccccccc
@@ -2758,7 +2097,7 @@ CREATE INDEX IF NOT EXISTS model_contributions_round_idx
 
 -- 2026-05-22 (afternoon): drop the obsolete `lead text` column if a prior
 -- init created it. The new column is `lead_user_id uuid REFERENCES users(id)`
--- (added in compat patch section 9.1). Idempotent: IF EXISTS.
+-- (added in compat patch section 8.1). Idempotent: IF EXISTS.
 ALTER TABLE public.projects DROP COLUMN IF EXISTS lead;
 
 -- Backfill for existing volumes where `models` was created before the
