@@ -1212,3 +1212,140 @@ table.admin-table tr.admin-row.active td { background: var(--orange-soft); }
     color: #374151;
     word-break: break-word;
 }
+/* =========================================================================
+   INRAE brand theme (appended override — wins by cascade order).
+   Palette: INRAE teal #00847F (primary) + slate #275662 (deep surface) +
+   white. Official INRAE primary is #00a3a6 — swap --brand below to use it.
+   All class names preserved; this only recolors.
+   ========================================================================= */
+:root {
+    --accent: #275662;          /* deep slate — sidebar, headings, primary surfaces */
+    --accent-soft: #e6eef0;
+    --blue: #00847F;            /* links / info -> INRAE teal */
+    --blue-soft: #e0f0ef;
+    --brand: #00847F;           /* INRAE teal (official primary: #00a3a6) */
+    --brand-dark: #275662;
+    --brand-soft: #e0f0ef;
+}
+
+/* teal interactive accents */
+a { color: var(--brand); }
+a:hover { color: var(--brand-dark); }
+
+.sidebar-link.active { box-shadow: inset 3px 0 0 var(--brand); }
+.sidebar-link.active .sidebar-icon,
+.sidebar-link.active .nav-text { color: #ffffff; }
+
+.btn-primary,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--brand) !important;
+    border-color: var(--brand) !important;
+}
+.btn-primary:hover {
+    background-color: var(--brand-dark) !important;
+    border-color: var(--brand-dark) !important;
+}
+.btn-outline-primary {
+    color: var(--brand) !important;
+    border-color: var(--brand) !important;
+}
+.btn-outline-primary:hover {
+    background-color: var(--brand) !important;
+    border-color: var(--brand) !important;
+    color: #fff !important;
+}
+.text-primary { color: var(--brand) !important; }
+.badge.bg-primary { background-color: var(--brand) !important; }
+
+/* ----- partner-logo footer ------------------------------------------- */
+.app-footer {
+    background: var(--accent);
+    color: rgba(255, 255, 255, 0.85);
+    border-top: 3px solid var(--brand);
+    padding: 20px 24px 18px;
+    margin-top: 32px;
+    text-align: center;
+}
+.app-footer-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 10px;
+}
+.app-footer-logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 34px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+.app-footer-logo {
+    height: 36px;
+    width: auto;
+    /* render every logo uniformly white on the slate band, whatever its source */
+    filter: brightness(0) invert(1);
+    opacity: 0.9;
+    transition: opacity 0.15s ease;
+}
+.app-footer-logo:hover { opacity: 1; }
+.app-footer-credit { font-size: 13px; color: rgba(255, 255, 255, 0.85); }
+.app-footer-credit strong { color: #ffffff; font-weight: 600; }
+.app-footer-copy {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 4px;
+}
+
+/* =========================================================================
+   INRAE — fold the legacy orange accent into the institutional teal.
+   Everything orange flows through --orange, so this single override recolours
+   all orange buttons, active borders, role pills and accents to INRAE teal.
+   (Attached swatch ≈ #00847F; swap here if you want the exact hex.)
+   ========================================================================= */
+:root {
+    --orange: #00847F;
+    --orange-soft: #e0f0ef;
+}
+
+/* =========================================================================
+   INRAE BLUE (#275662) — corrective override.
+   The brand accent and the former orange/red on buttons & controls must be
+   the institutional BLUE, not teal/green. This is the final :root, so it wins.
+   Swap --brand below if your blue swatch is a different hex.
+   ========================================================================= */
+:root {
+    --brand: #275662;          /* INRAE institutional blue */
+    --brand-dark: #1d434d;     /* hover / active */
+    --brand-soft: #e4eaed;
+    --blue: #275662;
+    --blue-soft: #e4eaed;
+    --orange: #275662;         /* former orange accent -> blue */
+    --orange-soft: #e4eaed;
+}
+/* sidebar sits on the same blue, so its active marker must be light to show */
+.sidebar-link.active { box-shadow: inset 3px 0 0 #ffffff; }
+
+/* =========================================================================
+   INRAE LOGO TEAL (#00a3a6) — final palette.
+   Use the exact turquoise from the INRAE logo as the brand accent (buttons,
+   links, active markers). Sidebar / headings / footer use a slightly deeper
+   teal (#007E82) so white text keeps good contrast. Final :root -> wins.
+   ========================================================================= */
+:root {
+    --brand: #00a3a6;          /* exact INRAE logo turquoise */
+    --brand-dark: #008c8e;     /* hover */
+    --brand-soft: #e1f3f3;
+    --accent: #007E82;         /* deeper teal — sidebar, headings, footer band */
+    --accent-soft: #e1f3f3;
+    --blue: #007E82;
+    --blue-soft: #e1f3f3;
+    --orange: #00a3a6;         /* former orange/red accent -> logo teal */
+    --orange-soft: #e1f3f3;
+}
+a { color: var(--accent); }
+a:hover { color: var(--brand-dark); }
+.sidebar-link.active { box-shadow: inset 3px 0 0 #ffffff; }

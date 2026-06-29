@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 130" font-family="sans-serif">
+  <rect width="260" height="130" fill="#ffffff"/>
+  <line x1="30" y1="110" x2="250" y2="110" stroke="#ced4da"/>
+  <path d="M30,70 C80,60 110,55 150,58 C190,61 220,40 250,30 L250,70 C220,72 190,80 150,80 C110,80 80,82 30,86 Z" fill="#00b894" opacity="0.15"/>
+  <path d="M30,78 C80,71 110,68 150,69 C190,70 220,58 250,50" fill="none" stroke="#00b894" stroke-width="2.5"/>
+  <text x="120" y="126" font-size="8" fill="#adb5bd">input →</text>
+  <text x="200" y="44" font-size="8" fill="#00b894">wider = less sure</text>
+</svg>

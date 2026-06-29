@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 130" font-family="sans-serif">
+  <rect width="260" height="130" fill="#ffffff"/>
+  <line x1="30" y1="110" x2="250" y2="110" stroke="#ced4da"/><line x1="30" y1="10" x2="30" y2="110" stroke="#ced4da"/>
+  <path d="M30,95 C90,90 110,55 160,42 S235,22 250,18 L250,40 C235,40 160,62 110,72 S60,100 30,103 Z" fill="#2c7be5" opacity="0.13"/>
+  <path d="M30,99 C90,93 110,58 160,45 S235,24 250,20" fill="none" stroke="#2c7be5" stroke-width="2.5"/>
+  <text x="120" y="126" font-size="8" fill="#adb5bd">feature value →</text>
+  <text x="34" y="20" font-size="8" fill="#adb5bd">prediction</text>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 130" font-family="sans-serif">
+  <rect width="260" height="130" fill="#ffffff"/>
+  <line x1="20" y1="100" x2="250" y2="100" stroke="#ced4da"/>
+  <text x="20" y="114" font-size="8" fill="#adb5bd">E[f(x)]</text>
+  <rect x="22" y="70" width="34" height="30" fill="#adb5bd"/>
+  <rect x="62" y="52" width="34" height="18" fill="#2c7be5"/><line x1="56" y1="70" x2="96" y2="70" stroke="#ced4da" stroke-dasharray="2"/>
+  <rect x="102" y="44" width="34" height="8" fill="#2c7be5"/>
+  <rect x="142" y="44" width="34" height="10" fill="#e17055"/>
+  <rect x="182" y="38" width="34" height="6" fill="#2c7be5"/>
+  <line x1="216" y1="38" x2="248" y2="38" stroke="#00b894" stroke-width="2"/>
+  <text x="218" y="34" font-size="8" fill="#00b894">f(x)</text>
+  <g font-size="7.5" fill="#495057"><text x="24" y="114">base</text><text x="64" y="114">sugar</text><text x="108" y="114">DO</text><text x="146" y="114">temp</text><text x="186" y="114">pH</text></g>
+</svg>

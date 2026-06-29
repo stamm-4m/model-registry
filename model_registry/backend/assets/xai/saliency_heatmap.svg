@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 130" font-family="sans-serif">
+  <rect width="260" height="130" fill="#ffffff"/>
+  <g font-size="8" fill="#495057"><text x="2" y="26">DO</text><text x="2" y="50">pH</text><text x="2" y="74">temp</text><text x="2" y="98">sugar</text></g>
+  <g>
+    <rect x="40" y="16" width="32" height="20" fill="#fbe9d0"/><rect x="74" y="16" width="32" height="20" fill="#f5b461"/><rect x="108" y="16" width="32" height="20" fill="#e8833a"/><rect x="142" y="16" width="32" height="20" fill="#c44e1f"/><rect x="176" y="16" width="32" height="20" fill="#7a2410"/>
+    <rect x="40" y="40" width="32" height="20" fill="#fdf2e2"/><rect x="74" y="40" width="32" height="20" fill="#fbe9d0"/><rect x="108" y="40" width="32" height="20" fill="#f5b461"/><rect x="142" y="40" width="32" height="20" fill="#e8833a"/><rect x="176" y="40" width="32" height="20" fill="#c44e1f"/>
+    <rect x="40" y="64" width="32" height="20" fill="#fdf2e2"/><rect x="74" y="64" width="32" height="20" fill="#fdf2e2"/><rect x="108" y="64" width="32" height="20" fill="#fbe9d0"/><rect x="142" y="64" width="32" height="20" fill="#f5b461"/><rect x="176" y="64" width="32" height="20" fill="#e8833a"/>
+    <rect x="40" y="88" width="32" height="20" fill="#fdf2e2"/><rect x="74" y="88" width="32" height="20" fill="#fdf2e2"/><rect x="108" y="88" width="32" height="20" fill="#fdf2e2"/><rect x="142" y="88" width="32" height="20" fill="#fbe9d0"/><rect x="176" y="88" width="32" height="20" fill="#f5b461"/>
+  </g>
+  <text x="120" y="124" font-size="8" fill="#adb5bd">time → (recent on right)</text>
+</svg>

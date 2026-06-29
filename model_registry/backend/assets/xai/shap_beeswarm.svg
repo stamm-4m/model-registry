@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 130" font-family="sans-serif">
+  <rect width="260" height="130" fill="#ffffff"/>
+  <line x1="130" y1="10" x2="130" y2="118" stroke="#ced4da"/>
+  <g font-size="9" fill="#495057">
+    <text x="4" y="28">sugar</text><text x="4" y="56">DO</text><text x="4" y="84">pH</text><text x="4" y="112">temp</text>
+  </g>
+  <g>
+    <circle cx="100" cy="24" r="3.2" fill="#2c7be5"/><circle cx="80" cy="24" r="3.2" fill="#2c7be5"/><circle cx="160" cy="24" r="3.2" fill="#e17055"/><circle cx="190" cy="24" r="3.2" fill="#e17055"/><circle cx="145" cy="24" r="3.2" fill="#f0a58a"/>
+    <circle cx="118" cy="52" r="3.2" fill="#6ea8e6"/><circle cx="150" cy="52" r="3.2" fill="#e17055"/><circle cx="108" cy="52" r="3.2" fill="#2c7be5"/><circle cx="168" cy="52" r="3.2" fill="#f0a58a"/>
+    <circle cx="124" cy="80" r="3.2" fill="#a9cbf0"/><circle cx="140" cy="80" r="3.2" fill="#f0a58a"/><circle cx="116" cy="80" r="3.2" fill="#6ea8e6"/>
+    <circle cx="128" cy="108" r="3.2" fill="#cfe0f5"/><circle cx="134" cy="108" r="3.2" fill="#f5c4b3"/>
+  </g>
+  <text x="150" y="16" font-size="8" fill="#e17055">high value</text>
+  <text x="78" y="124" font-size="8" fill="#2c7be5">low value</text>
+</svg>

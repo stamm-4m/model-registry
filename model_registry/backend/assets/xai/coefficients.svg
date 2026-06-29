@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 130" font-family="sans-serif">
+  <rect width="260" height="130" fill="#ffffff"/>
+  <line x1="130" y1="10" x2="130" y2="118" stroke="#ced4da"/>
+  <g font-size="9" fill="#495057">
+    <rect x="130" y="14" width="95" height="12" rx="2" fill="#2c7be5"/><text x="128" y="24" text-anchor="end">sugar</text>
+    <rect x="130" y="36" width="55" height="12" rx="2" fill="#2c7be5"/><text x="128" y="46" text-anchor="end">DO</text>
+    <rect x="92" y="58" width="38" height="12" rx="2" fill="#e17055"/><text x="186" y="68">pH</text>
+    <rect x="70" y="80" width="60" height="12" rx="2" fill="#e17055"/><text x="186" y="90">temperature</text>
+  </g>
+  <text x="150" y="112" font-size="8" fill="#2c7be5">+ raises</text><text x="70" y="112" font-size="8" fill="#e17055">− lowers</text>
+</svg>
