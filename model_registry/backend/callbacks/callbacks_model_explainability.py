@@ -15,11 +15,9 @@ import logging
 from dash import Input, Output, State, html, no_update
 from dash.exceptions import PreventUpdate
 
-from model_registry.backend.pages.model_explainability import (
-    build_local_waterfall_fig,
-    build_local_waterfall_fig_real,
-    build_pdp_fig,
-    build_pdp_fig_real,
+from model_registry.backend.utils import utils_model_explainability as xai_utils
+from model_registry.backend.utils import (
+    utils_model_explainability_sections as xai_sections,
 )
 
 logger = logging.getLogger(__name__)
@@ -38,8 +36,8 @@ def register_model_explainability_callbacks(app):
         pdp = store.get("pdp") or {}
         if feature in pdp:
             d = pdp[feature]
-            return build_pdp_fig_real(feature, d["x"], d["y"])
-        return build_pdp_fig(feature, store.get("seed_key", "x"))
+            return xai_utils.build_pdp_fig_real(feature, d["x"], d["y"])
+        return xai_utils.build_pdp_fig(feature, store.get("seed_key", "x"))
 
     @app.callback(
         Output("xai-local-graph", "figure"),
@@ -55,10 +53,10 @@ def register_model_explainability_callbacks(app):
         if key in inst:
             d = inst[key]
             out_name = (store.get("outputs") or ["output"])[0]
-            return build_local_waterfall_fig_real(
+            return xai_utils.build_local_waterfall_fig_real(
                 d["pairs"], d.get("base", 0.0), d.get("pred", 0.0), out_name
             )
-        return build_local_waterfall_fig(
+        return xai_utils.build_local_waterfall_fig(
             store.get("features", []),
             store.get("outputs", []),
             store.get("seed_key", "x"),
@@ -136,9 +134,7 @@ def register_model_explainability_callbacks(app):
                 ),
             )
 
-        from model_registry.backend.pages.model_explainability import _core_section
-
-        new_core = _core_section(
+        new_core = xai_sections.core_section(
             features,
             outputs,
             store.get("seed_key", "x"),
