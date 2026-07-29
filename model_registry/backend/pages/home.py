@@ -48,6 +48,17 @@ def home_layout(projects_options=None, permissions=None):
                         text_color="primary",
                         className="me-2 px-3 py-2 border",
                     ),
+                    dbc.DropdownMenu(
+                        label="Export metadata",
+                        children=[
+                            dbc.DropdownMenuItem("YAML (.yaml)", id="ml-exp-yaml"),
+                            dbc.DropdownMenuItem("CSV (.csv)", id="ml-exp-csv"),
+                            dbc.DropdownMenuItem("Excel (.xlsx)", id="ml-exp-xlsx"),
+                        ],
+                        color="primary", size="sm", className="me-2",
+                    ),
+                    dcc.Download(id="ml-export-dl"),
+                    dcc.Download(id="ml-bundle-dl"),
                 ],
                 className="page-header-actions",
             ),

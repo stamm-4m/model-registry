@@ -80,3 +80,14 @@ window.dashAgGridComponentFunctions.DeleteIconRenderer = function () {
         }
     );
 };
+
+window.dashAgGridComponentFunctions.DownloadIconRenderer = function () {
+    return React.createElement(
+        "i",
+        {
+            className: "bi bi-download icon-column",
+            title: "Download model bundle (binary + metadata)",
+            alt: "Download"
+        }
+    );
+};

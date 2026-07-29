@@ -188,6 +188,8 @@ _TABLES = [
     ("federations", M.Federation, None, None),
     ("federation_participants", M.FederationParticipant, None, None),
     ("model_contributions", M.ModelContribution, None, None),
+    ("federation_rounds", M.FederationRound, None, None),
+    ("dynamic_model", M.DynamicModel, None, None),
     # --- Phase 4: drift monitoring
     ("experiment_drift_detectors", M.ExperimentDriftDetector, None, None),
     ("drift_results", M.DriftResult, None, None),

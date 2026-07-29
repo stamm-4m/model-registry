@@ -8,7 +8,12 @@ from model_registry.backend.pages.add_project import add_project_layout
 from model_registry.backend.pages.admin import admin_layout
 from model_registry.backend.pages.details_model import details_model_layout
 from model_registry.backend.pages.drift_detectors import drift_detectors_layout
-from model_registry.backend.pages.dynamic_models import dynamic_models_layout
+from model_registry.backend.pages.federated_learning import federated_learning_layout
+from model_registry.backend.pages.reinforcement_learning import reinforcement_learning_layout
+from model_registry.backend.pages.dynamic_models import (
+    dynamic_model_detail_layout,
+    dynamic_models_layout,
+)
 from model_registry.backend.pages.edit_model import edit_model_layout
 from model_registry.backend.pages.help import help_layout
 from model_registry.backend.pages.home import home_layout
@@ -93,11 +98,23 @@ def register_sidebar_callbacks(app):
             # legacy / parameterless link -> 'select a model' prompt
             return model_explainability_layout()
 
+        elif pathname.startswith("/dynamic-model-details"):
+            parts = pathname.strip("/").split("/")
+            if len(parts) != 2:
+                return not_found_layout()
+            return dynamic_model_detail_layout(parts[1], session_data)
+
         elif pathname == "/dynamic-models":
-            return dynamic_models_layout()
+            return dynamic_models_layout(session_data)
 
         elif pathname == "/drift-detectors":
             return drift_detectors_layout(session_data)
+
+        elif pathname == "/federated-learning":
+            return federated_learning_layout(session_data)
+
+        elif pathname == "/reinforcement-learning":
+            return reinforcement_learning_layout(session_data)
 
         elif pathname == "/projects":
             return projects_layout(session_data)

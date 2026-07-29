@@ -8,6 +8,7 @@ ACTION_PERMISSIONS = {
     "register_to": "models:write",  # Register to IBISBA
     "xai": "models:read",  # Explainability
     "details": "models:read",  # Details
+    "download": "models:read",  # Download bundle
     "edit": "models:edit",  # Edit
     "delete": "models:edit",  # Delete
 }
@@ -46,7 +47,7 @@ def get_models_grid(permissions=None):
             "headerName": "Status",
             "field": "status",
             "cellRenderer": "StatusRenderer",
-            "width": 100,
+            "width": 70,
         },
         {
             "headerName": "XAI",
@@ -62,6 +63,13 @@ def get_models_grid(permissions=None):
             "filter": False,
             "cellRenderer": "DetailsIconRenderer",
             "width": 40,
+        },
+        {
+            "headerName": "Download",
+            "field": "download",
+            "filter": False,
+            "cellRenderer": "DownloadIconRenderer",
+            "width": 60,
         },
         {
             "headerName": "Edit",

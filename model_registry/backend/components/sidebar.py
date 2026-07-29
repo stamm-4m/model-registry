@@ -51,7 +51,7 @@ def sidebar(session_data=None):
     header = html.Div(
         [
             html.A(
-                html.Img(src="/assets/ml_repo_logo.png", className="sidebar-logo"),
+                html.Img(src="/assets/logo_red_black.png", className="sidebar-logo"),
                 href="/",
                 className="sidebar-logo-link",
             ),
@@ -91,6 +91,11 @@ def sidebar(session_data=None):
     nav_items.append(
         _nav_link("Drift Detectors", "/drift-detectors", icon="bi-shield-check")
     )
+
+    # Learning paradigms
+    nav_items.append(html.Div("Learning", className="sidebar-section-title"))
+    nav_items.append(_nav_link("Federated Learning", "/federated-learning", icon="bi-diagram-3"))
+    nav_items.append(_nav_link("Reinforcement Learning", "/reinforcement-learning", icon="bi-robot"))
 
     # Admin section
     if is_super_admin:
@@ -143,6 +148,23 @@ def sidebar(session_data=None):
     # Support section
     nav_items.append(html.Div("Support", className="sidebar-section-title"))
     nav_items.append(_nav_link("Help", "/help", icon="bi-question-circle"))
+
+    # Partner logos (INRAE + TBI) + credit below Support
+    nav_items.append(html.Div(
+        [
+            html.Div(
+                [
+                    html.Img(src="/assets/inrae.webp", alt="INRAE",
+                             className="sidebar-partner-logo"),
+                    html.Img(src="/assets/tbi.png", alt="TBI",
+                             className="sidebar-partner-logo sidebar-partner-logo-tbi"),
+                ],
+                className="sidebar-partner-logos",
+            ),
+            html.Div("Mathematics cell", className="sidebar-partner-credit"),
+        ],
+        className="sidebar-partner",
+    ))
 
     # ---------- Footer (logout) ----------
     footer = html.Div(

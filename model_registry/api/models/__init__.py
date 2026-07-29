@@ -1,4 +1,6 @@
 # Existing auth + organization models
+from model_registry.api.models.federation_round import FederationRound
+from model_registry.api.models.dynamic_model import DynamicModel
 from .access_request import AccessRequest
 from .actuator import Actuator
 from .actuator_state import ActuatorState
@@ -112,6 +114,8 @@ __all__ = [
     "Federation",
     "FederationParticipant",
     "ModelContribution",
+    "FederationRound",
+    "DynamicModel",
     # Drift-detector packs (Phase 5)
     "ExperimentDriftDetector",
     "DriftResult",

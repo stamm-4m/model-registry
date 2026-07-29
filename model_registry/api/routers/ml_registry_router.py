@@ -349,3 +349,143 @@ def explain_model(
         return explainability.explain_with_data(model, config, scaler, family, df, y)
 
     return explainability.explain(model, config, scaler, family)
+
+
+# ---------------- Artifact / Bundle Download ----------------
+
+def _resolve_artifact_path(project_id: str, model_id: str, req):
+    """Return (config, absolute_file_path_or_None) for a model, using the
+    already-loaded registry entry + the project's models dir."""
+    import os
+    from model_registry.api.utils.project_loader import get_project_paths
+    try:
+        models = req.app.state.registry.get_project(project_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    if model_id not in models:
+        raise HTTPException(status_code=404, detail="Model not found")
+    config = models[model_id].get("config") or {}
+    mlc = config.get("ml_model_configuration", {})
+    model_file = (
+        (mlc.get("model_description", {}) or {}).get("config_files", {}) or {}
+    ).get("model_file")
+    path = None
+    if model_file:
+        candidate = os.path.join(get_project_paths(project_id)["MODEL_DIR"], model_file)
+        if os.path.exists(candidate):
+            path = candidate
+    return config, model_file, path
+
+
+def _build_metadata_xlsx(config) -> bytes:
+    """Well-structured Excel of a model's metadata, one sheet per section."""
+    import io
+    import json
+
+    import pandas as pd
+
+    mlc = (config or {}).get("ml_model_configuration", {}) or {}
+    ident = mlc.get("model_identification", {}) or {}
+    desc = mlc.get("model_description", {}) or {}
+    training = mlc.get("training_information", {}) or {}
+    inputs = mlc.get("inputs", {}) or {}
+    outputs = mlc.get("outputs", {}) or {}
+
+    def _cell(v):
+        return json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list)) else v
+
+    def kv_df(d):
+        rows = [{"Field": k, "Value": _cell(v)} for k, v in (d or {}).items()]
+        return pd.DataFrame(rows or [{"Field": "", "Value": ""}])
+
+    def list_df(items, cols):
+        rows = []
+        for it in (items or []):
+            if isinstance(it, dict):
+                rows.append({c: _cell(it.get(c)) for c in cols})
+            elif isinstance(it, str):
+                rows.append({cols[0]: it})
+        return pd.DataFrame(rows or [{c: "" for c in cols}])
+
+    overview = {
+        **ident,
+        "learner": desc.get("learner"), "model_type": desc.get("model_type"),
+        "model_name": desc.get("model_name"), "description": desc.get("description"),
+    }
+    description = {
+        "language": desc.get("language"), "packages": desc.get("packages"),
+        "config_files": desc.get("config_files"),
+        "input_time_interval": desc.get("input_time_interval"),
+    }
+    tr = dict(training)
+    hp = tr.pop("hyperparameters", None)
+
+    buf = io.BytesIO()
+    with pd.ExcelWriter(buf, engine="openpyxl") as xw:
+        kv_df(overview).to_excel(xw, sheet_name="Overview", index=False)
+        kv_df(description).to_excel(xw, sheet_name="Description", index=False)
+        kv_df(tr).to_excel(xw, sheet_name="Training", index=False)
+        if isinstance(hp, dict) and hp:
+            kv_df(hp).to_excel(xw, sheet_name="Hyperparameters", index=False)
+        list_df(inputs.get("features") if isinstance(inputs, dict) else inputs,
+                ["name", "type", "units", "lag", "feature_scaling",
+                 "expected_range", "description"]).to_excel(
+                    xw, sheet_name="Inputs", index=False)
+        list_df(outputs.get("information") if isinstance(outputs, dict) else outputs,
+                ["name", "description", "units", "forecast_horizon",
+                 "feature_scaling", "expected_range"]).to_excel(
+                    xw, sheet_name="Outputs", index=False)
+    buf.seek(0)
+    return buf.getvalue()
+
+
+@router.get("/{project_id}/model_artifact/{model_id}")
+def download_model_artifact(
+    project_id: str,
+    model_id: str,
+    req: Request,
+    user=Depends(require_permission_resource("models:read", "Models")),
+):
+    """Stream the raw model binary. 404 if the model has no artifact on disk."""
+    import os
+    from fastapi.responses import FileResponse
+    _config, model_file, path = _resolve_artifact_path(project_id, model_id, req)
+    if not path:
+        raise HTTPException(status_code=404, detail="This model has no downloadable artifact.")
+    return FileResponse(path, filename=os.path.basename(model_file),
+                        media_type="application/octet-stream")
+
+
+@router.get("/{project_id}/model_bundle/{model_id}")
+def download_model_bundle(
+    project_id: str,
+    model_id: str,
+    req: Request,
+    user=Depends(require_permission_resource("models:read", "Models")),
+):
+    """Zip {binary + metadata.yaml}, matching the stamm-sdk ArtifactBundle.
+    metadata.yaml is always present; the binary is added when it exists on disk."""
+    import io
+    import os
+    import zipfile
+
+    import yaml
+    from fastapi.responses import StreamingResponse
+
+    config, model_file, path = _resolve_artifact_path(project_id, model_id, req)
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("metadata.yaml",
+                   yaml.safe_dump(config or {}, sort_keys=False, allow_unicode=True))
+        if path:
+            z.write(path, arcname=os.path.basename(model_file))
+        try:
+            z.writestr("metadata.xlsx", _build_metadata_xlsx(config))
+        except Exception as exc:  # openpyxl missing / build issue -> skip xlsx
+            logging.getLogger(__name__).info("metadata.xlsx skipped: %s", exc)
+    buf.seek(0)
+    fname = f"{model_id}_bundle.zip"
+    return StreamingResponse(
+        buf, media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{fname}"'},
+    )

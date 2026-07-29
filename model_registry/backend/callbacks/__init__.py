@@ -26,6 +26,15 @@ from model_registry.backend.callbacks.callbacks_details_model import (
 from model_registry.backend.callbacks.callbacks_drift_detectors import (
     register_drift_detectors_callbacks,
 )
+from model_registry.backend.callbacks.callbacks_federated_learning import (
+    register_federated_learning_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_export import (
+    register_export_callbacks,
+)
+from model_registry.backend.callbacks.callbacks_dynamic_models import (
+    register_dynamic_models_callbacks,
+)
 from model_registry.backend.callbacks.callbacks_edit_model import (
     register_edit_model_callbacks,
 )
@@ -102,4 +111,7 @@ def register_callbacks(app):
     register_experiment_modal_callbacks(app)
     register_delete_experiment_modal_callbacks(app)
     register_drift_detectors_callbacks(app)
+    register_federated_learning_callbacks(app)
+    register_export_callbacks(app)
+    register_dynamic_models_callbacks(app)
     register_model_explainability_callbacks(app)
