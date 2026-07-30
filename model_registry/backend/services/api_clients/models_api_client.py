@@ -247,6 +247,56 @@ class ModelsApiClient:
             return response.json(), session_data
         return None, session_data
 
+    # ---- experiment_models CRUD ------------------------------------
+
+    def list_experiment_models(
+        self,
+        session_data: _SessionData,
+        offset: int = 0,
+        limit: int = 1000,
+    ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
+        response, session_data = authenticated_request(
+            "GET",
+            f"/api/v1/experiment_models/?offset={offset}&limit={limit}",
+            session_data,
+        )
+        if response is None:
+            return None, None
+        if response.status_code == 200:
+            return response.json(), session_data
+        return None, session_data
+
+    def create_experiment_model(
+        self,
+        payload: dict[str, Any],
+        session_data: _SessionData,
+    ) -> tuple[dict[str, Any] | None, _SessionData | None]:
+        response, session_data = authenticated_request(
+            "POST", "/api/v1/experiment_models/", session_data, json=payload
+        )
+        if response is None:
+            return None, None
+        if response.status_code in (200, 201):
+            return response.json(), session_data
+        logger.warning(
+            "create_experiment_model failed status=%s body=%s",
+            response.status_code,
+            _safe_json(response),
+        )
+        return None, session_data
+
+    def delete_experiment_model(
+        self,
+        relation_id: str,
+        session_data: _SessionData,
+    ) -> tuple[int | None, _SessionData | None]:
+        response, session_data = authenticated_request(
+            "DELETE", f"/api/v1/experiment_models/{relation_id}", session_data
+        )
+        if response is None:
+            return None, None
+        return response.status_code, session_data
+
     def create_project_model(
         self,
         payload: dict[str, Any],

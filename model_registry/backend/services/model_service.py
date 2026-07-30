@@ -261,6 +261,8 @@ class ModelService:
         for row in all_rows:
             if str(row.get("id")) not in model_ids:
                 continue
+            #outputs = row.get("outputs", {})
+            target_name, target_description = get_target_info(row.get("outputs"))
             formatted.append(
                 {
                     "model_name": row.get("name") or row.get("slug"),
@@ -275,6 +277,8 @@ class ModelService:
                         "version": row.get("version"),
                         "status": row.get("status"),
                         "is_active": bool(row.get("is_active")),
+                        "target_description": target_description,
+                        "target_name": target_name,
                     },
                 }
             )
@@ -304,3 +308,68 @@ def get_model_file_info(project_id, model_id, session_data):
 def predict_dummy(X):
     # Placeholder for model inference
     return [0 for _ in range(len(X))]
+
+from typing import Any
+
+
+def get_target_info(outputs: Any) -> tuple[str, str]:
+    """
+    Extract target name and description from the outputs metadata.
+
+    Supported formats:
+
+    1. Legacy:
+        ["biomass_gL"]
+
+    2. New:
+        {
+            "scaler": null,
+            "information": [
+                {
+                    "name": "...",
+                    "description": "..."
+                }
+            ]
+        }
+
+    3. Partial:
+        {
+            "scaler": null,
+            "information": [
+                {
+                    "name": "..."
+                }
+            ]
+        }
+
+    Returns:
+        (target_name, target_description)
+    """
+
+    target_name = ""
+    target_description = ""
+
+    # Legacy format: ["biomass_gL"]
+    if isinstance(outputs, list):
+        if outputs and isinstance(outputs[0], str):
+            target_name = outputs[0]
+        return target_name, target_description
+
+    # New format
+    if not isinstance(outputs, dict):
+        return target_name, target_description
+
+    information = outputs.get("information")
+
+    if not isinstance(information, list) or not information:
+        return target_name, target_description
+
+    target = information[0]
+
+    if not isinstance(target, dict):
+        return target_name, target_description
+
+    target_name = target.get("name", "") or ""
+    target_description = target.get("description", "") or ""
+
+    return target_name, target_description

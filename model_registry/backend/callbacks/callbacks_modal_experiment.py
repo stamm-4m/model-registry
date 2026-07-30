@@ -7,6 +7,8 @@ from dash.exceptions import PreventUpdate
 
 from model_registry.backend.services.experiment_service import ExperimentService
 from model_registry.backend.services.project_service import ProjectService
+from model_registry.backend.services.model_service import ModelService
+from model_registry.backend.services.api_clients import ModelsApiClient
 
 logger = logging.getLogger(__name__)
 
@@ -48,8 +50,42 @@ def register_experiment_modal_callbacks(app):
         ], session_data
 
     @app.callback(
+        Output("exp-models-dropdown", "options"),
+        Output("user-session", "data", allow_duplicate=True),
+        Input("exp-project-dropdown", "value"),
+        State("user-session", "data"),
+        prevent_initial_call=True,
+    )
+    def load_models_for_project(project_uuid, session_data):
+        if not project_uuid:
+            raise PreventUpdate
+        # Resolve external project code
+        psvc = ProjectService()
+        proj, session_data = psvc.get_project(session_data, project_uuid)
+        if not proj or not proj.project_id:
+            return [], session_data
+        msvc = ModelService()
+        models, session_data = msvc.list_db_models_for_project(session_data, proj.project_id)
+        options = []
+        if models:
+            for m in models:
+                db_uuid = m.get("metadata", {}).get("db_uuid")
+                label = m.get("model_name") or db_uuid
+                # get description and name if available
+                target_name = m.get("metadata", {}).get("target_name")
+                target_description = m.get("metadata", {}).get("target_description")
+
+                if target_name:
+                    label += f" - {target_name}"
+                if target_description:
+                    label += f" - {target_description}"
+                options.append({"label": label, "value": str(db_uuid)})
+        return options, session_data
+
+    @app.callback(
         Output("exp-name-input", "value"),
         Output("exp-project-dropdown", "value"),
+        Output("exp-models-dropdown", "value"),
         Output("exp-description-input", "value"),
         Output("exp-initial-conditions-input", "value"),
         Output("exp-set-points-input", "value"),
@@ -64,6 +100,7 @@ def register_experiment_modal_callbacks(app):
         Input("btn-save-exp", "n_clicks"),
         State("exp-name-input", "value"),
         State("exp-project-dropdown", "value"),
+        State("exp-models-dropdown", "value"),
         State("exp-description-input", "value"),
         State("exp-initial-conditions-input", "value"),
         State("exp-set-points-input", "value"),
@@ -77,6 +114,7 @@ def register_experiment_modal_callbacks(app):
         n,
         name,
         project_id,
+        model_ids,
         description,
         initial_conditions,
         set_points,
@@ -89,6 +127,7 @@ def register_experiment_modal_callbacks(app):
             raise PreventUpdate
         if not name or not project_id:
             return (
+                dash.no_update,
                 dash.no_update,
                 dash.no_update,
                 dash.no_update,
@@ -122,6 +161,7 @@ def register_experiment_modal_callbacks(app):
                 _, session_data = service.update_experiment(
                     session_data,
                     exp_id,
+                    model_ids=model_ids,
                     name=name,
                     project_id=project_id,
                     description=description,
@@ -138,6 +178,7 @@ def register_experiment_modal_callbacks(app):
                     session_data,
                     name=name,
                     project_id=project_id,
+                    model_ids=model_ids,
                     description=description,
                     initial_conditions=ic,
                     set_points=sp,
@@ -147,10 +188,11 @@ def register_experiment_modal_callbacks(app):
                 msg = "Experiment created successfully"
                 icon = "success"
             logger.debug(f"Saved experiment: {name}, project_id: {project_id}")
-            return "", None, "", "", "", "", "", None, n, True, msg, icon, session_data
+            return "", None, [], "", "", "", "", "", None, n, True, msg, icon, session_data
         except Exception as e:
             logger.error(f"Error saving experiment: {e}")
             return (
+                dash.no_update,
                 dash.no_update,
                 dash.no_update,
                 dash.no_update,
@@ -170,6 +212,7 @@ def register_experiment_modal_callbacks(app):
         Output("experiment-modal", "is_open", allow_duplicate=True),
         Output("exp-name-input", "value", allow_duplicate=True),
         Output("exp-project-dropdown", "value", allow_duplicate=True),
+        Output("exp-models-dropdown", "value", allow_duplicate=True),
         Output("exp-description-input", "value", allow_duplicate=True),
         Output("exp-initial-conditions-input", "value", allow_duplicate=True),
         Output("exp-set-points-input", "value", allow_duplicate=True),
@@ -201,10 +244,18 @@ def register_experiment_modal_callbacks(app):
         logger.debug(
             f"Editing experiment with ID: {exp_id}, name: {exp.name}, project_id: {exp.project_id}"
         )
+        # load linked model ids
+        models_client = ModelsApiClient()
+        links, session_data = models_client.list_experiment_models(session_data)
+        logger.debug(f"Loaded experiment_models links: {links}")
+        linked = []
+        if links:
+            linked = [str(l.get("model_id")) for l in links if str(l.get("experiment_id")) == str(exp_id) and l.get("model_id")]
         return (
             True,
             exp.name,
             str(exp.project_id) if exp.project_id else None,
+            linked,
             exp.description or "",
             ic,
             sp,

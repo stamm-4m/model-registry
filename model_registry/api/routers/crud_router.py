@@ -172,6 +172,7 @@ _TABLES = [
     ("actuator_states", M.ActuatorState, None),
     ("runs", M.Run, None),
     ("experiments", M.Experiment, None),
+    ("experiment_models", M.ExperimentModel, None),
     ("predictions", M.Prediction, None),
     ("annotations", M.Annotation, None),
     ("alerts", M.Alert, None),

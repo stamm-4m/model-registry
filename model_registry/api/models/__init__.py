@@ -49,6 +49,7 @@ from .phase_override import PhaseOverride
 from .prediction import Prediction
 from .project import Project
 from .project_model import ProjectModel
+from .experiment_model import ExperimentModel
 from .project_soft_sensor import ProjectSoftSensor
 from .refresh_token import RefreshToken
 from .role import Role
@@ -111,6 +112,7 @@ __all__ = [
     # Model registry + federated learning (proposal 2026-05-22)
     "Model",
     "ProjectModel",
+    "ExperimentModel",
     "Federation",
     "FederationParticipant",
     "ModelContribution",

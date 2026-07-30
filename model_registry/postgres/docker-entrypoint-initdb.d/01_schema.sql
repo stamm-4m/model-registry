@@ -2134,6 +2134,18 @@ CREATE TRIGGER federations_set_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION public.tg_federations_set_updated_at();
 
+
+-- Add experiment_models junction table to link experiments and models
+CREATE TABLE IF NOT EXISTS public.experiment_models (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    experiment_id UUID REFERENCES public.experiments(id) ON DELETE CASCADE,
+    model_id UUID REFERENCES public.models(id) ON DELETE CASCADE,
+    role TEXT DEFAULT 'attached',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+-- Allow NULLs for existing data compatibility: experiment_id and model_id are nullable
+
 COMMIT;
 
 -- end of 01_schema.sql --
+

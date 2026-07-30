@@ -11,6 +11,7 @@ from uuid import UUID
 
 from model_registry.backend.services.api_clients import ExperimentsApiClient
 from model_registry.backend.services.dtos import ExperimentDTO
+from model_registry.backend.services.api_clients import ModelsApiClient
 
 _SessionData = dict[str, Any]
 
@@ -54,12 +55,29 @@ class ExperimentService:
         data, session_data = self.client.create(payload, session_data)
         if data is None:
             return None, session_data
-        return ExperimentDTO.from_dict(data), session_data
+        exp = ExperimentDTO.from_dict(data)
+
+        # If caller provided model_ids, create junction rows in experiment_models
+        model_ids = kwargs.get("model_ids")
+        if model_ids:
+            models_client = ModelsApiClient()
+            for mid in model_ids:
+                try:
+                    link_payload = {"experiment_id": exp.id, "model_id": _coerce_id(mid)}
+                    _, session_data = models_client.create_experiment_model(
+                        link_payload, session_data
+                    )
+                except Exception:
+                    # non-fatal: continue creating other links
+                    continue
+
+        return exp, session_data
 
     def update_experiment(
         self,
         session_data: _SessionData,
         experiment_id,
+        model_ids: list[str] | None = None,
         name: str | None = None,
         project_id: str | None = None,
         description: str | None = None,
@@ -84,12 +102,38 @@ class ExperimentService:
         if end_time is not None:
             payload["end_time"] = end_time
         if not payload:
-            return self.get_experiment_by_id(session_data, experiment_id)
+            # still allow managing relations even if no field updates
+            if model_ids is None:
+                return self.get_experiment_by_id(session_data, experiment_id)
         data, session_data = self.client.update(
             _coerce_id(experiment_id), payload, session_data
         )
         if data is None:
             return None, session_data
+
+        # Manage experiment_models relations if model_ids provided
+        if model_ids is not None:
+            models_client = ModelsApiClient()
+            # delete existing links for this experiment
+            links, session_data = models_client.list_experiment_models(session_data)
+            if links:
+                for l in [x for x in links if str(x.get("experiment_id")) == str(experiment_id)]:
+                    try:
+                        _, session_data = models_client.delete_experiment_model(
+                            l.get("id"), session_data
+                        )
+                    except Exception:
+                        continue
+            # create new links
+            for mid in model_ids:
+                try:
+                    link_payload = {"experiment_id": _coerce_id(experiment_id), "model_id": _coerce_id(mid)}
+                    _, session_data = models_client.create_experiment_model(
+                        link_payload, session_data
+                    )
+                except Exception:
+                    continue
+
         return ExperimentDTO.from_dict(data), session_data
 
     def delete_experiment(

@@ -366,6 +366,8 @@ INSERT INTO public.resources (id, name) VALUES ('792217aa-203c-5b0a-b573-d3bdcf5
 
 INSERT INTO public.resources (id, name) VALUES ('a3fb3694-186e-53bf-a073-6d74ef73846e'::uuid, 'Experiments_equipments') ON CONFLICT DO NOTHING;
 
+INSERT INTO public.resources (id, name) VALUES ('80649f36-2bb3-5643-9a95-5a0ed8eec857'::uuid, 'Experiment_models') ON CONFLICT DO NOTHING;
+
 INSERT INTO public.resources (id, name) VALUES ('f4adb6b7-bff1-5a32-8524-d2ba0dc4c8fb'::uuid, 'Drift_detectors') ON CONFLICT DO NOTHING;
 
 INSERT INTO public.resources (id, name) VALUES ('6c83df86-ab1d-5619-8cb1-2a64b4493bd2'::uuid, 'Phase_notes') ON CONFLICT DO NOTHING;
@@ -547,6 +549,12 @@ INSERT INTO public.permissions (id, name, description) VALUES ('59f2dcab-179a-51
 
 INSERT INTO public.permissions (id, name, description) VALUES ('1605180e-b79c-5f1d-8807-12bcc4217138'::uuid, 'project_dynamic_models:edit', 'Edit project_dynamic_models data') ON CONFLICT DO NOTHING;
 
+INSERT INTO public.permissions (id, name, description) VALUES ('484d2c9f-7d9a-5a29-a5c0-4f5c7e96f022'::uuid, 'experiment_models:read', 'Read experiment_models data') ON CONFLICT DO NOTHING;
+
+INSERT INTO public.permissions (id, name, description) VALUES ('1dffaf90-286b-5bb0-b4a4-f6cfb7b6e3c1'::uuid, 'experiment_models:write', 'Write experiment_models data') ON CONFLICT DO NOTHING;
+
+INSERT INTO public.permissions (id, name, description) VALUES ('7ae8dd13-5f77-5ec2-827a-2d7f4d7d0f0a'::uuid, 'experiment_models:edit', 'Edit experiment_models data') ON CONFLICT DO NOTHING;
+
 INSERT INTO public.permissions (id, name, description) VALUES ('e11c3fd8-3d75-5009-86a2-8ec899c6af91'::uuid, 'soft_sensor_metrics:read', 'Read soft_sensor_metrics data') ON CONFLICT DO NOTHING;
 
 INSERT INTO public.permissions (id, name, description) VALUES ('e0aa148d-1e16-5598-928e-9ddec1a23014'::uuid, 'soft_sensor_metrics:write', 'Write soft_sensor_metrics data') ON CONFLICT DO NOTHING;
@@ -566,6 +574,9 @@ INSERT INTO public.permissions (id, name, description) VALUES ('b9ee9e25-9afe-5c
 INSERT INTO public.permissions (id, name, description) VALUES ('a9794fb9-6900-5c72-bd4d-af529891818f'::uuid, 'role_permission:edit', 'Edit role_permission data') ON CONFLICT DO NOTHING;
 
 -- 3. super_admin role_permission grants -------------------------------
+INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('7f439d05-9283-5ce3-8f36-fb2d0f3f3b35'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, '484d2c9f-7d9a-5a29-a5c0-4f5c7e96f022'::uuid, '80649f36-2bb3-5643-9a95-5a0ed8eec857'::uuid) ON CONFLICT DO NOTHING;
+INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('27c3e0cd-86d9-5a4f-bc3c-8df6433cce6c'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, '1dffaf90-286b-5bb0-b4a4-f6cfb7b6e3c1'::uuid, '80649f36-2bb3-5643-9a95-5a0ed8eec857'::uuid) ON CONFLICT DO NOTHING;
+INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('4bde1a3f-4e62-5d1d-9c6a-60282c9c6bb0'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, '7ae8dd13-5f77-5ec2-827a-2d7f4d7d0f0a'::uuid, '80649f36-2bb3-5643-9a95-5a0ed8eec857'::uuid) ON CONFLICT DO NOTHING;
 INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('4440006f-63c9-5065-b80d-4549bfd172a4'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, 'f7602b5c-8259-563e-bf2c-ce0b2711372a'::uuid, '9b184f1e-b46d-5d2d-9e5e-d1418e3e1879'::uuid) ON CONFLICT DO NOTHING;
 
 INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('5e62dba6-a164-5147-93e2-10b82f43995a'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, '145ee8ce-06c2-5182-b8aa-2e9c3ccb7bef'::uuid, '9b184f1e-b46d-5d2d-9e5e-d1418e3e1879'::uuid) ON CONFLICT DO NOTHING;

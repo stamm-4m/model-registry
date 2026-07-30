@@ -23,6 +23,12 @@ def experiment_modal():
                         id="exp-description-input",
                         placeholder="Enter experiment description",
                     ),
+                    dbc.Label("Models (project)", className="mt-3"),
+                    dcc.Dropdown(
+                        id="exp-models-dropdown",
+                        placeholder="Select one or more models",
+                        multi=True,
+                    ),
                     dbc.Label("Initial Conditions (JSON)", className="mt-3"),
                     dbc.Textarea(
                         id="exp-initial-conditions-input",
