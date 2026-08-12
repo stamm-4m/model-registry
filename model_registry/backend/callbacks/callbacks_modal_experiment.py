@@ -1,16 +1,49 @@
 import json
 import logging
+from datetime import UTC, datetime
 
 import dash
 from dash import ALL, Input, Output, State
 from dash.exceptions import PreventUpdate
 
+from model_registry.backend.services.airflow_client import (
+    trigger_deployment_soft_sensors,
+)
+from model_registry.backend.services.api_clients import RunsApiClient
 from model_registry.backend.services.experiment_service import ExperimentService
 from model_registry.backend.services.project_service import ProjectService
 from model_registry.backend.services.model_service import ModelService
 from model_registry.backend.services.api_clients import ModelsApiClient
 
 logger = logging.getLogger(__name__)
+
+
+def _start_prediction_loop(session_data, experiment_id: str, project_id: str):
+    """Create the experiment's first run and trigger the Airflow prediction
+    loop for it. Best-effort: logs and returns on any failure so a hiccup
+    here never blocks experiment creation from succeeding in the UI.
+    """
+    run_payload = {
+        "experiment_id": experiment_id,
+        "start_time": datetime.now(UTC).isoformat(),
+    }
+    run, session_data = RunsApiClient().create(run_payload, session_data)
+    if run is None:
+        logger.error(f"Could not create initial run for experiment {experiment_id} — Airflow not triggered.")
+        return session_data
+
+    project, session_data = ProjectService().get_project(session_data, project_id)
+    project_name = project.name if project else ""
+
+    triggered = trigger_deployment_soft_sensors(
+        run_id=run["id"],
+        experiment_id=experiment_id,
+        project_id=project_id,
+        project_name=project_name,
+    )
+    if not triggered:
+        logger.warning(f"Airflow trigger failed for experiment {experiment_id}, run {run['id']}.")
+    return session_data
 
 
 def register_experiment_modal_callbacks(app):
@@ -174,7 +207,7 @@ def register_experiment_modal_callbacks(app):
                 icon = "success"
             else:
                 logger.debug("Creating new experiment")
-                _, session_data = service.add_experiment(
+                new_exp, session_data = service.add_experiment(
                     session_data,
                     name=name,
                     project_id=project_id,
@@ -187,6 +220,10 @@ def register_experiment_modal_callbacks(app):
                 )
                 msg = "Experiment created successfully"
                 icon = "success"
+                if new_exp is not None:
+                    session_data = _start_prediction_loop(
+                        session_data, new_exp.id, project_id
+                    )
             logger.debug(f"Saved experiment: {name}, project_id: {project_id}")
             return "", None, [], "", "", "", "", "", None, n, True, msg, icon, session_data
         except Exception as e:

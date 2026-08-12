@@ -21,6 +21,13 @@ class Settings(BaseSettings):
     )
     MODEL2SEEK_BASE_URL: str = Field(..., description="Base URL of the MODEL2SEEK API")
 
+    # --- Airflow (workflow-orchestrator) — triggers deployment_soft_sensors
+    # when an experiment is created. Optional: if unset, the trigger is
+    # skipped (logged) instead of blocking experiment creation.
+    AIRFLOW_API_BASE: str = Field(default="", description="Base URL of the Airflow API server")
+    AIRFLOW_TRIGGER_USERNAME: str = Field(default="", description="Airflow user (Op role) used to trigger DAG runs")
+    AIRFLOW_TRIGGER_PASSWORD: str = Field(default="", description="Password for AIRFLOW_TRIGGER_USERNAME")
+
     class Config:
         env_file = (os.path.join(BASE_DIR, ".env"),)
         env_file_encoding = "utf-8"
