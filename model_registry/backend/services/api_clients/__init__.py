@@ -14,6 +14,7 @@ from .organizations_api_client import (
     OrganizationsDepartmentsApiClient,
 )
 from .projects_api_client import ProjectsApiClient
+from .runs_api_client import RunsApiClient
 from .users_api_client import RolesApiClient, UserRolesApiClient, UsersApiClient
 
 __all__ = [
@@ -29,5 +30,6 @@ __all__ = [
     "UserRolesApiClient",
     "RolesApiClient",
     "ExperimentsApiClient",
+    "RunsApiClient",
     "ModelsApiClient",
 ]
