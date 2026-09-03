@@ -126,7 +126,7 @@ def sidebar(session_data=None):
                         indent=True,
                     ),
                     _nav_link(
-                        "Projects & Experiments",
+                        "Projects",
                         "/projects",
                         icon="bi-folder-fill",
                         link_id="project-link",
