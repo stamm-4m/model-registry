@@ -6,7 +6,7 @@
 --   permissions, grants, soft_sensors, demo experiments/runs/equipments,
 --   model+FL resources/perms); 03_real (real org/lab/project structure,
 --   users, project leads as lead_user_id FK, example models); Carlos's
---   05_seed (12 high-fidelity YAML models, project_models, project backfills).
+--   05_seed (12 high-fidelity YAML models, project_soft_sensors, project backfills).
 --
 -- Carlos's free-text `lead = ...` backfills were dropped (lead is an FK now,
 -- assigned in the 03_real section). See HANDOFF for the P0002 lead conflict.
@@ -100,10 +100,10 @@ b1a1e1a0-0012-4000-8000-000000000012	project:read	Read project data
 b1a1e1a0-0013-4000-8000-000000000013	experiments:write	Write experiments data
 b1a1e1a0-0014-4000-8000-000000000014	experiments:edit	Edit experiments data
 b1a1e1a0-0015-4000-8000-000000000015	experiments:read	Read experiments data
-b1a1e1a0-0016-4000-8000-000000000016	models:write	Write models data
-b1a1e1a0-0017-4000-8000-000000000017	models:edit	Edit models data
-b1a1e1a0-0018-4000-8000-000000000018	models:read	Read models data
-b1a1e1a0-0019-4000-8000-000000000019	models:deploy	Deploy models
+b1a1e1a0-0016-4000-8000-000000000016	soft_sensors:write	Write soft_sensors data
+b1a1e1a0-0017-4000-8000-000000000017	soft_sensors:edit	Edit soft_sensors data
+b1a1e1a0-0018-4000-8000-000000000018	soft_sensors:read	Read soft_sensors data
+b1a1e1a0-0019-4000-8000-000000000019	soft_sensors:deploy	Deploy soft_sensors
 b1a1e1a0-0020-4000-8000-000000000020	users:write	Write users data
 b1a1e1a0-0021-4000-8000-000000000021	users:edit	Edit users data
 b1a1e1a0-0022-4000-8000-000000000022	users:read	Read users data
@@ -195,7 +195,7 @@ COPY public.resources (id, name) FROM stdin;
 20000000-0000-0000-0000-000000000002	Departments
 40000000-0000-0000-0000-000000000004	Projects
 50000000-0000-0000-0000-000000000005	Experiments
-60000000-0000-0000-0000-000000000006	Models
+60000000-0000-0000-0000-000000000006	Soft_sensors
 70000000-0000-0000-0000-000000000007	Users
 30000000-0000-0000-0000-000000000003	Laboratories
 80000000-0000-0000-0000-000000000008	Department_laboratory
@@ -306,8 +306,6 @@ COPY public.simulations (id, value, "time", dynamic_model_id) FROM stdin;
 \.
 COPY public.soft_sensor_metrics (id, metric_name, metric_value, description, experiment_id, soft_sensor_id) FROM stdin;
 \.
-COPY public.soft_sensors (id, path_metadata, path_model) FROM stdin;
-\.
 COPY public.streaming_jobs (run_id, status, speed, duration_h, signals, started_at, last_heartbeat, bioprocess_t_h, rows_written_total, pid, last_error) FROM stdin;
 \.
 COPY public.user_role (id, user_id, role_id, laboratory_id, created_at, updated_at, resource_type, real_resource_id, permission_id) FROM stdin;
@@ -338,6 +336,8 @@ BEGIN;
 -- 1. Missing Resource rows --------------------------------------------
 INSERT INTO public.resources (id, name) VALUES ('9b184f1e-b46d-5d2d-9e5e-d1418e3e1879'::uuid, 'Equipments') ON CONFLICT DO NOTHING;
 
+INSERT INTO public.resources (id, name) VALUES ('888c4494-6b3b-536c-bf4d-7151904f4521'::uuid, 'Project_soft_sensors') ON CONFLICT DO NOTHING;
+
 INSERT INTO public.resources (id, name) VALUES ('65793b6d-e5b2-58cc-9b50-813ad4bc90b7'::uuid, 'Sensors') ON CONFLICT DO NOTHING;
 
 INSERT INTO public.resources (id, name) VALUES ('7ee06a32-7a30-58df-8c69-cdd6293674b6'::uuid, 'Actuators') ON CONFLICT DO NOTHING;
@@ -356,17 +356,13 @@ INSERT INTO public.resources (id, name) VALUES ('b4cf8d08-afaf-538e-9029-1ab142d
 
 INSERT INTO public.resources (id, name) VALUES ('c09b609d-24ab-55f6-a460-773ad4eec347'::uuid, 'Alert_rules') ON CONFLICT DO NOTHING;
 
-INSERT INTO public.resources (id, name) VALUES ('6910ff73-6450-5736-95a9-e6b849ed0804'::uuid, 'Soft_sensors') ON CONFLICT DO NOTHING;
-
-INSERT INTO public.resources (id, name) VALUES ('888c4494-6b3b-536c-bf4d-7151904f4521'::uuid, 'Project_soft_sensors') ON CONFLICT DO NOTHING;
-
 INSERT INTO public.resources (id, name) VALUES ('b5bdd12f-9fe1-56a5-ab39-ba2cd10f8cec'::uuid, 'Streaming_jobs') ON CONFLICT DO NOTHING;
 
 INSERT INTO public.resources (id, name) VALUES ('792217aa-203c-5b0a-b573-d3bdcf57c1ce'::uuid, 'Equipment_components') ON CONFLICT DO NOTHING;
 
 INSERT INTO public.resources (id, name) VALUES ('a3fb3694-186e-53bf-a073-6d74ef73846e'::uuid, 'Experiments_equipments') ON CONFLICT DO NOTHING;
 
-INSERT INTO public.resources (id, name) VALUES ('80649f36-2bb3-5643-9a95-5a0ed8eec857'::uuid, 'Experiment_models') ON CONFLICT DO NOTHING;
+INSERT INTO public.resources (id, name) VALUES ('80649f36-2bb3-5643-9a95-5a0ed8eec857'::uuid, 'Experiment_soft_sensors') ON CONFLICT DO NOTHING;
 
 INSERT INTO public.resources (id, name) VALUES ('f4adb6b7-bff1-5a32-8524-d2ba0dc4c8fb'::uuid, 'Drift_detectors') ON CONFLICT DO NOTHING;
 
@@ -549,11 +545,11 @@ INSERT INTO public.permissions (id, name, description) VALUES ('59f2dcab-179a-51
 
 INSERT INTO public.permissions (id, name, description) VALUES ('1605180e-b79c-5f1d-8807-12bcc4217138'::uuid, 'project_dynamic_models:edit', 'Edit project_dynamic_models data') ON CONFLICT DO NOTHING;
 
-INSERT INTO public.permissions (id, name, description) VALUES ('484d2c9f-7d9a-5a29-a5c0-4f5c7e96f022'::uuid, 'experiment_models:read', 'Read experiment_models data') ON CONFLICT DO NOTHING;
+INSERT INTO public.permissions (id, name, description) VALUES ('484d2c9f-7d9a-5a29-a5c0-4f5c7e96f022'::uuid, 'experiment_soft_sensors:read', 'Read experiment_soft_sensors data') ON CONFLICT DO NOTHING;
 
-INSERT INTO public.permissions (id, name, description) VALUES ('1dffaf90-286b-5bb0-b4a4-f6cfb7b6e3c1'::uuid, 'experiment_models:write', 'Write experiment_models data') ON CONFLICT DO NOTHING;
+INSERT INTO public.permissions (id, name, description) VALUES ('1dffaf90-286b-5bb0-b4a4-f6cfb7b6e3c1'::uuid, 'experiment_soft_sensors:write', 'Write experiment_soft_sensors data') ON CONFLICT DO NOTHING;
 
-INSERT INTO public.permissions (id, name, description) VALUES ('7ae8dd13-5f77-5ec2-827a-2d7f4d7d0f0a'::uuid, 'experiment_models:edit', 'Edit experiment_models data') ON CONFLICT DO NOTHING;
+INSERT INTO public.permissions (id, name, description) VALUES ('7ae8dd13-5f77-5ec2-827a-2d7f4d7d0f0a'::uuid, 'experiment_soft_sensors:edit', 'Edit experiment_soft_sensors data') ON CONFLICT DO NOTHING;
 
 INSERT INTO public.permissions (id, name, description) VALUES ('e11c3fd8-3d75-5009-86a2-8ec899c6af91'::uuid, 'soft_sensor_metrics:read', 'Read soft_sensor_metrics data') ON CONFLICT DO NOTHING;
 
@@ -637,13 +633,13 @@ INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VAL
 
 INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('78fdf3fc-3579-5f57-b6e6-87990b8daab6'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, 'fa613837-5e75-5dc3-bede-4bff03ee1a73'::uuid, 'c09b609d-24ab-55f6-a460-773ad4eec347'::uuid) ON CONFLICT DO NOTHING;
 
-INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('343fdb12-5cbd-5659-a5c6-543363ed3e8a'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, '4c069006-fc66-58a0-b3ab-6ba8a223a3a7'::uuid, '6910ff73-6450-5736-95a9-e6b849ed0804'::uuid) ON CONFLICT DO NOTHING;
+INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('343fdb12-5cbd-5659-a5c6-543363ed3e8a'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, 'b1a1e1a0-0018-4000-8000-000000000018'::uuid, '60000000-0000-0000-0000-000000000006'::uuid) ON CONFLICT DO NOTHING;
 
-INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('d30869db-68bf-5fec-949b-d8d3a81fde3c'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, '9772ef7a-fb34-570e-b882-d15fce85feb6'::uuid, '6910ff73-6450-5736-95a9-e6b849ed0804'::uuid) ON CONFLICT DO NOTHING;
+INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('d30869db-68bf-5fec-949b-d8d3a81fde3c'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, 'b1a1e1a0-0016-4000-8000-000000000016'::uuid, '60000000-0000-0000-0000-000000000006'::uuid) ON CONFLICT DO NOTHING;
 
-INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('4b2db373-95a0-55cf-9969-671b7791c607'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, '0828fb6c-041d-55d8-9078-edd89586c0f0'::uuid, '6910ff73-6450-5736-95a9-e6b849ed0804'::uuid) ON CONFLICT DO NOTHING;
+INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('4b2db373-95a0-55cf-9969-671b7791c607'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, 'b1a1e1a0-0017-4000-8000-000000000017'::uuid, '60000000-0000-0000-0000-000000000006'::uuid) ON CONFLICT DO NOTHING;
 
-INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('329e7b33-9ea5-5131-abdc-dc510df2748c'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, 'dccd99ea-30d3-5e7f-b8b6-fd102abae849'::uuid, '6910ff73-6450-5736-95a9-e6b849ed0804'::uuid) ON CONFLICT DO NOTHING;
+INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('329e7b33-9ea5-5131-abdc-dc510df2748c'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, 'b1a1e1a0-0019-4000-8000-000000000019'::uuid, '60000000-0000-0000-0000-000000000006'::uuid) ON CONFLICT DO NOTHING;
 
 INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('86b4b9b4-6ce5-5441-92ba-425fcd7edbd8'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, '497c574d-eaf7-5d35-a1bf-6d8e680c4bc5'::uuid, '888c4494-6b3b-536c-bf4d-7151904f4521'::uuid) ON CONFLICT DO NOTHING;
 
@@ -749,12 +745,6 @@ INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VAL
 
 INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('43d11a0c-750e-5396-9700-d4682e905c07'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, 'a9794fb9-6900-5c72-bd4d-af529891818f'::uuid, '5f32e04a-427e-54f4-af24-2f7abcb3c51d'::uuid) ON CONFLICT DO NOTHING;
 
--- 4. Demo soft_sensors (hardcoded UUIDs match streamer DEMO_SOFT_SENSORS) -
-INSERT INTO public.soft_sensors (id, path_metadata, path_model) VALUES ('dddddddd-aaaa-bbbb-cccc-000000000001'::uuid, 'demo:biomass', 'demo:biomass.pkl') ON CONFLICT DO NOTHING;
-
-INSERT INTO public.soft_sensors (id, path_metadata, path_model) VALUES ('dddddddd-aaaa-bbbb-cccc-000000000002'::uuid, 'demo:substrate', 'demo:substrate.pkl') ON CONFLICT DO NOTHING;
-
-INSERT INTO public.soft_sensors (id, path_metadata, path_model) VALUES ('dddddddd-aaaa-bbbb-cccc-000000000003'::uuid, 'demo:titer', 'demo:titer.pkl') ON CONFLICT DO NOTHING;
 
 -- 5. project_soft_sensors: link demo soft sensors to P0001/P0002/P0003 --
 INSERT INTO public.project_soft_sensors (id, project_id, soft_sensor_id) VALUES ('73b4c707-8cad-52d2-bdda-e9939dff7427'::uuid, 'ccccccc1-cccc-cccc-cccc-cccccccccccc'::uuid, 'dddddddd-aaaa-bbbb-cccc-000000000001'::uuid) ON CONFLICT DO NOTHING;
@@ -896,8 +886,8 @@ WHERE NOT EXISTS (
 INSERT INTO public.resources (id, name)
 SELECT uuid_generate_v4(), v.name
 FROM (VALUES
-    ('Models'),
-    ('Project_models'),
+    ('Soft_sensors'),
+    ('Project_soft_sensors'),
     ('Federations'),
     ('Federation_participants'),
     ('Model_contributions')
@@ -907,13 +897,13 @@ WHERE NOT EXISTS (SELECT 1 FROM public.resources WHERE name = v.name);
 INSERT INTO public.permissions (id, name, description)
 SELECT uuid_generate_v4(), v.name, v.description
 FROM (VALUES
-    ('models:read',                  'Read models'),
-    ('models:write',                 'Create/update models'),
-    ('models:edit',                  'Edit model metadata'),
-    ('models:deploy',                'Promote models to deployed'),
-    ('project_models:read',          'Read project-model links'),
-    ('project_models:write',         'Create/update project-model links'),
-    ('project_models:edit',          'Edit project-model links'),
+    ('soft_sensors:read',                  'Read soft_sensors data'),
+    ('soft_sensors:write',                 'Create/update soft_sensors'),
+    ('soft_sensors:edit',                  'Edit soft_sensors metadata'),
+    ('soft_sensors:deploy',                'Promote soft_sensors to deployed'),
+    ('project_soft_sensors:read',          'Read project-soft_sensors links'),
+    ('project_soft_sensors:write',         'Create/update project-soft_sensors links'),
+    ('project_soft_sensors:edit',          'Edit project-soft_sensors links'),
     ('federations:read',             'Read federations'),
     ('federations:write',            'Create/update federations'),
     ('federations:edit',             'Edit federation metadata'),
@@ -939,10 +929,10 @@ SELECT uuid_generate_v4(),
        r.id
 FROM public.permissions p, public.resources r
 WHERE
-    (p.name IN ('models:read','models:write','models:edit','models:deploy')
-        AND r.name = 'Models')
- OR (p.name IN ('project_models:read','project_models:write','project_models:edit')
-        AND r.name = 'Project_models')
+    (p.name IN ('soft_sensors:read','soft_sensors:write','soft_sensors:edit','soft_sensors:deploy')
+        AND r.name = 'Soft_sensors')
+ OR (p.name IN ('project_soft_sensors:read','project_soft_sensors:write','project_soft_sensors:edit')
+        AND r.name = 'Project_soft_sensors')
  OR (p.name IN ('federations:read','federations:write','federations:edit')
         AND r.name = 'Federations')
  OR (p.name IN ('federation_participants:read','federation_participants:write','federation_participants:edit')
@@ -1173,13 +1163,13 @@ VALUES (
     'ccccccc3-cccc-cccc-cccc-cccccccccccc'::uuid
 );
 
--- 5. Seed example models -------------------------------------------------
+-- 5. Seed example soft_sensors -------------------------------------------------
 -- Six rows across four algorithm families. Realistic config + metrics so
 -- the UI / API has visible content. Stable UUIDs so re-runs are no-ops
 -- via ON CONFLICT DO NOTHING.
 
 -- Penicillin (P0001 / lab TBI)
-INSERT INTO public.models
+INSERT INTO public.soft_sensors
   (id, slug, name, description, algorithm, status, version,
    config, inputs, outputs, metrics, prediction_horizon_min, created_at)
 VALUES
@@ -1196,7 +1186,7 @@ VALUES
    '2026-05-01 09:00:00+00')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO public.models
+INSERT INTO public.soft_sensors
   (id, slug, name, description, algorithm, status, version,
    config, inputs, outputs, metrics, prediction_horizon_min, created_at)
 VALUES
@@ -1214,7 +1204,7 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- Bioindustry E. coli (P0002 / lab TBI)
-INSERT INTO public.models
+INSERT INTO public.soft_sensors
   (id, slug, name, description, algorithm, status, version,
    config, inputs, outputs, metrics, prediction_horizon_min, created_at)
 VALUES
@@ -1231,7 +1221,7 @@ VALUES
    '2026-05-05 14:00:00+00')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO public.models
+INSERT INTO public.soft_sensors
   (id, slug, name, description, algorithm, status, version,
    config, inputs, outputs, metrics, prediction_horizon_min, created_at)
 VALUES
@@ -1249,7 +1239,7 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- Bioindustry Pichia Pastoris (P0003 / lab TWB)
-INSERT INTO public.models
+INSERT INTO public.soft_sensors
   (id, slug, name, description, algorithm, status, version,
    config, inputs, outputs, metrics, prediction_horizon_min, created_at)
 VALUES
@@ -1266,7 +1256,7 @@ VALUES
    '2026-05-10 10:00:00+00')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO public.models
+INSERT INTO public.soft_sensors
   (id, slug, name, description, algorithm, status, version,
    config, inputs, outputs, metrics, prediction_horizon_min, created_at)
 VALUES
@@ -1283,41 +1273,41 @@ VALUES
    '2026-05-12 16:00:00+00')
 ON CONFLICT (id) DO NOTHING;
 
--- 6. project_models links ------------------------------------------------
--- Each model is its project's primary model. WHERE NOT EXISTS so the
--- script stays idempotent without depending on a (project_id, model_id, role)
+-- 6. project_soft_sensors links ------------------------------------------------
+-- Each soft_sensor is its project's primary soft_sensor. WHERE NOT EXISTS so the
+-- script stays idempotent without depending on a (project_id, soft_sensor_id, role)
 -- unique constraint.
 
-INSERT INTO public.project_models (id, project_id, model_id, role)
+INSERT INTO public.project_soft_sensors (id, project_id, soft_sensor_id, role)
 SELECT uuid_generate_v4(), 'ccccccc1-cccc-cccc-cccc-cccccccccccc'::uuid, m.id, 'primary'
-FROM public.models m
+FROM public.soft_sensors m
 WHERE m.slug IN ('biomass_indpensim_dt_v1','penicillin_titer_nn_v1')
   AND NOT EXISTS (
-      SELECT 1 FROM public.project_models pm
+    SELECT 1 FROM public.project_soft_sensors pm
       WHERE pm.project_id = 'ccccccc1-cccc-cccc-cccc-cccccccccccc'::uuid
-        AND pm.model_id   = m.id
+        AND pm.soft_sensor_id = m.id
         AND pm.role       = 'primary'
   );
 
-INSERT INTO public.project_models (id, project_id, model_id, role)
+INSERT INTO public.project_soft_sensors (id, project_id, soft_sensor_id, role)
 SELECT uuid_generate_v4(), 'ccccccc2-cccc-cccc-cccc-cccccccccccc'::uuid, m.id, 'primary'
-FROM public.models m
+FROM public.soft_sensors m
 WHERE m.slug IN ('ecoli_biomass_mlp_v1','ecoli_nanobody_svm_v1')
   AND NOT EXISTS (
-      SELECT 1 FROM public.project_models pm
+    SELECT 1 FROM public.project_soft_sensors pm
       WHERE pm.project_id = 'ccccccc2-cccc-cccc-cccc-cccccccccccc'::uuid
-        AND pm.model_id   = m.id
+        AND pm.soft_sensor_id = m.id
         AND pm.role       = 'primary'
   );
 
-INSERT INTO public.project_models (id, project_id, model_id, role)
+INSERT INTO public.project_soft_sensors (id, project_id, soft_sensor_id, role)
 SELECT uuid_generate_v4(), 'ccccccc3-cccc-cccc-cccc-cccccccccccc'::uuid, m.id, 'primary'
-FROM public.models m
+FROM public.soft_sensors m
 WHERE m.slug IN ('pichia_biomass_rf_v1','pichia_protein_ensemble_v1')
   AND NOT EXISTS (
-      SELECT 1 FROM public.project_models pm
+    SELECT 1 FROM public.project_soft_sensors pm
       WHERE pm.project_id = 'ccccccc3-cccc-cccc-cccc-cccccccccccc'::uuid
-        AND pm.model_id   = m.id
+        AND pm.soft_sensor_id = m.id
         AND pm.role       = 'primary'
   );
 
@@ -1379,7 +1369,7 @@ WHERE project_id = 'P0003';
 --    Idempotent — once the keys are gone, the WHERE filters out the row.
 -- ===========================================================================
 
-UPDATE public.models
+UPDATE public.soft_sensors
 SET
     authors = COALESCE(authors, config->>'author'),
     doi     = COALESCE(doi,     NULLIF(config->>'doi', '')),
@@ -1599,7 +1589,7 @@ BEGIN
     -- P0002 Bioindustry_E.Coli
     -- ===================================================================
 
-    INSERT INTO public.models (
+    INSERT INTO public.soft_sensors (
         slug, name, version, external_uuid,
         algorithm, status, status_description,
         learner, model_type, description,
@@ -1664,7 +1654,7 @@ BEGIN
         'joblib'
     ) ON CONFLICT (slug) DO NOTHING;
 
-    INSERT INTO public.models (
+    INSERT INTO public.soft_sensors (
         slug, name, version, external_uuid,
         algorithm, status, status_description,
         learner, model_type, description,
@@ -1733,7 +1723,7 @@ BEGIN
     -- ===================================================================
 
     -- 0001 RF [Python]
-    INSERT INTO public.models (
+    INSERT INTO public.soft_sensors (
         slug, name, version, external_uuid,
         algorithm, status, status_description,
         learner, model_type, description,
@@ -1777,7 +1767,7 @@ BEGIN
     ) ON CONFLICT (slug) DO NOTHING;
 
     -- 0002 RF [R]
-    INSERT INTO public.models (
+    INSERT INTO public.soft_sensors (
         slug, name, version, external_uuid,
         algorithm, status, status_description,
         learner, model_type, description,
@@ -1824,7 +1814,7 @@ BEGIN
     ) ON CONFLICT (slug) DO NOTHING;
 
     -- 0003 CUBIST [R]
-    INSERT INTO public.models (
+    INSERT INTO public.soft_sensors (
         slug, name, version, external_uuid,
         algorithm, status, status_description,
         learner, model_type, description,
@@ -1868,7 +1858,7 @@ BEGIN
     ) ON CONFLICT (slug) DO NOTHING;
 
     -- 0004 CART [R]
-    INSERT INTO public.models (
+    INSERT INTO public.soft_sensors (
         slug, name, version, external_uuid,
         algorithm, status, status_description,
         learner, model_type, description,
@@ -1911,7 +1901,7 @@ BEGIN
     ) ON CONFLICT (slug) DO NOTHING;
 
     -- 0005 CART [Python]
-    INSERT INTO public.models (
+    INSERT INTO public.soft_sensors (
         slug, name, version, external_uuid,
         algorithm, status, status_description,
         learner, model_type, description,
@@ -1951,7 +1941,7 @@ BEGIN
     ) ON CONFLICT (slug) DO NOTHING;
 
     -- 0006 M5 [R]
-    INSERT INTO public.models (
+    INSERT INTO public.soft_sensors (
         slug, name, version, external_uuid,
         algorithm, status, status_description,
         learner, model_type, description,
@@ -1996,7 +1986,7 @@ BEGIN
     ) ON CONFLICT (slug) DO NOTHING;
 
     -- 0007 SVM [Python] — uses Z-score scaling on features/output.
-    INSERT INTO public.models (
+    INSERT INTO public.soft_sensors (
         slug, name, version, external_uuid,
         algorithm, status, status_description,
         learner, model_type, description,
@@ -2047,7 +2037,7 @@ BEGIN
     ) ON CONFLICT (slug) DO NOTHING;
 
     -- 0008 GBM [Python] — YAML marks status offline.
-    INSERT INTO public.models (
+    INSERT INTO public.soft_sensors (
         slug, name, version, external_uuid,
         algorithm, status, status_description,
         learner, model_type, description,
@@ -2100,7 +2090,7 @@ BEGIN
     ) ON CONFLICT (slug) DO NOTHING;
 
     -- 0009 LSTM [Python/Keras] — has a model_architecture section.
-    INSERT INTO public.models (
+    INSERT INTO public.soft_sensors (
         slug, name, version, external_uuid,
         algorithm, status, status_description,
         learner, model_type, description,
@@ -2210,7 +2200,7 @@ BEGIN
     ) ON CONFLICT (slug) DO NOTHING;
 
     -- 0010 HGB [Python]
-    INSERT INTO public.models (
+    INSERT INTO public.soft_sensors (
         slug, name, version, external_uuid,
         algorithm, status, status_description,
         learner, model_type, description,
@@ -2261,22 +2251,22 @@ END
 $seed$;
 
 -- ===========================================================================
--- 4. Link models to projects via project_models
---    (UNIQUE(project_id, model_id, role) keeps this idempotent)
+-- 4. Link models to projects via project_soft_sensors
+--    (UNIQUE(project_id, soft_sensor_id, role) keeps this idempotent)
 -- ===========================================================================
 
 -- P0002 Bioindustry_E.Coli
-INSERT INTO public.project_models (project_id, model_id, role)
+INSERT INTO public.project_soft_sensors (project_id, soft_sensor_id, role)
 SELECT p.id, m.id, 'primary'
-FROM public.projects p, public.models m
+FROM public.projects p, public.soft_sensors m
 WHERE p.project_id = 'P0002'
   AND m.slug IN ('0001_python_ecoli_CART', '0002_python_ecoli_RF')
-ON CONFLICT (project_id, model_id, role) DO NOTHING;
+ON CONFLICT (project_id, soft_sensor_id, role) DO NOTHING;
 
 -- P0001 IndPenSim
-INSERT INTO public.project_models (project_id, model_id, role)
+INSERT INTO public.project_soft_sensors (project_id, soft_sensor_id, role)
 SELECT p.id, m.id, 'primary'
-FROM public.projects p, public.models m
+FROM public.projects p, public.soft_sensors m
 WHERE p.project_id = 'P0001'
   AND m.slug IN (
       '0001_python_penicillin_RF',
@@ -2290,7 +2280,7 @@ WHERE p.project_id = 'P0001'
       '0009_python_penicillin_LSTM',
       '0010_python_penicillin_HGB'
   )
-ON CONFLICT (project_id, model_id, role) DO NOTHING;
+ON CONFLICT (project_id, soft_sensor_id, role) DO NOTHING;
 
 COMMIT;
 

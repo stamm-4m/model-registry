@@ -24,10 +24,12 @@ class ModelContribution(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     aggregated_model_id = Column(
-        UUID(as_uuid=True), ForeignKey("models.id", ondelete="CASCADE"), nullable=False
+        UUID(as_uuid=True),
+        ForeignKey("soft_sensors.id", ondelete="CASCADE"),
+        nullable=False,
     )
     contributor_model_id = Column(
-        UUID(as_uuid=True), ForeignKey("models.id"), nullable=False
+        UUID(as_uuid=True), ForeignKey("soft_sensors.id"), nullable=False
     )
     federation_id = Column(
         UUID(as_uuid=True),

@@ -83,47 +83,47 @@ class ModelService:
         return model_file_name, model_file_relative, session_data
 
     # ------------------------------------------------------------------
-    # CRUD endpoints (/api/v1/models and /api/v1/project_models)
+    # CRUD endpoints (/api/v1/models and /api/v1/project_soft_sensors)
     # ------------------------------------------------------------------
 
-    def get_all_model_rows(
+    def get_all_soft_sensor_rows(
         self, session_data: _SessionData
     ) -> tuple[list[dict[str, Any]], _SessionData | None]:
-        data, session_data = self.client.list_models_table(session_data)
+        data, session_data = self.client.list_soft_sensors_table(session_data)
         if data is None:
             return [], session_data
         return data, session_data
 
-    def get_model_row(
+    def get_soft_sensor_row(
         self, session_data: _SessionData, model_row_id: str
     ) -> tuple[dict[str, Any] | None, _SessionData | None]:
-        return self.client.get_model_row(model_row_id, session_data)
+        return self.client.get_soft_sensor_row(model_row_id, session_data)
 
-    def create_model_row(
+    def create_soft_sensor_row(
         self, session_data: _SessionData, payload: dict[str, Any]
     ) -> tuple[dict[str, Any] | None, _SessionData | None]:
-        return self.client.create_model_row(payload, session_data)
+        return self.client.create_soft_sensor_row(payload, session_data)
 
-    def update_model_row(
+    def update_soft_sensor_row(
         self,
         session_data: _SessionData,
         model_row_id: str,
         payload: dict[str, Any],
     ) -> tuple[dict[str, Any] | None, _SessionData | None]:
-        return self.client.update_model_row(model_row_id, payload, session_data)
+        return self.client.update_soft_sensor_row(model_row_id, payload, session_data)
 
-    def delete_model_row(
+    def delete_soft_sensor_row(
         self, session_data: _SessionData, model_row_id: str
     ) -> tuple[bool, _SessionData | None]:
-        status, session_data = self.client.delete_model_row(model_row_id, session_data)
+        status, session_data = self.client.delete_soft_sensor_row(model_row_id, session_data)
         if status is None:
             return False, session_data
         return status == 204, session_data
 
-    def list_project_models(
+    def list_project_soft_sensors(
         self, session_data: _SessionData
     ) -> tuple[list[dict[str, Any]], _SessionData | None]:
-        data, session_data = self.client.list_project_models(session_data)
+        data, session_data = self.client.list_project_soft_sensors(session_data)
         if data is None:
             return [], session_data
         return data, session_data
@@ -182,18 +182,18 @@ class ModelService:
             return None, session_data
         project_uuid = match.get("id")
 
-        # Create the model row.
-        model, session_data = self.client.create_model_row(payload, session_data)
+        # Create the soft sensor row.
+        model, session_data = self.client.create_soft_sensor_row(payload, session_data)
         if model is None:
             return None, session_data
 
-        # Link via project_models.
+        # Link via project_soft_sensors 
         link_payload = {
             "project_id": project_uuid,
             "model_id": model.get("id"),
             "role": "primary",
         }
-        _, session_data = self.client.create_project_model(link_payload, session_data)
+        _, session_data = self.client.create_project_soft_sensor(link_payload, session_data)
 
         # Refresh the in-memory registry so subsequent reads (list / metadata)
         # see the new model without waiting for an API restart.
@@ -242,24 +242,24 @@ class ModelService:
             return [], session_data
         project_uuid = str(match.get("id"))
 
-        links, session_data = self.client.list_project_models(session_data)
+        links, session_data = self.client.list_project_soft_sensors(session_data)
         if not links:
             return [], session_data
-        model_ids = {
-            str(l.get("model_id"))
+        soft_sensor_ids = {
+            str(l.get("soft_sensor_id"))
             for l in links
             if str(l.get("project_id")) == project_uuid
         }
-        if not model_ids:
+        if not soft_sensor_ids:
             return [], session_data
 
-        all_rows, session_data = self.client.list_models_table(session_data)
+        all_rows, session_data = self.client.list_soft_sensors_table(session_data)
         if not all_rows:
             return [], session_data
 
         formatted: list[dict[str, Any]] = []
         for row in all_rows:
-            if str(row.get("id")) not in model_ids:
+            if str(row.get("id")) not in soft_sensor_ids:
                 continue
             #outputs = row.get("outputs", {})
             target_name, target_description = get_target_info(row.get("outputs"))

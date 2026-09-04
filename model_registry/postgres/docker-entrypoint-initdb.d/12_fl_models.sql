@@ -3,7 +3,7 @@
 -- by federations.current_global_model_id. FK-safe + idempotent.
 BEGIN;
 
-INSERT INTO public.models
+INSERT INTO public.soft_sensors
     (id, slug, name, algorithm, status, version, inputs, outputs,
      federation_id, federation_round, federation_role, validation_status,
      description, tags, is_active, created_at, updated_at)
@@ -32,21 +32,21 @@ JOIN public.federations f ON f.slug = v.fed_slug
 ON CONFLICT (slug) DO NOTHING;
 
 -- link each global model to its coordinator project -> appears in ML Soft Sensors
-INSERT INTO public.project_models (id, project_id, model_id, role)
+INSERT INTO public.project_soft_sensors (id, project_id, soft_sensor_id, role)
 SELECT gen_random_uuid(), p.id, m.id, 'primary'
 FROM (VALUES
     ('fed_biomass_global',    'P0001'),
     ('fed_penicillin_global', 'P0001'),
     ('fed_ecoli_global',      'P0002')
 ) AS v(model_slug, proj_id)
-JOIN public.models   m ON m.slug = v.model_slug
+JOIN public.soft_sensors m ON m.slug = v.model_slug
 JOIN public.projects p ON p.project_id = v.proj_id
 ON CONFLICT DO NOTHING;
 
 -- point each federation at its aggregated global model
 UPDATE public.federations f
 SET current_global_model_id = m.id, updated_at = now()
-FROM public.models m
+FROM public.soft_sensors m
 WHERE m.federation_id = f.id
   AND m.federation_role = 'aggregated_global'
   AND f.current_global_model_id IS NULL;

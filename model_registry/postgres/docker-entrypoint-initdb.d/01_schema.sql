@@ -512,24 +512,6 @@ CREATE TABLE public.project_dynamic_models (
 
 ALTER TABLE public.project_dynamic_models OWNER TO CURRENT_USER;
 
---
--- TOC entry 286 (class 1259 OID 34346)
--- Name: project_soft_sensors; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.project_soft_sensors (
-    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
-    project_id uuid NOT NULL,
-    soft_sensor_id uuid NOT NULL
-);
-
-
-ALTER TABLE public.project_soft_sensors OWNER TO CURRENT_USER;
-
---
--- TOC entry 285 (class 1259 OID 34335)
--- Name: projects; Type: TABLE; Schema: public; Owner: postgres
---
 
 CREATE TABLE public.projects (
     id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
@@ -684,20 +666,6 @@ CREATE TABLE public.soft_sensor_metrics (
 
 
 ALTER TABLE public.soft_sensor_metrics OWNER TO CURRENT_USER;
-
---
--- TOC entry 287 (class 1259 OID 34352)
--- Name: soft_sensors; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.soft_sensors (
-    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
-    path_metadata text NOT NULL,
-    path_model text NOT NULL
-);
-
-
-ALTER TABLE public.soft_sensors OWNER TO CURRENT_USER;
 
 --
 -- TOC entry 320 (class 1259 OID 34980)
@@ -994,25 +962,6 @@ ALTER TABLE ONLY public.laboratory_project
 ALTER TABLE ONLY public.laboratory_user
     ADD CONSTRAINT laboratory_user_pkey PRIMARY KEY (id, user_id, laboratory_id);
 
-
---
--- TOC entry 5461 (class 2606 OID 34361)
--- Name: soft_sensors ml_models_name_version_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.soft_sensors
-    ADD CONSTRAINT ml_models_name_version_key UNIQUE (path_metadata, path_model);
-
-
---
--- TOC entry 5463 (class 2606 OID 34359)
--- Name: soft_sensors ml_soft_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.soft_sensors
-    ADD CONSTRAINT ml_soft_pkey PRIMARY KEY (id);
-
-
 --
 -- TOC entry 5523 (class 2606 OID 34529)
 -- Name: organizations_departments organizations_departments_organization_id_department_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
@@ -1090,7 +1039,7 @@ ALTER TABLE ONLY public.phase_overrides
 -- Name: predictions predictions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.predictions
+ALTER TABLE public.predictions
     ADD CONSTRAINT predictions_pkey PRIMARY KEY ("time", run_id, soft_sensor_id);
 
 
@@ -1101,15 +1050,6 @@ ALTER TABLE ONLY public.predictions
 
 ALTER TABLE ONLY public.project_dynamic_models
     ADD CONSTRAINT project_dynamic_models_pkey PRIMARY KEY (id);
-
-
---
--- TOC entry 5459 (class 2606 OID 34351)
--- Name: project_soft_sensors project_soft_sensors_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.project_soft_sensors
-    ADD CONSTRAINT project_soft_sensors_pkey PRIMARY KEY (id);
 
 
 --
@@ -1234,7 +1174,7 @@ ALTER TABLE ONLY public.simulations
 -- Name: soft_sensor_metrics soft_sensor_metrics_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.soft_sensor_metrics
+ALTER TABLE public.soft_sensor_metrics
     ADD CONSTRAINT soft_sensor_metrics_pkey PRIMARY KEY (id);
 
 
@@ -1667,33 +1607,6 @@ ALTER TABLE ONLY public.predictions
 
 
 --
--- TOC entry 5579 (class 2606 OID 34763)
--- Name: predictions fk_predictions_soft_sensor; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.predictions
-    ADD CONSTRAINT fk_predictions_soft_sensor FOREIGN KEY (soft_sensor_id) REFERENCES public.soft_sensors(id) ON DELETE CASCADE;
-
-
---
--- TOC entry 5576 (class 2606 OID 34748)
--- Name: project_soft_sensors fk_pss_project; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.project_soft_sensors
-    ADD CONSTRAINT fk_pss_project FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
-
-
---
--- TOC entry 5577 (class 2606 OID 34753)
--- Name: project_soft_sensors fk_pss_soft_sensor; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.project_soft_sensors
-    ADD CONSTRAINT fk_pss_soft_sensor FOREIGN KEY (soft_sensor_id) REFERENCES public.soft_sensors(id) ON DELETE CASCADE;
-
-
---
 -- TOC entry 5590 (class 2606 OID 34823)
 -- Name: role_permission fk_role_permission_permission; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -1763,15 +1676,6 @@ ALTER TABLE ONLY public.simulations
 
 ALTER TABLE ONLY public.soft_sensor_metrics
     ADD CONSTRAINT fk_ssm_experiment FOREIGN KEY (experiment_id) REFERENCES public.experiments(id) ON DELETE CASCADE;
-
-
---
--- TOC entry 5581 (class 2606 OID 34773)
--- Name: soft_sensor_metrics fk_ssm_soft_sensor; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.soft_sensor_metrics
-    ADD CONSTRAINT fk_ssm_soft_sensor FOREIGN KEY (soft_sensor_id) REFERENCES public.soft_sensors(id) ON DELETE CASCADE;
 
 
 --
@@ -1934,7 +1838,7 @@ CREATE TABLE IF NOT EXISTS public.federations (
 );
 
 -- 8.3 Models (replaces path-only soft_sensors) ---------------------------
-CREATE TABLE IF NOT EXISTS public.models (
+CREATE TABLE IF NOT EXISTS public.soft_sensors (
     id                       uuid PRIMARY KEY DEFAULT public.uuid_generate_v4(),
     slug                     text NOT NULL UNIQUE,
     name                     text NOT NULL,
@@ -1963,8 +1867,8 @@ CREATE TABLE IF NOT EXISTS public.models (
     trained_by_user_id       uuid REFERENCES public.users(id),
 
     -- Single-parent lineage.
-    parent_model_id          uuid REFERENCES public.models(id),
-    superseded_by_model_id   uuid REFERENCES public.models(id),
+    parent_model_id          uuid REFERENCES public.soft_sensors(id),
+    superseded_by_model_id   uuid REFERENCES public.soft_sensors(id),
 
     -- Federated-learning lineage.
     federation_id            uuid REFERENCES public.federations(id),
@@ -2015,38 +1919,48 @@ CREATE TABLE IF NOT EXISTS public.models (
 );
 
 CREATE INDEX IF NOT EXISTS models_status_idx
-    ON public.models (status) WHERE is_active;
+    ON public.soft_sensors (status) WHERE is_active;
 
 CREATE INDEX IF NOT EXISTS models_algorithm_idx
-    ON public.models (algorithm);
+    ON public.soft_sensors (algorithm);
 
 CREATE INDEX IF NOT EXISTS models_config_gin
-    ON public.models USING gin (config);
+    ON public.soft_sensors USING gin (config);
 
 CREATE INDEX IF NOT EXISTS models_metrics_gin
-    ON public.models USING gin (metrics);
+    ON public.soft_sensors USING gin (metrics);
 
 CREATE INDEX IF NOT EXISTS models_federation_round_idx
-    ON public.models (federation_id, federation_round)
+    ON public.soft_sensors (federation_id, federation_round)
     WHERE federation_id IS NOT NULL;
+
+-- These dependencies are deferred because the base dump defines the
+-- time-series tables before the enriched soft_sensors table.
+ALTER TABLE public.predictions
+    ADD CONSTRAINT fk_predictions_soft_sensor
+    FOREIGN KEY (soft_sensor_id) REFERENCES public.soft_sensors(id) ON DELETE CASCADE;
+
+ALTER TABLE public.soft_sensor_metrics
+    ADD CONSTRAINT fk_ssm_soft_sensor
+    FOREIGN KEY (soft_sensor_id) REFERENCES public.soft_sensors(id) ON DELETE CASCADE;
 
 -- Now that models exists, add the deferred FK from federations.
 DO $$
 BEGIN
     ALTER TABLE public.federations
         ADD CONSTRAINT federations_current_global_model_fk
-        FOREIGN KEY (current_global_model_id) REFERENCES public.models(id);
+        FOREIGN KEY (current_global_model_id) REFERENCES public.soft_sensors(id);
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 -- 8.4 Project ↔ Model link table -----------------------------------------
-CREATE TABLE IF NOT EXISTS public.project_models (
+CREATE TABLE IF NOT EXISTS public.project_soft_sensors (
     id          uuid PRIMARY KEY DEFAULT public.uuid_generate_v4(),
     project_id  uuid NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
-    model_id    uuid NOT NULL REFERENCES public.models(id) ON DELETE CASCADE,
+    soft_sensor_id    uuid NOT NULL REFERENCES public.soft_sensors(id) ON DELETE CASCADE,
     role        text NOT NULL DEFAULT 'primary',
     created_at  timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT project_models_pmr_uq UNIQUE (project_id, model_id, role)
+    CONSTRAINT project_soft_sensors_pmr_uq UNIQUE (project_id, soft_sensor_id, role)
 );
 
 -- 8.5 Federation ↔ Project link table -----------------------------------
@@ -2069,8 +1983,8 @@ CREATE TABLE IF NOT EXISTS public.federation_participants (
 -- 8.6 Multi-parent lineage (federated aggregation edges) ----------------
 CREATE TABLE IF NOT EXISTS public.model_contributions (
     id                      uuid PRIMARY KEY DEFAULT public.uuid_generate_v4(),
-    aggregated_model_id     uuid NOT NULL REFERENCES public.models(id) ON DELETE CASCADE,
-    contributor_model_id    uuid NOT NULL REFERENCES public.models(id),
+    aggregated_model_id     uuid NOT NULL REFERENCES public.soft_sensors(id) ON DELETE CASCADE,
+    contributor_model_id    uuid NOT NULL REFERENCES public.soft_sensors(id),
     federation_id           uuid NOT NULL REFERENCES public.federations(id) ON DELETE CASCADE,
     round_number            integer NOT NULL,
     contribution_weight     numeric NOT NULL DEFAULT 1.0,
@@ -2103,7 +2017,7 @@ ALTER TABLE public.projects DROP COLUMN IF EXISTS lead;
 -- Backfill for existing volumes where `models` was created before the
 -- doi/authors split or before the high-fidelity YAML columns. Safe no-ops
 -- on fresh boots (CREATE TABLE above already includes them).
-ALTER TABLE public.models
+ALTER TABLE public.soft_sensors
     ADD COLUMN IF NOT EXISTS doi                  text,
     ADD COLUMN IF NOT EXISTS authors              text,
     ADD COLUMN IF NOT EXISTS learner              text,
@@ -2135,15 +2049,15 @@ CREATE TRIGGER federations_set_updated_at
     EXECUTE FUNCTION public.tg_federations_set_updated_at();
 
 
--- Add experiment_models junction table to link experiments and models
-CREATE TABLE IF NOT EXISTS public.experiment_models (
+-- Add experiment_soft_sensors junction table to link experiments and soft sensors
+CREATE TABLE IF NOT EXISTS public.experiment_soft_sensors (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     experiment_id UUID REFERENCES public.experiments(id) ON DELETE CASCADE,
-    model_id UUID REFERENCES public.models(id) ON DELETE CASCADE,
+    soft_sensor_id UUID REFERENCES public.soft_sensors(id) ON DELETE CASCADE,
     role TEXT DEFAULT 'attached',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
--- Allow NULLs for existing data compatibility: experiment_id and model_id are nullable
+-- Allow NULLs for existing data compatibility: experiment_id and soft_sensor_id are nullable
 
 COMMIT;
 

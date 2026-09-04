@@ -172,20 +172,18 @@ _TABLES = [
     ("actuator_states", M.ActuatorState, None),
     ("runs", M.Run, None),
     ("experiments", M.Experiment, None),
-    ("experiment_models", M.ExperimentModel, None),
+    ("experiment_soft_sensors", M.ExperimentSoftSensors, None),
     ("predictions", M.Prediction, None),
     ("annotations", M.Annotation, None),
     ("alerts", M.Alert, None),
     ("equipment_components", M.EquipmentComponent, None),
     ("experiments_equipments", M.ExperimentEquipment, None),
     # --- FermOps streaming + soft-sensor demo
-    ("soft_sensors", M.SoftSensor, None),
-    ("project_soft_sensors", M.ProjectSoftSensor, None),
+    ("soft_sensors", M.SoftSensors, _validate_model_payload_advisory, _preprocess_model_body),
     ("streaming_jobs", M.StreamingJob, None),
     # --- Model registry + federated learning (proposal 2026-05-22)
     # 4-tuple: (prefix, model, validator, preprocessor)
-    ("models", M.Model, _validate_model_payload_advisory, _preprocess_model_body),
-    ("project_models", M.ProjectModel, None, None),
+    ("project_soft_sensors", M.ProjectSoftSensors, None, None),
     ("federations", M.Federation, None, None),
     ("federation_participants", M.FederationParticipant, None, None),
     ("model_contributions", M.ModelContribution, None, None),

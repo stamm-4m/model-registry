@@ -24,6 +24,6 @@ RUN poetry config virtualenvs.create false \
 
 # Copy source code
 COPY model_registry ./model_registry
-COPY README.md LICENSE ./
+COPY README.md LICENCE ./
 
 EXPOSE 8000

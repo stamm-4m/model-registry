@@ -2,7 +2,7 @@
 
 Covers both:
 - registry endpoints under ``/<project_id>/...`` (list/metadata/update)
-- CRUD endpoints under ``/api/v1/models`` and ``/api/v1/project_models``
+- CRUD endpoints under ``/api/v1/models`` and ``/api/v1/project_soft_sensors`` (list/get/create/update/delete)
 
 All requests use ``authenticated_request`` to preserve token refresh behavior.
 """
@@ -31,11 +31,11 @@ class ModelsApiClient:
 
     # ---- registry endpoints ------------------------------------------
 
-    def list_models_for_project(
+    def list_soft_sensors_for_project(
         self, project_id: str, session_data: _SessionData
     ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         response, session_data = authenticated_request(
-            "GET", f"/{project_id}/list_models/", session_data
+            "GET", f"/{project_id}/list_soft_sensors/", session_data
         )
         if response is None:
             return None, None
@@ -43,7 +43,7 @@ class ModelsApiClient:
             return response.json(), session_data
         return None, session_data
 
-    def get_model_metadata(
+    def get_soft_sensor_metadata(
         self,
         project_id: str,
         model_id: str,
@@ -107,11 +107,11 @@ class ModelsApiClient:
         )
         return {"ok": False, "reason": f"HTTP {response.status_code}"}, session_data
 
-    def list_models_full(
+    def list_soft_sensors_full(
         self, project_id: str, session_data: _SessionData
     ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         response, session_data = authenticated_request(
-            "GET", f"/{project_id}/models_full/", session_data
+            "GET", f"/{project_id}/soft_sensors_full/", session_data
         )
         if response is None:
             return None, None
@@ -119,7 +119,7 @@ class ModelsApiClient:
             return response.json(), session_data
         return None, session_data
 
-    def update_registry_model(
+    def update_registry_soft_sensor(
         self,
         project_id: str,
         model_id: str,
@@ -137,15 +137,15 @@ class ModelsApiClient:
         if response.status_code == 200:
             return response.json(), session_data
         logger.warning(
-            "update_registry_model failed status=%s body=%s",
+            "update_registry_soft_sensor failed status=%s body=%s",
             response.status_code,
             _safe_json(response),
         )
         return None, session_data
 
-    # ---- models CRUD -------------------------------------------------
+    # ---- soft_sensors CRUD -------------------------------------------------
 
-    def list_models_table(
+    def list_soft_sensors_table(
         self,
         session_data: _SessionData,
         offset: int = 0,
@@ -153,7 +153,7 @@ class ModelsApiClient:
     ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET",
-            f"/api/v1/models/?offset={offset}&limit={limit}",
+            f"/api/v1/soft_sensors/?offset={offset}&limit={limit}",
             session_data,
         )
         if response is None:
@@ -162,11 +162,11 @@ class ModelsApiClient:
             return response.json(), session_data
         return None, session_data
 
-    def get_model_row(
-        self, model_row_id: str, session_data: _SessionData
+    def get_soft_sensor_row(
+        self, soft_sensor_id: str, session_data: _SessionData
     ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
-            "GET", f"/api/v1/models/{model_row_id}", session_data
+            "GET", f"/api/v1/soft_sensors/{soft_sensor_id}", session_data
         )
         if response is None:
             return None, None
@@ -174,34 +174,34 @@ class ModelsApiClient:
             return response.json(), session_data
         return None, session_data
 
-    def create_model_row(
+    def create_soft_sensor_row(
         self,
         payload: dict[str, Any],
         session_data: _SessionData,
     ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
-            "POST", "/api/v1/models/", session_data, json=payload
+            "POST", "/api/v1/soft_sensors/", session_data, json=payload
         )
         if response is None:
             return None, None
         if response.status_code in (200, 201):
             return response.json(), session_data
         logger.warning(
-            "create_model_row failed status=%s body=%s",
+            "create_soft_sensor_row failed status=%s body=%s",
             response.status_code,
             _safe_json(response),
         )
         return None, session_data
 
-    def update_model_row(
+    def update_soft_sensor_row(
         self,
-        model_row_id: str,
+        soft_sensor_id: str,
         payload: dict[str, Any],
         session_data: _SessionData,
     ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "PATCH",
-            f"/api/v1/models/{model_row_id}",
+            f"/api/v1/soft_sensors/{soft_sensor_id}",
             session_data,
             json=payload,
         )
@@ -210,27 +210,27 @@ class ModelsApiClient:
         if response.status_code == 200:
             return response.json(), session_data
         logger.warning(
-            "update_model_row failed status=%s body=%s",
+            "update_soft_sensor_row failed status=%s body=%s",
             response.status_code,
             _safe_json(response),
         )
         return None, session_data
 
-    def delete_model_row(
+    def delete_soft_sensor_row(
         self,
-        model_row_id: str,
+        soft_sensor_id: str,
         session_data: _SessionData,
     ) -> tuple[int | None, _SessionData | None]:
         response, session_data = authenticated_request(
-            "DELETE", f"/api/v1/models/{model_row_id}", session_data
+            "DELETE", f"/api/v1/soft_sensors/{soft_sensor_id}", session_data
         )
         if response is None:
             return None, None
         return response.status_code, session_data
 
-    # ---- project_models CRUD ----------------------------------------
+    # ---- project_soft_sensors CRUD ----------------------------------------
 
-    def list_project_models(
+    def list_project_soft_sensors(
         self,
         session_data: _SessionData,
         offset: int = 0,
@@ -238,7 +238,7 @@ class ModelsApiClient:
     ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET",
-            f"/api/v1/project_models/?offset={offset}&limit={limit}",
+            f"/api/v1/project_soft_sensors/?offset={offset}&limit={limit}",
             session_data,
         )
         if response is None:
@@ -247,9 +247,9 @@ class ModelsApiClient:
             return response.json(), session_data
         return None, session_data
 
-    # ---- experiment_models CRUD ------------------------------------
+    # ---- experiment_soft_sensors CRUD ------------------------------------
 
-    def list_experiment_models(
+    def list_experiment_soft_sensors(
         self,
         session_data: _SessionData,
         offset: int = 0,
@@ -257,7 +257,7 @@ class ModelsApiClient:
     ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "GET",
-            f"/api/v1/experiment_models/?offset={offset}&limit={limit}",
+            f"/api/v1/experiment_soft_sensors/?offset={offset}&limit={limit}",
             session_data,
         )
         if response is None:
@@ -266,57 +266,57 @@ class ModelsApiClient:
             return response.json(), session_data
         return None, session_data
 
-    def create_experiment_model(
+    def create_experiment_soft_sensor(
         self,
         payload: dict[str, Any],
         session_data: _SessionData,
     ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
-            "POST", "/api/v1/experiment_models/", session_data, json=payload
+            "POST", "/api/v1/experiment_soft_sensors/", session_data, json=payload
         )
         if response is None:
             return None, None
         if response.status_code in (200, 201):
             return response.json(), session_data
         logger.warning(
-            "create_experiment_model failed status=%s body=%s",
+            "create_experiment_soft_sensor failed status=%s body=%s",
             response.status_code,
             _safe_json(response),
         )
         return None, session_data
 
-    def delete_experiment_model(
+    def delete_experiment_soft_sensor(
         self,
         relation_id: str,
         session_data: _SessionData,
     ) -> tuple[int | None, _SessionData | None]:
         response, session_data = authenticated_request(
-            "DELETE", f"/api/v1/experiment_models/{relation_id}", session_data
+            "DELETE", f"/api/v1/experiment_soft_sensors/{relation_id}", session_data
         )
         if response is None:
             return None, None
         return response.status_code, session_data
 
-    def create_project_model(
+    def create_project_soft_sensor(
         self,
         payload: dict[str, Any],
         session_data: _SessionData,
     ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
-            "POST", "/api/v1/project_models/", session_data, json=payload
+            "POST", "/api/v1/project_soft_sensors/", session_data, json=payload
         )
         if response is None:
             return None, None
         if response.status_code in (200, 201):
             return response.json(), session_data
         logger.warning(
-            "create_project_model failed status=%s body=%s",
+            "create_project_soft_sensor failed status=%s body=%s",
             response.status_code,
             _safe_json(response),
         )
         return None, session_data
 
-    def update_project_model(
+    def update_project_soft_sensor(
         self,
         relation_id: str,
         payload: dict[str, Any],
@@ -324,7 +324,7 @@ class ModelsApiClient:
     ) -> tuple[dict[str, Any] | None, _SessionData | None]:
         response, session_data = authenticated_request(
             "PATCH",
-            f"/api/v1/project_models/{relation_id}",
+            f"/api/v1/project_soft_sensors/{relation_id}",
             session_data,
             json=payload,
         )
@@ -333,19 +333,19 @@ class ModelsApiClient:
         if response.status_code == 200:
             return response.json(), session_data
         logger.warning(
-            "update_project_model failed status=%s body=%s",
+            "update_project_soft_sensor failed status=%s body=%s",
             response.status_code,
             _safe_json(response),
         )
         return None, session_data
 
-    def delete_project_model(
+    def delete_project_soft_sensor(
         self,
         relation_id: str,
         session_data: _SessionData,
     ) -> tuple[int | None, _SessionData | None]:
         response, session_data = authenticated_request(
-            "DELETE", f"/api/v1/project_models/{relation_id}", session_data
+            "DELETE", f"/api/v1/project_soft_sensors/{relation_id}", session_data
         )
         if response is None:
             return None, None

@@ -116,7 +116,7 @@ def get_sensor_readings(
         description=f"max rows (default {DEFAULT_LIMIT}, max {MAX_LIMIT})",
     ),
     db: Session = Depends(get_db),
-    user=Depends(require_permission_resource("models:read", "Models")),
+    user=Depends(require_permission_resource("soft_sensors:read", "SoftSensors")),
 ):
     """Return ``sensor_readings`` rows for this run, ordered by time ASC.
 
@@ -140,7 +140,7 @@ def get_actuator_states(
         description=f"max rows (default {DEFAULT_LIMIT}, max {MAX_LIMIT})",
     ),
     db: Session = Depends(get_db),
-    user=Depends(require_permission_resource("models:read", "Models")),
+    user=Depends(require_permission_resource("soft_sensors:read", "SoftSensors")),
 ):
     """Return ``actuator_states`` rows for this run, ordered by time ASC."""
     return _query(ActuatorState, db, _parse_run_id(run_id), _parse_since(since), limit)
@@ -161,7 +161,7 @@ def get_predictions(
         description=f"max rows (default {DEFAULT_LIMIT}, max {MAX_LIMIT})",
     ),
     db: Session = Depends(get_db),
-    user=Depends(require_permission_resource("models:read", "Models")),
+    user=Depends(require_permission_resource("soft_sensors:read", "SoftSensors")),
 ):
     """Return ``predictions`` rows for this run, ordered by time ASC."""
     return _query(Prediction, db, _parse_run_id(run_id), _parse_since(since), limit)
@@ -178,7 +178,7 @@ def get_predictions(
 def reset_run(
     run_id: str,
     db: Session = Depends(get_db),
-    user=Depends(require_permission_resource("models:edit", "Models")),
+    user=Depends(require_permission_resource("soft_sensors:edit", "SoftSensors")),
 ):
     """Wipe sensor_readings + actuator_states + predictions for this run.
 

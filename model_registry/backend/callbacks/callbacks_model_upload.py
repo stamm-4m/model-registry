@@ -742,13 +742,13 @@ def register_model_upload_callbacks(app):
         try:
             if mode == "edit" and db_uuid:
                 # PATCH — update existing row
-                result, session_data = ModelService().update_model_row(
+                result, session_data = ModelService().update_soft_sensor_row(
                     session_data, db_uuid, payload
                 )
                 verb = "updated"
             else:
                 # POST — create new row and link to project
-                result, session_data = ModelService().create_model_for_project(
+                result, session_data = ModelService().create_soft_sensor_for_project(
                     session_data, project_id, payload
                 )
                 verb = "saved"
@@ -757,23 +757,23 @@ def register_model_upload_callbacks(app):
                 return (
                     True,
                     dbc.Alert(
-                        "❌ Error: could not save model to the database.",
+                        "❌ Error: could not save soft sensor to the database.",
                         color="danger",
                     ),
                     "danger",
                     "Error",
                     dbc.Alert(
-                        "❌ Error: could not save model to the database.",
+                        "❌ Error: could not save soft sensor to the database.",
                         color="danger",
                     ),
                 )
 
             return (
                 True,
-                dbc.Alert(f"✅ Model {verb} successfully.", color="success"),
+                dbc.Alert(f"✅ Soft Sensor {verb} successfully.", color="success"),
                 "success",
                 "Success",
-                dbc.Alert(f"✅ Model {verb} successfully.", color="success"),
+                dbc.Alert(f"✅ Soft Sensor {verb} successfully.", color="success"),
                 session_data,
             )
 

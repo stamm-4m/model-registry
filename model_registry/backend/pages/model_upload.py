@@ -21,7 +21,7 @@ def _fetch_model_row(slug: str, session_data) -> dict:
     try:
         from model_registry.backend.services.model_service import ModelService
 
-        rows, _ = ModelService().get_all_model_rows(session_data)
+        rows, _ = ModelService().get_all_soft_sensor_rows(session_data)
         return next((r for r in (rows or []) if r.get("slug") == slug), {})
     except Exception as exc:
         logger.warning("Could not fetch model row for slug=%s: %s", slug, exc)
