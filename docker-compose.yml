@@ -1,12 +1,12 @@
 services:
   postgres:
-    image: timescale/timescaledb:latest-pg17
+    image: timescale/timescaledb:latest-pg16
     container_name: stamm-postgres
     restart: unless-stopped
     env_file:
       - ./model_registry/postgres/.env
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - stamm_pgdata:/var/lib/postgresql/data
       - ./model_registry/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro

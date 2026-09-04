@@ -9,7 +9,7 @@ from dash.exceptions import PreventUpdate
 from model_registry.backend.services.airflow_client import (
     trigger_deployment_soft_sensors,
 )
-from model_registry.backend.services.api_clients import RunsApiClient
+from model_registry.backend.services.api_clients import RunsApiClient, EquipmentsApiClient
 from model_registry.backend.services.experiment_service import ExperimentService
 from model_registry.backend.services.project_service import ProjectService
 from model_registry.backend.services.model_service import ModelService
@@ -18,7 +18,24 @@ from model_registry.backend.services.api_clients import ModelsApiClient
 logger = logging.getLogger(__name__)
 
 
-def _start_prediction_loop(session_data, experiment_id: str, project_id: str):
+def _resolve_model_slugs(session_data, model_ids: list | None):
+    """models.slug for every model attached to the experiment — the
+    identifiers Airflow needs to call /predict/{model_id} for each one.
+    """
+    if not model_ids:
+        return [], session_data
+    models_client = ModelsApiClient()
+    slugs = []
+    for mid in model_ids:
+        model, session_data = models_client.get_model_row(mid, session_data)
+        if model and model.get("slug"):
+            slugs.append(model["slug"])
+    return slugs, session_data
+
+
+def _start_prediction_loop(
+    session_data, experiment_id: str, project_id: str, model_ids: list | None = None, vessel_id: str | None = None
+):
     """Create the experiment's first run and trigger the Airflow prediction
     loop for it. Best-effort: logs and returns on any failure so a hiccup
     here never blocks experiment creation from succeeding in the UI.
@@ -35,11 +52,17 @@ def _start_prediction_loop(session_data, experiment_id: str, project_id: str):
     project, session_data = ProjectService().get_project(session_data, project_id)
     project_name = project.name if project else ""
 
+    model_slugs, session_data = _resolve_model_slugs(session_data, model_ids)
+    if not model_slugs:
+        logger.warning(f"No model attached to experiment {experiment_id} — Airflow will fall back to its own env-var pin.")
+
     triggered = trigger_deployment_soft_sensors(
         run_id=run["id"],
         experiment_id=experiment_id,
         project_id=project_id,
         project_name=project_name,
+        model_ids=model_slugs,
+        vessel_id=vessel_id,
     )
     if not triggered:
         logger.warning(f"Airflow trigger failed for experiment {experiment_id}, run {run['id']}.")
@@ -83,6 +106,20 @@ def register_experiment_modal_callbacks(app):
         ], session_data
 
     @app.callback(
+        Output("exp-vessel-dropdown", "options"),
+        Output("user-session", "data", allow_duplicate=True),
+        Input("btn-open-exp-modal", "n_clicks"),
+        Input({"type": "btn-edit-exp", "index": ALL}, "n_clicks"),
+        State("user-session", "data"),
+        prevent_initial_call=True,
+    )
+    def load_vessels_dropdown(n, n_list, session_data):
+        equipments, session_data = EquipmentsApiClient().list(session_data)
+        return [
+            {"label": eq.get("name"), "value": str(eq.get("id"))} for eq in (equipments or [])
+        ], session_data
+
+    @app.callback(
         Output("exp-models-dropdown", "options"),
         Output("user-session", "data", allow_duplicate=True),
         Input("exp-project-dropdown", "value"),
@@ -119,6 +156,7 @@ def register_experiment_modal_callbacks(app):
         Output("exp-name-input", "value"),
         Output("exp-project-dropdown", "value"),
         Output("exp-models-dropdown", "value"),
+        Output("exp-vessel-dropdown", "value"),
         Output("exp-description-input", "value"),
         Output("exp-initial-conditions-input", "value"),
         Output("exp-set-points-input", "value"),
@@ -134,6 +172,7 @@ def register_experiment_modal_callbacks(app):
         State("exp-name-input", "value"),
         State("exp-project-dropdown", "value"),
         State("exp-models-dropdown", "value"),
+        State("exp-vessel-dropdown", "value"),
         State("exp-description-input", "value"),
         State("exp-initial-conditions-input", "value"),
         State("exp-set-points-input", "value"),
@@ -148,6 +187,7 @@ def register_experiment_modal_callbacks(app):
         name,
         project_id,
         model_ids,
+        vessel_id,
         description,
         initial_conditions,
         set_points,
@@ -160,6 +200,7 @@ def register_experiment_modal_callbacks(app):
             raise PreventUpdate
         if not name or not project_id:
             return (
+                dash.no_update,
                 dash.no_update,
                 dash.no_update,
                 dash.no_update,
@@ -197,6 +238,7 @@ def register_experiment_modal_callbacks(app):
                     model_ids=model_ids,
                     name=name,
                     project_id=project_id,
+                    vessel_id=vessel_id,
                     description=description,
                     initial_conditions=ic,
                     set_points=sp,
@@ -212,6 +254,7 @@ def register_experiment_modal_callbacks(app):
                     name=name,
                     project_id=project_id,
                     model_ids=model_ids,
+                    vessel_id=vessel_id,
                     description=description,
                     initial_conditions=ic,
                     set_points=sp,
@@ -222,13 +265,14 @@ def register_experiment_modal_callbacks(app):
                 icon = "success"
                 if new_exp is not None:
                     session_data = _start_prediction_loop(
-                        session_data, new_exp.id, project_id
+                        session_data, new_exp.id, project_id, model_ids, vessel_id
                     )
             logger.debug(f"Saved experiment: {name}, project_id: {project_id}")
-            return "", None, [], "", "", "", "", "", None, n, True, msg, icon, session_data
+            return "", None, [], None, "", "", "", "", "", None, n, True, msg, icon, session_data
         except Exception as e:
             logger.error(f"Error saving experiment: {e}")
             return (
+                dash.no_update,
                 dash.no_update,
                 dash.no_update,
                 dash.no_update,
@@ -250,6 +294,7 @@ def register_experiment_modal_callbacks(app):
         Output("exp-name-input", "value", allow_duplicate=True),
         Output("exp-project-dropdown", "value", allow_duplicate=True),
         Output("exp-models-dropdown", "value", allow_duplicate=True),
+        Output("exp-vessel-dropdown", "value", allow_duplicate=True),
         Output("exp-description-input", "value", allow_duplicate=True),
         Output("exp-initial-conditions-input", "value", allow_duplicate=True),
         Output("exp-set-points-input", "value", allow_duplicate=True),
@@ -293,6 +338,7 @@ def register_experiment_modal_callbacks(app):
             exp.name,
             str(exp.project_id) if exp.project_id else None,
             linked,
+            str(exp.vessel_id) if exp.vessel_id else None,
             exp.description or "",
             ic,
             sp,

@@ -13,9 +13,9 @@ class Prediction(Base):
     run_id = Column(
         UUID(as_uuid=True), ForeignKey("runs.id"), primary_key=True, nullable=False
     )
-    soft_sensor_id = Column(
+    model_id = Column(
         UUID(as_uuid=True),
-        ForeignKey("soft_sensors.id"),
+        ForeignKey("models.id"),
         primary_key=True,
         nullable=False,
     )

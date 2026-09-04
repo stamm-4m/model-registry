@@ -80,6 +80,7 @@ class ExperimentService:
         model_ids: list[str] | None = None,
         name: str | None = None,
         project_id: str | None = None,
+        vessel_id: str | None = None,
         description: str | None = None,
         initial_conditions: dict[str, Any] | None = None,
         set_points: dict[str, Any] | None = None,
@@ -91,6 +92,8 @@ class ExperimentService:
             payload["name"] = name
         if project_id is not None:
             payload["project_id"] = _coerce_id(project_id)
+        if vessel_id is not None:
+            payload["vessel_id"] = _coerce_id(vessel_id)
         if description is not None:
             payload["description"] = description
         if initial_conditions is not None:

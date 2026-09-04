@@ -45,9 +45,18 @@ def trigger_deployment_soft_sensors(
     experiment_id: str,
     project_id: str,
     project_name: str,
+    model_ids: list[str] | None = None,
+    vessel_id: str | None = None,
     user_id: str | None = None,
 ) -> bool:
-    """POST a new dagRun for deployment_soft_sensors. Returns True on success."""
+    """POST a new dagRun for deployment_soft_sensors. Returns True on success.
+
+    model_ids is the list of models.slug for every model attached to this
+    experiment (see _start_prediction_loop) — Airflow runs a prediction for
+    each one, instead of its own env-var pin, when present. vessel_id is the
+    bioreactor this experiment runs on (experiments.vessel_id), passed
+    through for provenance.
+    """
     token = _get_token()
     if not token:
         return False
@@ -58,6 +67,10 @@ def trigger_deployment_soft_sensors(
         "project_id": project_id,
         "project_name": project_name,
     }
+    if model_ids:
+        conf["model_ids"] = model_ids
+    if vessel_id:
+        conf["vessel_id"] = vessel_id
     if user_id:
         conf["user_id"] = user_id
 
