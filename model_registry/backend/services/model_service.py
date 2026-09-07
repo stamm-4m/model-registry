@@ -34,22 +34,22 @@ class ModelService:
     # Registry endpoints (/list_models, /metadata, /models_full, /update)
     # ------------------------------------------------------------------
 
-    def list_models(
+    def list_soft_sensor(
         self, session_data: _SessionData, project_id: str
     ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
-        return self.client.list_models_for_project(project_id, session_data)
+        return self.client.list_soft_sensors_for_project(project_id, session_data)
 
-    def get_model_metadata(
+    def get_soft_sensor_metadata(
         self, session_data: _SessionData, project_id: str, model_id: str
     ) -> tuple[dict[str, Any] | None, _SessionData | None]:
-        return self.client.get_model_metadata(project_id, model_id, session_data)
+        return self.client.get_soft_sensor_metadata(project_id, model_id, session_data)
 
-    def list_models_full(
+    def list_soft_sensor_full(
         self, session_data: _SessionData, project_id: str
     ) -> tuple[list[dict[str, Any]] | None, _SessionData | None]:
-        return self.client.list_models_full(project_id, session_data)
+        return self.client.list_soft_sensors_full(project_id, session_data)
 
-    def update_registry_model(
+    def update_registry_soft_sensor(
         self,
         session_data: _SessionData,
         project_id: str,
@@ -132,13 +132,13 @@ class ModelService:
     # Composite create: Model + ProjectModel link
     # ------------------------------------------------------------------
 
-    def create_model_for_project(
+    def create_soft_sensor_for_project(
         self,
         session_data: _SessionData,
         project_external_id: str,
         payload: dict[str, Any],
     ) -> tuple[dict[str, Any] | None, _SessionData | None]:
-        """Create a model row in Postgres and link it to ``project_external_id``.
+        """Create a soft sensor row in Postgres and link it to ``project_external_id``.
 
         ``project_external_id`` is the human-readable code stored in
         ``projects.project_id`` (e.g. ``"P0004"``). The project's UUID is
@@ -210,12 +210,12 @@ class ModelService:
 
         return model, session_data
 
-    def list_db_models_for_project(
+    def list_db_soft_sensors_for_project(
         self,
         session_data: _SessionData,
         project_external_id: str,
     ) -> tuple[list[dict[str, Any]], _SessionData | None]:
-        """Return Postgres-backed models linked to ``project_external_id``.
+        """Return Postgres-backed soft sensors linked to ``project_external_id``.
 
         Output dicts mimic the legacy ``/list_models/`` shape so they can be
         merged seamlessly with YAML-backed rows in the home grid:
