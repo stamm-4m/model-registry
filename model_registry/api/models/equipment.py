@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from sqlalchemy import Column, DateTime, String, Text
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 
 from model_registry.api.core.database import Base
 
@@ -18,3 +19,7 @@ class Equipment(Base):
     model = Column(String, nullable=True)
     version = Column(String, nullable=True)
     created_at = Column(DateTime, nullable=True)
+
+    laboratory_equipments = relationship(
+        "LaboratoryEquipment", back_populates="equipment"
+    )

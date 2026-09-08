@@ -98,7 +98,7 @@ def register_experiment_modal_callbacks(app):
         if not proj or not proj.project_id:
             return [], session_data
         msvc = ModelService()
-        models, session_data = msvc.list_db_models_for_project(session_data, proj.project_id)
+        models, session_data = msvc.list_db_soft_sensors_for_project(session_data, proj.project_id)
         options = []
         if models:
             for m in models:

@@ -390,6 +390,8 @@ INSERT INTO public.resources (id, name) VALUES ('42c9fb80-2624-5cca-8d57-f44ba2a
 
 INSERT INTO public.resources (id, name) VALUES ('5f32e04a-427e-54f4-af24-2f7abcb3c51d'::uuid, 'Role_permission') ON CONFLICT DO NOTHING;
 
+INSERT INTO public.resources (id, name) VALUES ('b6b3c5a1-6f8e-5d21-9c34-2a7e1f0d4b56'::uuid, 'Laboratory_equipments') ON CONFLICT DO NOTHING;
+
 -- 2. Permissions for the new resources ---------------------------------
 INSERT INTO public.permissions (id, name, description) VALUES ('f7602b5c-8259-563e-bf2c-ce0b2711372a'::uuid, 'equipments:read', 'Read equipments data') ON CONFLICT DO NOTHING;
 
@@ -569,6 +571,12 @@ INSERT INTO public.permissions (id, name, description) VALUES ('b9ee9e25-9afe-5c
 
 INSERT INTO public.permissions (id, name, description) VALUES ('a9794fb9-6900-5c72-bd4d-af529891818f'::uuid, 'role_permission:edit', 'Edit role_permission data') ON CONFLICT DO NOTHING;
 
+INSERT INTO public.permissions (id, name, description) VALUES ('c3d5e7f9-1a2b-5c6d-8e9f-0a1b2c3d4e5f'::uuid, 'laboratory_equipments:read', 'Read laboratory_equipments data') ON CONFLICT DO NOTHING;
+
+INSERT INTO public.permissions (id, name, description) VALUES ('d4e6f8a0-2b3c-5d6e-9f0a-1b2c3d4e5f60'::uuid, 'laboratory_equipments:write', 'Write laboratory_equipments data') ON CONFLICT DO NOTHING;
+
+INSERT INTO public.permissions (id, name, description) VALUES ('e5f7a9b1-3c4d-5e6f-0a1b-2c3d4e5f6071'::uuid, 'laboratory_equipments:edit', 'Edit laboratory_equipments data') ON CONFLICT DO NOTHING;
+
 -- 3. super_admin role_permission grants -------------------------------
 INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('7f439d05-9283-5ce3-8f36-fb2d0f3f3b35'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, '484d2c9f-7d9a-5a29-a5c0-4f5c7e96f022'::uuid, '80649f36-2bb3-5643-9a95-5a0ed8eec857'::uuid) ON CONFLICT DO NOTHING;
 INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('27c3e0cd-86d9-5a4f-bc3c-8df6433cce6c'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, '1dffaf90-286b-5bb0-b4a4-f6cfb7b6e3c1'::uuid, '80649f36-2bb3-5643-9a95-5a0ed8eec857'::uuid) ON CONFLICT DO NOTHING;
@@ -744,6 +752,23 @@ INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VAL
 INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('0ca7aa69-d0b1-5d4a-ab84-7a153c71fefa'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, 'b9ee9e25-9afe-5c9c-a4c3-493a12f16e29'::uuid, '5f32e04a-427e-54f4-af24-2f7abcb3c51d'::uuid) ON CONFLICT DO NOTHING;
 
 INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('43d11a0c-750e-5396-9700-d4682e905c07'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, 'a9794fb9-6900-5c72-bd4d-af529891818f'::uuid, '5f32e04a-427e-54f4-af24-2f7abcb3c51d'::uuid) ON CONFLICT DO NOTHING;
+
+INSERT INTO public.role_permission (id, role_id, permission_id, resource_id)
+SELECT uuid_generate_v5(
+           '00000000-0000-0000-0000-000000000001'::uuid,
+           'super_admin:laboratory_equipments:' || p.name
+       ),
+       '11111111-1111-1111-1111-111111111111'::uuid,
+       p.id,
+       r.id
+FROM public.permissions p
+JOIN public.resources r ON r.name = 'Laboratory_equipments'
+WHERE p.name IN (
+    'laboratory_equipments:read',
+    'laboratory_equipments:write',
+    'laboratory_equipments:edit'
+)
+ON CONFLICT DO NOTHING;
 
 
 -- 5. project_soft_sensors: link demo soft sensors to P0001/P0002/P0003 --
@@ -2281,6 +2306,34 @@ WHERE p.project_id = 'P0001'
       '0010_python_penicillin_HGB'
   )
 ON CONFLICT (project_id, soft_sensor_id, role) DO NOTHING;
+
+-- Link every seeded experiment to its primary vessel/equipment.
+INSERT INTO public.experiments_equipments (id, experiment_id, equipment_id)
+SELECT
+    public.uuid_generate_v5(
+        '00000000-0000-0000-0000-000000000001'::uuid,
+        e.id::text || ':' || e.vessel_id::text
+    ),
+    e.id,
+    e.vessel_id
+FROM public.experiments AS e
+WHERE e.vessel_id IS NOT NULL
+ON CONFLICT (id) DO NOTHING;
+
+-- Link each seeded vessel/equipment to the laboratory of its project.
+INSERT INTO public.laboratory_equipments (id, laboratory_id, equipment_id)
+SELECT
+        public.uuid_generate_v5(
+                '00000000-0000-0000-0000-000000000001'::uuid,
+                lp.laboratory_id::text || ':' || e.vessel_id::text
+        ),
+        lp.laboratory_id,
+        e.vessel_id
+FROM public.experiments AS e
+JOIN public.laboratory_project AS lp
+    ON lp.project_id = e.project_id
+WHERE e.vessel_id IS NOT NULL
+ON CONFLICT (laboratory_id, equipment_id) DO NOTHING;
 
 COMMIT;
 

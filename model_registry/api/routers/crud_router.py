@@ -147,6 +147,7 @@ _TABLES = [
     ("permissions", M.Permission, None),
     ("role_permission", M.RolePermission, None),
     ("laboratories", M.Laboratory, None),
+    ("laboratory_equipments", M.LaboratoryEquipment, None),
     ("laboratory_project", M.LaboratoryProject, None),
     ("laboratory_user", M.LaboratoryUser, None),
     ("projects", M.Project, None),

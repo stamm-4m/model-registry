@@ -24,6 +24,7 @@ from .drift_result import DriftResult
 from .equipment import Equipment
 from .equipment_component import EquipmentComponent
 from .experiment import Experiment
+from .laboratory_equipment import LaboratoryEquipment
 
 # --- Phase 4: drift monitoring (selection + results)
 from .experiment_drift_detector import ExperimentDriftDetector
@@ -103,6 +104,7 @@ __all__ = [
     "Alert",
     "EquipmentComponent",
     "ExperimentEquipment",
+    "LaboratoryEquipment",
     # Streaming + soft-sensor demo (FermOps streamer)
     "StreamingJob",
     # Model registry + federated learning (proposal 2026-05-22)

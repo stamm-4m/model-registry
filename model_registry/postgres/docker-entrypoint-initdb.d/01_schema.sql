@@ -297,6 +297,25 @@ CREATE TABLE public.equipments (
 
 ALTER TABLE public.equipments OWNER TO CURRENT_USER;
 
+-- TOC entry 285 (class 1259 OID 34337)
+-- Name: laboratory_equipments; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.laboratory_equipments (
+    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    laboratory_id uuid NOT NULL,
+    equipment_id uuid NOT NULL
+);
+
+
+ALTER TABLE public.laboratory_equipments OWNER TO CURRENT_USER;
+
+ALTER TABLE ONLY public.laboratory_equipments
+    ADD CONSTRAINT laboratory_equipments_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.laboratory_equipments
+    ADD CONSTRAINT laboratory_equipments_uq UNIQUE (laboratory_id, equipment_id);
+
 --
 -- TOC entry 283 (class 1259 OID 34313)
 -- Name: experiments; Type: TABLE; Schema: public; Owner: postgres
@@ -1532,6 +1551,12 @@ ALTER TABLE ONLY public.equipment_components
 
 ALTER TABLE ONLY public.equipment_components
     ADD CONSTRAINT fk_equipment_components_sensor FOREIGN KEY (sensor_id) REFERENCES public.sensors(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.laboratory_equipments
+    ADD CONSTRAINT laboratory_equipments_laboratory_fk FOREIGN KEY (laboratory_id) REFERENCES public.laboratories(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.laboratory_equipments
+    ADD CONSTRAINT laboratory_equipments_equipment_fk FOREIGN KEY (equipment_id) REFERENCES public.equipments(id) ON DELETE CASCADE;
 
 
 --
