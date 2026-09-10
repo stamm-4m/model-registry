@@ -29,7 +29,7 @@ def register_export_callbacks(app):
         if not trig or not session:
             raise PreventUpdate
         try:
-            rows, _ = ModelService().get_all_model_rows(session)
+            rows, _ = ModelService().get_all_soft_sensor_rows(session)
         except Exception as exc:
             logger.warning("export: could not fetch models: %s", exc)
             rows = []

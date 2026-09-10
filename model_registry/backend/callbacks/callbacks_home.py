@@ -48,7 +48,7 @@ def register_home_callbacks(app):
         for pid in projects:
             try:
                 models_response, session_data = (
-                    model_service.list_db_models_for_project(session_data, pid)
+                    model_service.list_db_soft_sensors_for_project(session_data, pid)
                 )
                 logger.debug(
                     f"count DB models for project {pid}: {len(models_response)}"

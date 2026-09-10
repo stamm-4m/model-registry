@@ -35,6 +35,7 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
     try:
+        logger.info("form_data: %s, username: %s, password: %s", form_data, form_data.username, form_data.password)
         access_token, refresh_token = login_user(
             db, form_data.username, form_data.password, include_permissions=True
         )

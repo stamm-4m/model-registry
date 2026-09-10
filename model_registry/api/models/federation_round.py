@@ -8,8 +8,15 @@ contribution charts. See [[project_fl_rl_views]].
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import (Column, DateTime, ForeignKey, Integer, Numeric, String,
-                        UniqueConstraint)
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 
 from model_registry.api.core.database import Base
@@ -30,7 +37,7 @@ class FederationRound(Base):
     participants_expected = Column(Integer)
     participants_received = Column(Integer)
     contributions = Column(JSONB, nullable=False, default=dict)
-    global_model_id = Column(UUID(as_uuid=True), ForeignKey("models.id"))
+    global_model_id = Column(UUID(as_uuid=True), ForeignKey("soft_sensors.id"))
     started_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     aggregated_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)

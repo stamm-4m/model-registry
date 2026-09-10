@@ -45,6 +45,13 @@ def login_user(
     for ur in user.roles:
         roles.append(ur.role.name)
         for rp in ur.role.permissions:
+            logger.info(
+                "Role permission: id=%s, role_id=%s, permission_id=%s, permission=%s",
+                rp.id,
+                rp.role_id,
+                rp.permission_id,
+                rp.permission
+            )
             perm_name = rp.permission.name
             res_name = rp.resource.name if hasattr(rp.resource, "name") else None
             permissions.append(perm_name)

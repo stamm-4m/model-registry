@@ -1,9 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 
-from model_registry.backend.pages.experiment_modal import experiment_modal
 from model_registry.backend.pages.modal_project import project_modal
-from model_registry.backend.utils.utils_experiments import toast_confirm_delete_exp
 from model_registry.backend.utils.utils_projects import toast_confirm_delete_proj
 from model_registry.backend.utils.utils_sidebar import get_user_role
 
@@ -64,11 +62,11 @@ def projects_layout(session_data=None):
                                 " / ",
                                 style={"color": "var(--ink-faint)"},
                             ),
-                            "Projects / Experiments",
+                            "Projects",
                         ]
                     ),
                     html.Div(
-                        "Manage projects and their experiments.",
+                        "Manage projects ",
                         className="page-sub",
                     ),
                 ]
@@ -95,14 +93,6 @@ def projects_layout(session_data=None):
         table_div_id="projects-table",
         toast=toast_confirm_delete_proj(),
     )
-    experiments_col = _tree_column(
-        title="Experiments",
-        btn_label="+ New Experiment",
-        btn_id="btn-open-exp-modal",
-        btn_color="success",
-        table_div_id="experiments-table",
-        toast=toast_confirm_delete_exp(),
-    )
 
     return dbc.Container(
         [
@@ -114,14 +104,13 @@ def projects_layout(session_data=None):
             header,
             dbc.Row(
                 [
-                    dbc.Col(projects_col, xs=12, md=6),
-                    dbc.Col(experiments_col, xs=12, md=6),
+                    dbc.Col(projects_col, xs=12, md=12)
+                    
                 ],
                 className="g-3",
             ),
             # Modals (unchanged, in their own files)
             project_modal(),
-            experiment_modal(),
         ],
         fluid=True,
         style={"padding": "20px 28px"},

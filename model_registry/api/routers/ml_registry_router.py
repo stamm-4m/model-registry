@@ -138,17 +138,17 @@ def get_variables(
     return info.get("variables", [])
 
 
-# ---------------- Model Endpoints ----------------
+# ---------------- Soft Sensor Endpoints ----------------
 
 
-@router.get("/{project_id}/list_models/")
-def list_models_endpoint(
+@router.get("/{project_id}/list_soft_sensors/")
+def list_soft_sensors_endpoint(
     project_id: str,
     request: Request,
-    user=Depends(require_permission_resource("models:read", "Models")),
+    user=Depends(require_permission_resource("soft_sensors:read", "SoftSensors")),
 ):
     """
-    List all models in a project with both model_ID and human-readable name.
+    List all soft sensors in a project with both soft_sensor_ID and human-readable name.
     """
     try:
         registry = request.app.state.registry
@@ -171,11 +171,11 @@ def list_models_endpoint(
 def reload_project_endpoint(
     project_id: str,
     request: Request,
-    user=Depends(require_permission_resource("models:write", "Models")),
+    user=Depends(require_permission_resource("soft_sensors:write", "SoftSensors")),
 ):
     """Force the in-memory registry to reload ``project_id`` from the DB.
 
-    Called by the backend right after creating / linking a new model so the
+    Called by the backend right after creating / linking a new soft sensor so the
     next read endpoint sees the fresh state without a process restart.
     """
     try:
@@ -191,9 +191,9 @@ def get_model_metadata(
     project_id: str,
     model_id: str,
     request: Request,
-    user=Depends(require_permission_resource("models:read", "Models")),
+    user=Depends(require_permission_resource("soft_sensors:read", "SoftSensors")),
 ):
-    """Return model metadata using model ID."""
+    """Return soft sensor metadata using soft sensor ID."""
     try:
         registry = request.app.state.registry
         models = registry.get_project(project_id)
@@ -208,13 +208,13 @@ def get_model_metadata(
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.get("/{project_id}/models_full/")
-def list_models_full(
+@router.get("/{project_id}/soft_sensor_full/")
+def list_soft_sensors_full(
     project_id: str,
     request: Request,
-    user=Depends(require_permission_resource("models:read", "Models")),
+    user=Depends(require_permission_resource("soft_sensors:read", "SoftSensors")),
 ):
-    """List all models in a project with full metadata, but only for models with status "online".
+    """List all soft sensors in a project with full metadata, but only for soft sensors with status "online".
 
     Args:
         project_id (str): identification of project
@@ -235,18 +235,18 @@ def list_models_full(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ---  ------------- Model update ----------------
+# ---  ------------- Soft Sensor update ----------------
 @router.put("/{project_id}/update/{model_id}")
-def update_model(
+def update_soft_sensor(
     project_id: str,
     model_id: str,
     payload: dict,
     request: Request,
-    user=Depends(require_permission_resource("models:edit", "Models")),
+    user=Depends(require_permission_resource("soft_sensors:edit", "SoftSensors")),
 ):
     try:
         registry = request.app.state.registry
-        registry.update_model(project_id, model_id, payload)
+        registry.update_soft_sensor(project_id, model_id, payload)
         return {"status": "ok"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -261,7 +261,7 @@ def predict(
     model_id: str,
     request: PredictionRequest,
     req: Request,
-    user=Depends(require_permission_resource("models:deploy", "Models")),
+    user=Depends(require_permission_resource("soft_sensors:deploy", "SoftSensors")),
 ):
     """
     Predict using a model identified by its ID.
@@ -317,7 +317,7 @@ def explain_model(
     model_id: str,
     req: Request,
     body: ExplainRequest | None = None,
-    user=Depends(require_permission_resource("models:read", "Models")),
+    user=Depends(require_permission_resource("soft_sensors:read", "SoftSensors")),
 ):
     """Return XAI explanations for a model. Loads nothing — uses the model the
     registry already holds in memory (resolved from the DB row). With no body,
@@ -461,7 +461,7 @@ def download_model_bundle(
     project_id: str,
     model_id: str,
     req: Request,
-    user=Depends(require_permission_resource("models:read", "Models")),
+    user=Depends(require_permission_resource("soft_sensors:read", "SoftSensors")),
 ):
     """Zip {binary + metadata.yaml}, matching the stamm-sdk ArtifactBundle.
     metadata.yaml is always present; the binary is added when it exists on disk."""

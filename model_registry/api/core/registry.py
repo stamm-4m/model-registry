@@ -7,9 +7,9 @@ import joblib
 import tensorflow as tf
 
 from model_registry.api.core.database import SessionLocal
-from model_registry.api.models.model import Model
+from model_registry.api.models.soft_sensors import SoftSensors
 from model_registry.api.models.project import Project
-from model_registry.api.models.project_model import ProjectModel
+from model_registry.api.models.project_soft_sensors import ProjectSoftSensors
 
 logger = logging.getLogger(__name__)
 
@@ -37,14 +37,14 @@ def _project_filter(project_id: str):
 
 def _model_filter(model_id: str):
     if _is_uuid(model_id):
-        return Model.id == UUID(str(model_id))
-    return Model.slug == str(model_id)
+        return SoftSensors.id == UUID(str(model_id))
+    return SoftSensors.slug == str(model_id)
 
 
-def _synthesize_yaml_shape(model_row: Model) -> dict[str, Any]:
+def _synthesize_yaml_shape(model_row: SoftSensors) -> dict[str, Any]:
     """Build the ``ml_model_configuration`` dict the dashboard expects.
 
-    Maps the ``models`` table columns (plus its ``config`` JSONB blob) onto
+    Maps the ``soft_sensors`` table columns (plus its ``config`` JSONB blob) onto
     the historical YAML-shaped keys consumed by the routers and the
     frontend, so callers don't need to know data now lives in the DB.
     Dedicated columns (``learner``, ``model_type``, ``language``,
@@ -267,8 +267,8 @@ def _resolve_artifact_path(path: str) -> str | None:
     return None
 
 
-def _load_artifact(model_row: Model):
-    """Load the binary artifact pointed to by ``Model.artifact_path``.
+def _load_artifact(model_row: SoftSensors):
+    """Load the binary artifact pointed to by ``SoftSensors.artifact_path``.
 
     Returns ``None`` if the file is missing or the format isn't supported.
     """
@@ -312,7 +312,7 @@ def _load_scaler(scaler_path: str | None):
         return None
 
 
-def _build_entry(model_row: Model) -> dict[str, Any]:
+def _build_entry(model_row: SoftSensors) -> dict[str, Any]:
     """Build the in-memory record kept under ``registry.projects[pid][mid]``."""
     config = _synthesize_yaml_shape(model_row)
     raw_config = dict(model_row.config or {})
@@ -334,7 +334,7 @@ def _build_entry(model_row: Model) -> dict[str, Any]:
 
 class ModelRegistry:
     """
-    Central registry that mirrors the ``projects``, ``project_models`` and
+    Central registry that mirrors the ``projects``, ``project_soft_sensors`` and
     ``models`` tables into memory.
 
     Project / model lookups accept either the row UUID or the human-readable
@@ -384,9 +384,9 @@ class ModelRegistry:
         models: dict[str, dict[str, Any]] = {}
 
         rows = (
-            db.query(Model)
-            .join(ProjectModel, ProjectModel.model_id == Model.id)
-            .filter(ProjectModel.project_id == project.id)
+            db.query(SoftSensors)
+            .join(ProjectSoftSensors, ProjectSoftSensors.soft_sensor_id == SoftSensors.id)
+            .filter(ProjectSoftSensors.project_id == project.id)
             .all()
         )
         for model_row in rows:
@@ -459,12 +459,12 @@ class ModelRegistry:
         "notes": "notes",
     }
 
-    def update_model(self, project_id: str, model_id: str, updates: dict):
-        """Update a model row.
+    def update_soft_sensor(self, project_id: str, soft_sensor_id: str, updates: dict):
+        """Update a soft sensor row.
 
-        ``updates`` may contain either real ``Model`` column names, or the
+        ``updates`` may contain either real ``SoftSensors`` column names, or the
         legacy ``ml_model_configuration`` nested dict -- in which case the
-        nested payload is merged into ``Model.config`` (JSONB) and only the
+        nested payload is merged into ``SoftSensors.config`` (JSONB) and only the
         well-known identification fields are mapped to dedicated columns.
         """
         db = SessionLocal()
@@ -474,15 +474,15 @@ class ModelRegistry:
                 raise ValueError(f"Project '{project_id}' not loaded")
 
             model_row = (
-                db.query(Model)
-                .join(ProjectModel, ProjectModel.model_id == Model.id)
-                .filter(ProjectModel.project_id == project.id)
-                .filter(_model_filter(model_id))
+                db.query(SoftSensors)
+                .join(ProjectSoftSensors, ProjectSoftSensors.soft_sensor_id == SoftSensors.id)
+                .filter(ProjectSoftSensors.project_id == project.id)
+                .filter(_model_filter(soft_sensor_id))
                 .first()
             )
             if model_row is None:
                 raise ValueError(
-                    f"Model '{model_id}' not found in project '{project_id}'"
+                    f"Soft sensor '{soft_sensor_id}' not found in project '{project_id}'"
                 )
 
             # Legacy nested-YAML payload -- merge into JSONB + lift known fields.
@@ -499,9 +499,9 @@ class ModelRegistry:
                 if "status" in ident:
                     # ``status`` is read from ``is_active`` (Boolean) in
                     # _synthesize_yaml_shape, so the dashboard sends a
-                    # Boolean here. ``Model.status`` is a String column
+                          # Boolean here. ``SoftSensors.status`` is a String column
                     # gated by a CHECK constraint, so route booleans to
-                    # ``is_active`` and only write strings to ``status``.
+                          # ``is_active`` and only write strings to ``status``.
                     status_value = ident["status"]
                     if isinstance(status_value, bool):
                         model_row.is_active = status_value

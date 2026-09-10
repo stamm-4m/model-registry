@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS public.federation_rounds (
     participants_expected integer,
     participants_received integer,
     contributions         jsonb NOT NULL DEFAULT '{}'::jsonb,  -- {project_id: weight}
-    global_model_id       uuid REFERENCES public.models(id),
+    global_model_id       uuid REFERENCES public.soft_sensors(id),
     started_at            timestamptz DEFAULT now(),
     aggregated_at         timestamptz DEFAULT now(),
     created_at            timestamptz NOT NULL DEFAULT now(),

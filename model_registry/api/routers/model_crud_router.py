@@ -1,7 +1,7 @@
 """Model-specific CRUD endpoints with template validation.
 
 This module provides validated endpoints for the Model table,
-integrating JSON Schema validation based on algorithm templates.
+    integrating JSON Schema validation based on algorithm templates.
 """
 
 import logging
@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from model_registry.api.core.database import get_db
 from model_registry.api.core.dependencies import require_permission_resource
-from model_registry.api.models import Model
+from model_registry.api.models import SoftSensors
 from model_registry.api.scaffold.crud import _coerce_pk, _row_to_dict
 from model_registry.backend.services.template_validator import (
     TemplateValidationError,
@@ -89,7 +89,7 @@ def register_model_crud(
     read_perms = read_perms or []
     write_perms = write_perms or []
 
-    pk_col = Model.id
+    pk_col = SoftSensors.id
     pk_name = "id"
     base = "/api/v1/models"
     tag = "crud:models"
@@ -98,7 +98,7 @@ def register_model_crud(
     def create_model(
         body: dict[str, Any],
         db: Session = Depends(get_db),
-        user=Depends(require_permission_resource(write_perms, Model.__tablename__)),
+        user=Depends(require_permission_resource(write_perms, SoftSensors.__tablename__)),
     ):
         """Create a model. Template validation is advisory (warnings only)."""
         # Advisory validation — log warnings but never block the save.
@@ -113,11 +113,11 @@ def register_model_crud(
         flat = _flatten_model_payload(body)
 
         # Strip keys that are not real columns so Model(**flat) never raises TypeError.
-        valid_cols = {c.name for c in Model.__table__.columns}
+        valid_cols = {c.name for c in SoftSensors.__table__.columns}
         flat = {k: v for k, v in flat.items() if k in valid_cols}
 
         try:
-            row = Model(**flat)
+            row = SoftSensors(**flat)
             db.add(row)
             db.commit()
             db.refresh(row)
@@ -134,11 +134,11 @@ def register_model_crud(
         model_id: str,
         body: dict[str, Any],
         db: Session = Depends(get_db),
-        user=Depends(require_permission_resource(write_perms, Model.__tablename__)),
+        user=Depends(require_permission_resource(write_perms, SoftSensors.__tablename__)),
     ):
         """Update a model with optional template validation."""
-        pk = _coerce_pk(Model, model_id)
-        row = db.query(Model).filter(Model.id == pk).first()
+        pk = _coerce_pk(SoftSensors, model_id)
+        row = db.query(SoftSensors).filter(SoftSensors.id == pk).first()
         if row is None:
             raise HTTPException(404, f"models {model_id} not found")
 
@@ -157,7 +157,7 @@ def register_model_crud(
             except ValueError as e:
                 logger.debug("Template validation skipped: %s", e)
 
-        valid_cols = {c.name for c in Model.__table__.columns}
+        valid_cols = {c.name for c in SoftSensors.__table__.columns}
         for k, v in flat.items():
             if k == "id" or k not in valid_cols:
                 continue

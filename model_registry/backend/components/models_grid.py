@@ -5,12 +5,12 @@ import dash_ag_grid as dag
 # Mapping of action column -> required permission on the "Models" resource.
 # Columns whose required permission is not granted to the user are hidden.
 ACTION_PERMISSIONS = {
-    "register_to": "models:write",  # Register to IBISBA
-    "xai": "models:read",  # Explainability
-    "details": "models:read",  # Details
-    "download": "models:read",  # Download bundle
-    "edit": "models:edit",  # Edit
-    "delete": "models:edit",  # Delete
+    "register_to": "soft_sensors:write",  # Register to IBISBA
+    "xai": "soft_sensors:read",  # Explainability
+    "details": "soft_sensors:read",  # Details
+    "download": "soft_sensors:read",  # Download bundle
+    "edit": "soft_sensors:edit",  # Edit
+    "delete": "soft_sensors:edit",  # Delete
 }
 
 
@@ -23,7 +23,7 @@ def _has_perm(perm, permissions):
 
 def get_models_grid(permissions=None):
     """Build the models grid. ``permissions`` is the set of permission strings
-    granted to the current user (e.g. ``{"models:read", "models:edit"}``).
+    granted to the current user (e.g. ``{"soft_sensors:read", "soft_sensors:edit"}``).
 
     Action columns whose required permission is not granted are excluded.
     """

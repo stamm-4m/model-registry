@@ -37,8 +37,10 @@ class Federation(Base):
 
     status = Column(String, nullable=False, default="planning")
 
-    # Pointer to the current aggregated-global model row (also in models).
-    current_global_model_id = Column(UUID(as_uuid=True), ForeignKey("models.id"))
+    # Pointer to the current aggregated-global soft sensor row.
+    current_global_model_id = Column(
+        UUID(as_uuid=True), ForeignKey("soft_sensors.id")
+    )
 
     notes = Column(Text)
     tags = Column(ARRAY(String), nullable=False, default=list)

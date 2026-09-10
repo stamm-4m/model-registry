@@ -1,9 +1,8 @@
 """
-Junction between projects and models.
+Junction between projects and soft sensors.
 
-Same shape as ``project_soft_sensors`` but pointing at the new
-``models`` table. A project can have multiple models attached, each
-with a role label (primary / baseline / reference).
+Maps projects to the enriched ``soft_sensors`` table. A project can have
+multiple soft sensors attached, each with a role label.
 """
 
 from datetime import datetime
@@ -15,8 +14,8 @@ from sqlalchemy.dialects.postgresql import UUID
 from model_registry.api.core.database import Base
 
 
-class ProjectModel(Base):
-    __tablename__ = "project_models"
+class ProjectSoftSensors(Base):
+    __tablename__ = "project_soft_sensors"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     project_id = Column(
@@ -24,8 +23,10 @@ class ProjectModel(Base):
         ForeignKey("projects.id", ondelete="CASCADE"),
         nullable=False,
     )
-    model_id = Column(
-        UUID(as_uuid=True), ForeignKey("models.id", ondelete="CASCADE"), nullable=False
+    soft_sensor_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("soft_sensors.id", ondelete="CASCADE"),
+        nullable=False,
     )
     role = Column(String, nullable=False, default="primary")
     created_at = Column(
@@ -34,6 +35,6 @@ class ProjectModel(Base):
 
     __table_args__ = (
         UniqueConstraint(
-            "project_id", "model_id", "role", name="project_models_pmr_uq"
+            "project_id", "soft_sensor_id", "role", name="project_soft_sensors_pmr_uq"
         ),
     )
