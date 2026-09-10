@@ -91,21 +91,6 @@ def register_experiment_modal_callbacks(app):
 
     @app.callback(
         Output("exp-project-dropdown", "options"),
-        Output("user-session", "data", allow_duplicate=True),
-        Input("btn-open-exp-modal", "n_clicks"),
-        Input({"type": "btn-edit-exp", "index": ALL}, "n_clicks"),
-        State("user-session", "data"),
-        prevent_initial_call=True,
-    )
-    def load_projects_dropdown(n, n_list, session_data):
-        service = ProjectService()
-        projects, session_data = service.get_all_projects(session_data)
-        logger.debug(f"Loaded projects for dropdown: {projects}")
-        return [
-            {"label": proj.name, "value": str(proj.id)} for proj in projects
-        ], session_data
-
-    @app.callback(
         Output("exp-vessel-dropdown", "options"),
         Output("user-session", "data", allow_duplicate=True),
         Input("btn-open-exp-modal", "n_clicks"),
@@ -113,11 +98,18 @@ def register_experiment_modal_callbacks(app):
         State("user-session", "data"),
         prevent_initial_call=True,
     )
-    def load_vessels_dropdown(n, n_list, session_data):
+    def load_projects_and_vessels_dropdowns(n, n_list, session_data):
+        service = ProjectService()
+        projects, session_data = service.get_all_projects(session_data)
+        logger.debug(f"Loaded projects for dropdown: {projects}")
+
         equipments, session_data = EquipmentsApiClient().list(session_data)
-        return [
-            {"label": eq.get("name"), "value": str(eq.get("id"))} for eq in (equipments or [])
-        ], session_data
+
+        return (
+            [{"label": proj.name, "value": str(proj.id)} for proj in projects],
+            [{"label": eq.get("name"), "value": str(eq.get("id"))} for eq in (equipments or [])],
+            session_data,
+        )
 
     @app.callback(
         Output("exp-models-dropdown", "options"),
