@@ -85,6 +85,8 @@ class ExperimentService:
         set_points: dict[str, Any] | None = None,
         start_time: str | None = None,
         end_time: str | None = None,
+        duration: int | None = None,
+        duration_unit: str | None = None
     ) -> tuple[ExperimentDTO | None, _SessionData | None]:
         payload: dict[str, Any] = {}
         if name is not None:
@@ -101,6 +103,10 @@ class ExperimentService:
             payload["start_time"] = start_time
         if end_time is not None:
             payload["end_time"] = end_time
+        if duration is not None:
+            payload["duration"] = duration
+        if duration_unit is not None:
+            payload["duration_unit"] = duration_unit
         if not payload:
             # still allow managing relations even if no field updates
             if model_ids is None:

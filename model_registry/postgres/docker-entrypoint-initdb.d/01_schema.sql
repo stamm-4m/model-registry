@@ -342,7 +342,10 @@ CREATE TABLE public.experiments (
     set_points jsonb,
     start_time timestamp with time zone,
     end_time timestamp with time zone,
-    created_at timestamp without time zone DEFAULT now()
+    created_at timestamp without time zone DEFAULT now(),
+    duration INTEGER NULL,
+    duration_unit VARCHAR(10) NULL
+        CHECK (duration_unit IN ('hours', 'days'))
 );
 
 

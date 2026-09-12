@@ -13,6 +13,8 @@ class ExperimentRepository(BaseRepository):
         set_points=None,
         start_time=None,
         end_time=None,
+        duration=None,
+        duration_unit=None
     ):
         exp = self.get_experiment_by_id(experiment_id)
         if not exp:
@@ -31,6 +33,10 @@ class ExperimentRepository(BaseRepository):
             exp.start_time = start_time
         if end_time is not None:
             exp.end_time = end_time
+        if duration is not None:
+            exp.duration = duration
+        if duration_unit is not None:
+            exp.duration_unit = duration_unit
         self.db.commit()
         self.db.refresh(exp)
         return exp
