@@ -8,6 +8,9 @@ from model_registry.api.routers.detector_packs_router import (
     router as detector_packs_router,
 )
 from model_registry.api.routers.ml_registry_router import router as ml_router
+from model_registry.api.routers.prediction_trigger_router import (
+    router as prediction_trigger_router,
+)
 from model_registry.api.routers.run_timeseries_router import router as run_ts_router
 from model_registry.backend.utils.logging_config import setup_logging
 
@@ -49,6 +52,9 @@ api.include_router(run_ts_router)
 # CRUD for detector_packs is auto-mounted by crud_router; this adds /register
 # and /{id}/activate which the scaffold can't express.
 api.include_router(detector_packs_router)
+# Triggers deployment_soft_sensors on Airflow — the only place that holds
+# the Airflow service-account credentials (see AIRFLOW_TRIGGER_* settings).
+api.include_router(prediction_trigger_router)
 
 
 def main():

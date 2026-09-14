@@ -27,7 +27,7 @@ def _resolve_model_slugs(session_data, model_ids: list | None):
     models_client = ModelsApiClient()
     slugs = []
     for mid in model_ids:
-        model, session_data = models_client.get_model_row(mid, session_data)
+        model, session_data = models_client.get_soft_sensor_row(mid, session_data)
         if model and model.get("slug"):
             slugs.append(model["slug"])
     return slugs, session_data
@@ -320,11 +320,11 @@ def register_experiment_modal_callbacks(app):
         )
         # load linked model ids
         models_client = ModelsApiClient()
-        links, session_data = models_client.list_experiment_models(session_data)
+        links, session_data = models_client.list_experiment_soft_sensors(session_data)
         logger.debug(f"Loaded experiment_models links: {links}")
         linked = []
         if links:
-            linked = [str(l.get("model_id")) for l in links if str(l.get("experiment_id")) == str(exp_id) and l.get("model_id")]
+            linked = [str(l.get("soft_sensor_id")) for l in links if str(l.get("experiment_id")) == str(exp_id) and l.get("soft_sensor_id")]
         return (
             True,
             exp.name,
