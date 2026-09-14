@@ -27,6 +27,8 @@ class ExperimentDTO:
     start_time: str | None = None
     end_time: str | None = None
     created_at: str | None = None
+    duration: int | None = None
+    duration_unit: str | None = None
     extra: dict[str, Any] = field(default_factory=dict)
 
     _KNOWN = {
@@ -51,6 +53,8 @@ class ExperimentDTO:
         "start_time",
         "end_time",
         "created_at",
+        "duration",
+        "duration_unit"
     }
 
     @classmethod
@@ -80,6 +84,8 @@ class ExperimentDTO:
             start_time=data.get("start_time"),
             end_time=data.get("end_time"),
             created_at=data.get("created_at"),
+            duration=data.get("duration"),
+            duration_unit=data.get("duration_unit"),
             extra=extras,
         )
 

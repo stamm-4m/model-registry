@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from sqlalchemy import JSON, Column, DateTime, ForeignKey, Text
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Text, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -23,5 +23,7 @@ class Experiment(Base):
     start_time = Column(DateTime(timezone=True), nullable=True)
     end_time = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime, nullable=False)
+    duration = Column(Integer, nullable=True)
+    duration_unit = Column(Text, nullable=True)
 
     project = relationship("Project", back_populates="experiments")

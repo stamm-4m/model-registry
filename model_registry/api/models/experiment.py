@@ -4,7 +4,7 @@ lead, status, is_reference, tags, vessel_id, lab_id, final_titer)."""
 
 from uuid import uuid4
 
-from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, String, Text, Integer
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 
 from model_registry.api.core.database import Base
@@ -34,3 +34,5 @@ class Experiment(Base):
     start_time = Column(DateTime(timezone=True), nullable=True)
     end_time = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime, nullable=True)
+    duration = Column(Integer, nullable=True)
+    duration_unit = Column(String(10), nullable=True)
