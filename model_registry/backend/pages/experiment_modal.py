@@ -29,6 +29,11 @@ def experiment_modal():
                         placeholder="Select one or more models",
                         multi=True,
                     ),
+                    dbc.Label("Bioreactor", className="mt-3"),
+                    dcc.Dropdown(
+                        id="exp-vessel-dropdown",
+                        placeholder="Select the bioreactor this experiment runs on",
+                    ),
                     dbc.Label("Initial Conditions (JSON)", className="mt-3"),
                     dbc.Textarea(
                         id="exp-initial-conditions-input",

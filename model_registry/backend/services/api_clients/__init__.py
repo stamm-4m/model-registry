@@ -3,6 +3,7 @@ from .departments_api_client import (
     DepartmentLaboratoryApiClient,
     DepartmentsApiClient,
 )
+from .equipments_api_client import EquipmentsApiClient
 from .experiments_api_client import ExperimentsApiClient
 from .laboratories_api_client import (
     LaboratoriesApiClient,
@@ -32,4 +33,5 @@ __all__ = [
     "ExperimentsApiClient",
     "RunsApiClient",
     "ModelsApiClient",
+    "EquipmentsApiClient",
 ]

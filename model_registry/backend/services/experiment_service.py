@@ -63,8 +63,8 @@ class ExperimentService:
             models_client = ModelsApiClient()
             for mid in model_ids:
                 try:
-                    link_payload = {"experiment_id": exp.id, "model_id": _coerce_id(mid)}
-                    _, session_data = models_client.create_experiment_model(
+                    link_payload = {"experiment_id": exp.id, "soft_sensor_id": _coerce_id(mid)}
+                    _, session_data = models_client.create_experiment_soft_sensor(
                         link_payload, session_data
                     )
                 except Exception:
@@ -80,6 +80,7 @@ class ExperimentService:
         model_ids: list[str] | None = None,
         name: str | None = None,
         project_id: str | None = None,
+        vessel_id: str | None = None,
         description: str | None = None,
         initial_conditions: dict[str, Any] | None = None,
         set_points: dict[str, Any] | None = None,
@@ -93,6 +94,8 @@ class ExperimentService:
             payload["name"] = name
         if project_id is not None:
             payload["project_id"] = _coerce_id(project_id)
+        if vessel_id is not None:
+            payload["vessel_id"] = _coerce_id(vessel_id)
         if description is not None:
             payload["description"] = description
         if initial_conditions is not None:
@@ -121,11 +124,11 @@ class ExperimentService:
         if model_ids is not None:
             models_client = ModelsApiClient()
             # delete existing links for this experiment
-            links, session_data = models_client.list_experiment_models(session_data)
+            links, session_data = models_client.list_experiment_soft_sensors(session_data)
             if links:
                 for l in [x for x in links if str(x.get("experiment_id")) == str(experiment_id)]:
                     try:
-                        _, session_data = models_client.delete_experiment_model(
+                        _, session_data = models_client.delete_experiment_soft_sensor(
                             l.get("id"), session_data
                         )
                     except Exception:
@@ -133,8 +136,8 @@ class ExperimentService:
             # create new links
             for mid in model_ids:
                 try:
-                    link_payload = {"experiment_id": _coerce_id(experiment_id), "model_id": _coerce_id(mid)}
-                    _, session_data = models_client.create_experiment_model(
+                    link_payload = {"experiment_id": _coerce_id(experiment_id), "soft_sensor_id": _coerce_id(mid)}
+                    _, session_data = models_client.create_experiment_soft_sensor(
                         link_payload, session_data
                     )
                 except Exception:

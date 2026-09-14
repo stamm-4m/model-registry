@@ -145,7 +145,7 @@ def get_variables(
 def list_soft_sensors_endpoint(
     project_id: str,
     request: Request,
-    user=Depends(require_permission_resource("soft_sensors:read", "SoftSensors")),
+    user=Depends(require_permission_resource("soft_sensors:read", "soft_sensors")),
 ):
     """
     List all soft sensors in a project with both soft_sensor_ID and human-readable name.
@@ -171,7 +171,7 @@ def list_soft_sensors_endpoint(
 def reload_project_endpoint(
     project_id: str,
     request: Request,
-    user=Depends(require_permission_resource("soft_sensors:write", "SoftSensors")),
+    user=Depends(require_permission_resource("soft_sensors:write", "soft_sensors")),
 ):
     """Force the in-memory registry to reload ``project_id`` from the DB.
 
@@ -191,7 +191,7 @@ def get_model_metadata(
     project_id: str,
     model_id: str,
     request: Request,
-    user=Depends(require_permission_resource("soft_sensors:read", "SoftSensors")),
+    user=Depends(require_permission_resource("soft_sensors:read", "soft_sensors")),
 ):
     """Return soft sensor metadata using soft sensor ID."""
     try:
@@ -212,7 +212,7 @@ def get_model_metadata(
 def list_soft_sensors_full(
     project_id: str,
     request: Request,
-    user=Depends(require_permission_resource("soft_sensors:read", "SoftSensors")),
+    user=Depends(require_permission_resource("soft_sensors:read", "soft_sensors")),
 ):
     """List all soft sensors in a project with full metadata, but only for soft sensors with status "online".
 
@@ -242,7 +242,7 @@ def update_soft_sensor(
     model_id: str,
     payload: dict,
     request: Request,
-    user=Depends(require_permission_resource("soft_sensors:edit", "SoftSensors")),
+    user=Depends(require_permission_resource("soft_sensors:edit", "soft_sensors")),
 ):
     try:
         registry = request.app.state.registry
@@ -261,7 +261,7 @@ def predict(
     model_id: str,
     request: PredictionRequest,
     req: Request,
-    user=Depends(require_permission_resource("soft_sensors:deploy", "SoftSensors")),
+    user=Depends(require_permission_resource("soft_sensors:deploy", "soft_sensors")),
 ):
     """
     Predict using a model identified by its ID.
@@ -317,7 +317,7 @@ def explain_model(
     model_id: str,
     req: Request,
     body: ExplainRequest | None = None,
-    user=Depends(require_permission_resource("soft_sensors:read", "SoftSensors")),
+    user=Depends(require_permission_resource("soft_sensors:read", "soft_sensors")),
 ):
     """Return XAI explanations for a model. Loads nothing — uses the model the
     registry already holds in memory (resolved from the DB row). With no body,
@@ -461,7 +461,7 @@ def download_model_bundle(
     project_id: str,
     model_id: str,
     req: Request,
-    user=Depends(require_permission_resource("soft_sensors:read", "SoftSensors")),
+    user=Depends(require_permission_resource("soft_sensors:read", "soft_sensors")),
 ):
     """Zip {binary + metadata.yaml}, matching the stamm-sdk ArtifactBundle.
     metadata.yaml is always present; the binary is added when it exists on disk."""

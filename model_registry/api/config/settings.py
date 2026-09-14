@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     # --- Database ---
     DATABASE_URL: str
 
+    # --- Airflow (workflow-orchestrator) — POST /api/v1/experiments/{id}/trigger-prediction
+    # is the only place these credentials are read. Optional: if unset, the
+    # trigger is skipped (logged) instead of blocking the request.
+    AIRFLOW_API_BASE: str = Field(default="")
+    AIRFLOW_TRIGGER_USERNAME: str = Field(default="")
+    AIRFLOW_TRIGGER_PASSWORD: str = Field(default="")
+
     class Config:
         env_file = os.path.join(BASE_DIR, ".env")
         env_file_encoding = "utf-8"
