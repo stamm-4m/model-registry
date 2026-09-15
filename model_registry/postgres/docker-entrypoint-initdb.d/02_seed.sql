@@ -355,6 +355,7 @@ WHERE ro.name = 'service_airflow'
     ('runs:read', 'Runs'),
     ('sensors:read', 'Sensors'),
     ('actuators:read', 'Actuators'),
+    ('equipment_components:read', 'Equipment_components'),
     ('predictions:write', 'Predictions'),
     ('sensor_readings:write', 'Sensor_readings'),
     ('actuator_states:write', 'Actuator_states')
