@@ -338,29 +338,15 @@ ec300c7b-2250-4efa-b9d3-6a7fa7714ee7	Margaux Bonal	user@example.com	+33000000007
 \.
 
 -- Service Airflow seed block
+-- The role_permission grant itself is deferred to just before section 3
+-- below (see "Service Airflow role_permission grant") — Sensors, Actuators,
+-- Runs, Predictions, Sensor_readings, Actuator_states and
+-- Equipment_components don't get their permissions/resources rows created
+-- until section 2, which runs later in this same file, so granting here
+-- would silently match nothing for those seven and only grant 3 of 10.
 INSERT INTO public.roles (id, name, description)
 VALUES (gen_random_uuid(), 'service_airflow', 'Airflow service account role')
 ON CONFLICT (name) DO NOTHING;
-
-INSERT INTO public.role_permission (role_id, permission_id, resource_id)
-SELECT ro.id, p.id, r.id
-FROM public.roles ro
-JOIN public.permissions p ON TRUE
-JOIN public.resources r ON TRUE
-WHERE ro.name = 'service_airflow'
-  AND (p.name, r.name) IN (
-    ('soft_sensors:read', 'Soft_sensors'),
-    ('soft_sensors:deploy', 'Soft_sensors'),
-    ('experiments:read', 'Experiments'),
-    ('runs:read', 'Runs'),
-    ('sensors:read', 'Sensors'),
-    ('actuators:read', 'Actuators'),
-    ('equipment_components:read', 'Equipment_components'),
-    ('predictions:write', 'Predictions'),
-    ('sensor_readings:write', 'Sensor_readings'),
-    ('actuator_states:write', 'Actuator_states')
-  )
-ON CONFLICT (role_id, permission_id) DO NOTHING;
 
 INSERT INTO public.user_role (id, user_id, role_id, laboratory_id, created_at, updated_at, resource_type, real_resource_id, permission_id)
 SELECT gen_random_uuid(), u.id, ro.id, NULL, now(), now(), NULL, NULL, NULL
@@ -621,6 +607,31 @@ INSERT INTO public.permissions (id, name, description) VALUES ('c3d5e7f9-1a2b-5c
 INSERT INTO public.permissions (id, name, description) VALUES ('d4e6f8a0-2b3c-5d6e-9f0a-1b2c3d4e5f60'::uuid, 'laboratory_equipments:write', 'Write laboratory_equipments data') ON CONFLICT DO NOTHING;
 
 INSERT INTO public.permissions (id, name, description) VALUES ('e5f7a9b1-3c4d-5e6f-0a1b-2c3d4e5f6071'::uuid, 'laboratory_equipments:edit', 'Edit laboratory_equipments data') ON CONFLICT DO NOTHING;
+
+-- 2b. Service Airflow role_permission grant -----------------------------
+-- Moved here (was right after the role/user creation above, before this
+-- transaction's resources/permissions existed) so all 10 target
+-- (permission, resource) pairs actually exist by the time this runs.
+INSERT INTO public.role_permission (role_id, permission_id, resource_id)
+SELECT ro.id, p.id, r.id
+FROM public.roles ro
+JOIN public.permissions p ON TRUE
+JOIN public.resources r ON TRUE
+WHERE ro.name = 'service_airflow'
+  AND (p.name, r.name) IN (
+    ('soft_sensors:read', 'Soft_sensors'),
+    ('soft_sensors:deploy', 'Soft_sensors'),
+    ('experiments:read', 'Experiments'),
+    ('experiments:edit', 'Experiments'),
+    ('runs:read', 'Runs'),
+    ('sensors:read', 'Sensors'),
+    ('actuators:read', 'Actuators'),
+    ('equipment_components:read', 'Equipment_components'),
+    ('predictions:write', 'Predictions'),
+    ('sensor_readings:write', 'Sensor_readings'),
+    ('actuator_states:write', 'Actuator_states')
+  )
+ON CONFLICT (role_id, permission_id) DO NOTHING;
 
 -- 3. super_admin role_permission grants -------------------------------
 INSERT INTO public.role_permission (id, role_id, permission_id, resource_id) VALUES ('7f439d05-9283-5ce3-8f36-fb2d0f3f3b35'::uuid, '11111111-1111-1111-1111-111111111111'::uuid, '484d2c9f-7d9a-5a29-a5c0-4f5c7e96f022'::uuid, '80649f36-2bb3-5643-9a95-5a0ed8eec857'::uuid) ON CONFLICT DO NOTHING;
