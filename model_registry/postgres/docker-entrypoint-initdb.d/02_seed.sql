@@ -30,6 +30,8 @@ COPY public.actuators (id, actuator_id, name, variable, unit, range_min, range_m
 22222222-aaaa-bbbb-cccc-000000000009	A-FOAM	Antifoam pump	Antifoam	mL	0	50	\N	2026-04-30 18:48:05.894961
 22222222-aaaa-bbbb-cccc-00000000000a	A-JKT	Jacket temperature loop	Jacket T	°C	5	60	\N	2026-04-30 18:48:05.894961
 22222222-aaaa-bbbb-cccc-00000000000b	A-HARV	Harvest pump	Harvest flow	mL/min	0	200	\N	2026-04-30 18:48:05.894961
+22222222-aaaa-bbbb-cccc-00000000000c	A-AGITATOR	Agitator	agitator	rpm	0	1500	\N	2026-04-30 18:48:05.894961
+22222222-aaaa-bbbb-cccc-00000000000d	A-SUGAR-FEED	Sugar feed rate	sugar_feed_rate	L/h	0	50	\N	2026-04-30 18:48:05.894961
 \.
 COPY public.alert_rules (id, experiment_id, name, source_type, source_id, source_label, condition, threshold, threshold_min, threshold_max, unit, sustained_for_min, severity, enabled, notes, created_at) FROM stdin;
 66666666-aaaa-bbbb-cccc-000000000001	55555555-aaaa-bbbb-cccc-000000000001	Temperature too high	sensor	S-T	Temperature (S-T)	gt	35	\N	\N	°C	5	warning	t	\N	2026-04-30 18:48:05.894961
@@ -301,6 +303,11 @@ COPY public.sensors (id, sensor_id, name, variable, unit, range_min, range_max, 
 11111111-aaaa-bbbb-cccc-00000000000a	S-RAMAN	Raman probe (Kaiser RXN2)	Multi-analyte	g/L	0	40	±0.5 g/L	online	\N	2026-04-30 18:48:05.894961
 11111111-aaaa-bbbb-cccc-00000000000b	S-OD	Optical density (in-line)	OD	OD600	0	30	±0.1	online	\N	2026-04-30 18:48:05.894961
 11111111-aaaa-bbbb-cccc-00000000000c	S-CAP	Capacitance (Aber)	Viable cell density	pF/cm	0	30	±2%	online	\N	2026-04-30 18:48:05.894961
+11111111-aaaa-bbbb-cccc-00000000000d	S-TEMP	Temperature	temperature	K	273.15	333.15	±0.1 K	online	\N	2026-04-30 18:48:05.894961
+11111111-aaaa-bbbb-cccc-00000000000e	S-DO-CONC	Dissolved Oxygen	dissolved_oxygen_concentration	mg/L	0	100	±0.5 mg/L	online	\N	2026-04-30 18:48:05.894961
+11111111-aaaa-bbbb-cccc-00000000000f	S-CO2	CO2 in off-gas	CO2_percent_in_off_gas	%	0	100	±0.5%	online	\N	2026-04-30 18:48:05.894961
+11111111-aaaa-bbbb-cccc-000000000010	S-O2	O2 in off-gas	oxygen_in_percent_in_off_gas	%	0	100	±0.5%	online	\N	2026-04-30 18:48:05.894961
+11111111-aaaa-bbbb-cccc-000000000011	S-VOLUME	Vessel volume	vessel_volume	L	0	500	±1 L	online	\N	2026-04-30 18:48:05.894961
 \.
 COPY public.simulations (id, value, "time", dynamic_model_id) FROM stdin;
 \.
@@ -327,7 +334,45 @@ COPY public.users (id, full_name, email, phone, password_hash, external_provider
 9e3c7f5a-0b9c-4e07-aefe-a7e6b18403f6	Ariane Bize	ariane.bize@inrae.fr	+33000000006	$2b$12$mrpteS07rvJJWcmpMC3g/OTImBcULqW81ExBjGuGoCssehvRIC7ZS	\N	\N	2026-04-25 01:16:02.090652	t
 ec300c7b-2250-4efa-b9d3-6a7fa7714ee7	Margaux Bonal	user@example.com	+33000000007	8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918	\N	\N	2026-03-21 02:27:53.425286	t
 424add51-e989-4af5-86bd-75a2cb461274	Carlos Alberto Suarez Muñoz	carsuamz@gmail.com	+33000000002	$2b$12$vl8ODWWIhRRw14XmgB71GOhsePeDzOVibz.T6lLlNp715YJUbbfJ2	\N	\N	2026-03-25 22:36:39.806539	t
+8b1bae69-927a-4a31-843a-02fe3a53b0eb	Airflow Service Account	airflow-service@stamm.local.com	\N	$2b$12$Wah43HWOhrG/309i94iSMu9vqaXYqGju.45/qQ7c3UhlrP5NRt6be	\N	\N	2026-04-30 18:48:05.894961	t
 \.
+
+-- Service Airflow seed block
+INSERT INTO public.roles (id, name, description)
+VALUES (gen_random_uuid(), 'service_airflow', 'Airflow service account role')
+ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO public.role_permission (role_id, permission_id, resource_id)
+SELECT ro.id, p.id, r.id
+FROM public.roles ro
+JOIN public.permissions p ON TRUE
+JOIN public.resources r ON TRUE
+WHERE ro.name = 'service_airflow'
+  AND (p.name, r.name) IN (
+    ('soft_sensors:read', 'Soft_sensors'),
+    ('soft_sensors:deploy', 'Soft_sensors'),
+    ('experiments:read', 'Experiments'),
+    ('runs:read', 'Runs'),
+    ('sensors:read', 'Sensors'),
+    ('actuators:read', 'Actuators'),
+    ('equipment_components:read', 'Equipment_components'),
+    ('predictions:write', 'Predictions'),
+    ('sensor_readings:write', 'Sensor_readings'),
+    ('actuator_states:write', 'Actuator_states')
+  )
+ON CONFLICT (role_id, permission_id) DO NOTHING;
+
+INSERT INTO public.user_role (id, user_id, role_id, laboratory_id, created_at, updated_at, resource_type, real_resource_id, permission_id)
+SELECT gen_random_uuid(), u.id, ro.id, NULL, now(), now(), NULL, NULL, NULL
+FROM public.users u
+JOIN public.roles ro ON ro.name = 'service_airflow'
+WHERE u.email = 'airflow-service@stamm.local.com'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM public.user_role ur
+    WHERE ur.user_id = u.id
+      AND ur.role_id = ro.id
+  );
 
 
 BEGIN;
@@ -884,12 +929,9 @@ ON CONFLICT DO NOTHING;
 -- 8. equipment_components for every BR-* vessel --------------------------
 -- The streamer queries this table to figure out which sensors / actuators
 -- are attached to a vessel. The schema forces all three FKs NOT NULL, so we
--- generate a cross-product row per (sensor, actuator, vessel). The streamer
--- treats any (sensor, vessel) appearance as "attached"; the duplication is
--- harmless. ~1056 rows on a clean init (12 sensors × 11 actuators × 8 vessels).
--- Updated 2026-05-20: covers all BR-NNN vessels, not just BR-001/BR-002, so
--- the streamer can run on any of them (the extra compat-seeded BR-003..008
--- previously had no components attached).
+-- generate a cross-product row per (sensor, actuator, vessel). Keep the
+-- original sensors and actuators attached to every BR-* vessel. The newly
+-- requested signals are attached only to BR-001 and BR-002 below.
 INSERT INTO public.equipment_components (id, actuator_id, sensor_id, equipment_id)
 SELECT uuid_generate_v4(), a.id, s.id, e.id
 FROM public.sensors s
@@ -898,12 +940,43 @@ CROSS JOIN (
     SELECT id FROM public.equipments
     WHERE name LIKE '%BR-%'
 ) e
-WHERE NOT EXISTS (
+WHERE s.variable NOT IN (
+          'temperature',
+          'dissolved_oxygen_concentration',
+          'CO2_percent_in_off_gas',
+          'oxygen_in_percent_in_off_gas',
+          'vessel_volume'
+      )
+  AND a.variable NOT IN ('agitator', 'sugar_feed_rate')
+  AND NOT EXISTS (
     SELECT 1 FROM public.equipment_components ec
     WHERE ec.actuator_id = a.id
       AND ec.sensor_id  = s.id
       AND ec.equipment_id = e.id
 );
+
+-- Attach only the five new sensors and two new actuators to BR-001/BR-002.
+-- pH is intentionally excluded: it already belongs to the original set.
+INSERT INTO public.equipment_components (id, actuator_id, sensor_id, equipment_id)
+SELECT uuid_generate_v4(), a.id, s.id, e.id
+FROM public.sensors s
+CROSS JOIN public.actuators a
+CROSS JOIN public.equipments e
+WHERE s.variable IN (
+                    'temperature',
+                    'dissolved_oxygen_concentration',
+                    'CO2_percent_in_off_gas',
+                    'oxygen_in_percent_in_off_gas',
+                    'vessel_volume'
+            )
+    AND a.variable IN ('agitator', 'sugar_feed_rate')
+    AND e.name IN ('BR-001', 'BR-002')
+    AND NOT EXISTS (
+            SELECT 1 FROM public.equipment_components ec
+            WHERE ec.actuator_id = a.id
+                AND ec.sensor_id = s.id
+                AND ec.equipment_id = e.id
+    );
 
 -- 9.7 Resources + permissions for the new tables ------------------------
 -- Idempotent inserts: there's no UNIQUE constraint on resources.name in
