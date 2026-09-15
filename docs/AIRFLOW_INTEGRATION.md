@@ -151,26 +151,27 @@ de `workflow-orchestrator` (paso 2).
 INSERT INTO roles (id, name) VALUES (gen_random_uuid(), 'service_airflow');
 ```
 
-### 5.3. Darle exactamente estos 11 permisos (ni más ni menos — es la lista mínima que Airflow necesita)
+### 5.3. Darle exactamente estos 10 permisos (ni más ni menos — es la lista mínima que Airflow necesita)
 ```sql
 INSERT INTO role_permission (role_id, permission_id, resource_id)
 SELECT (SELECT id FROM roles WHERE name = 'service_airflow'), p.id, r.id
 FROM permissions p, resources r
 WHERE (p.name, r.name) IN (
-  ('models:read', 'Models'),
-  ('models:deploy', 'Models'),
+  ('soft_sensors:read', 'Soft_sensors'),
+  ('soft_sensors:deploy', 'Soft_sensors'),
   ('experiments:read', 'Experiments'),
+  ('experiments:edit', 'Experiments'),
   ('runs:read', 'Runs'),
   ('sensors:read', 'Sensors'),
   ('actuators:read', 'Actuators'),
-  ('soft_sensors:read', 'Soft_sensors'),
-  ('project_soft_sensors:read', 'Project_soft_sensors'),
   ('predictions:write', 'Predictions'),
   ('sensor_readings:write', 'Sensor_readings'),
   ('actuator_states:write', 'Actuator_states')
 );
 ```
-Las dos últimas (`sensor_readings:write`, `actuator_states:write`) no las usa el DAG en sí — son para
+`experiments:edit` es lo que le permite al DAG marcar `experiments.status` como `completed` cuando
+deja de predecir para ese experimento (ver `tasks/postgres.py:_mark_experiment_completed`). Las dos
+últimas (`sensor_readings:write`, `actuator_states:write`) no las usa el DAG en sí — son para
 `scripts/auto_simulate_sensors.py` (ver más abajo), que usa esta misma cuenta para inyectar datos de
 prueba mientras no hay sensores reales conectados.
 
