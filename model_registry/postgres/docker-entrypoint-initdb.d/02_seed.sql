@@ -327,7 +327,44 @@ COPY public.users (id, full_name, email, phone, password_hash, external_provider
 9e3c7f5a-0b9c-4e07-aefe-a7e6b18403f6	Ariane Bize	ariane.bize@inrae.fr	+33000000006	$2b$12$mrpteS07rvJJWcmpMC3g/OTImBcULqW81ExBjGuGoCssehvRIC7ZS	\N	\N	2026-04-25 01:16:02.090652	t
 ec300c7b-2250-4efa-b9d3-6a7fa7714ee7	Margaux Bonal	user@example.com	+33000000007	8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918	\N	\N	2026-03-21 02:27:53.425286	t
 424add51-e989-4af5-86bd-75a2cb461274	Carlos Alberto Suarez Muñoz	carsuamz@gmail.com	+33000000002	$2b$12$vl8ODWWIhRRw14XmgB71GOhsePeDzOVibz.T6lLlNp715YJUbbfJ2	\N	\N	2026-03-25 22:36:39.806539	t
+8b1bae69-927a-4a31-843a-02fe3a53b0eb	Airflow Service Account	airflow-service@stamm.local.com	\N	$2b$12$VlZpHsRbqHvEUa16bssnUu9kg3axBq.hY6gmMBNSaeu7FwcQWItBK	\N	\N	2026-04-30 18:48:05.894961	t
 \.
+
+-- Service Airflow seed block
+INSERT INTO public.roles (id, name, description)
+VALUES (gen_random_uuid(), 'service_airflow', 'Airflow service account role')
+ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO public.role_permission (role_id, permission_id, resource_id)
+SELECT ro.id, p.id, r.id
+FROM public.roles ro
+JOIN public.permissions p ON TRUE
+JOIN public.resources r ON TRUE
+WHERE ro.name = 'service_airflow'
+  AND (p.name, r.name) IN (
+    ('soft_sensors:read', 'Soft_sensors'),
+    ('soft_sensors:deploy', 'Soft_sensors'),
+    ('experiments:read', 'Experiments'),
+    ('runs:read', 'Runs'),
+    ('sensors:read', 'Sensors'),
+    ('actuators:read', 'Actuators'),
+    ('predictions:write', 'Predictions'),
+    ('sensor_readings:write', 'Sensor_readings'),
+    ('actuator_states:write', 'Actuator_states')
+  )
+ON CONFLICT (role_id, permission_id) DO NOTHING;
+
+INSERT INTO public.user_role (id, user_id, role_id, laboratory_id, created_at, updated_at, resource_type, real_resource_id, permission_id)
+SELECT gen_random_uuid(), u.id, ro.id, NULL, now(), now(), NULL, NULL, NULL
+FROM public.users u
+JOIN public.roles ro ON ro.name = 'service_airflow'
+WHERE u.email = 'airflow-service@stamm.local.com'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM public.user_role ur
+    WHERE ur.user_id = u.id
+      AND ur.role_id = ro.id
+  );
 
 
 BEGIN;
