@@ -929,12 +929,9 @@ ON CONFLICT DO NOTHING;
 -- 8. equipment_components for every BR-* vessel --------------------------
 -- The streamer queries this table to figure out which sensors / actuators
 -- are attached to a vessel. The schema forces all three FKs NOT NULL, so we
--- generate a cross-product row per (sensor, actuator, vessel). The streamer
--- treats any (sensor, vessel) appearance as "attached"; the duplication is
--- harmless. ~1768 rows on a clean init (17 sensors × 13 actuators × 8 vessels).
--- Updated 2026-05-20: covers all BR-NNN vessels, not just BR-001/BR-002, so
--- the streamer can run on any of them (the extra compat-seeded BR-003..008
--- previously had no components attached).
+-- generate a cross-product row per (sensor, actuator, vessel). Keep the
+-- original sensors and actuators attached to every BR-* vessel. The newly
+-- requested signals are attached only to BR-001 and BR-002 below.
 INSERT INTO public.equipment_components (id, actuator_id, sensor_id, equipment_id)
 SELECT uuid_generate_v4(), a.id, s.id, e.id
 FROM public.sensors s
@@ -943,12 +940,43 @@ CROSS JOIN (
     SELECT id FROM public.equipments
     WHERE name LIKE '%BR-%'
 ) e
-WHERE NOT EXISTS (
+WHERE s.variable NOT IN (
+          'temperature',
+          'dissolved_oxygen_concentration',
+          'CO2_percent_in_off_gas',
+          'oxygen_in_percent_in_off_gas',
+          'vessel_volume'
+      )
+  AND a.variable NOT IN ('agitator', 'sugar_feed_rate')
+  AND NOT EXISTS (
     SELECT 1 FROM public.equipment_components ec
     WHERE ec.actuator_id = a.id
       AND ec.sensor_id  = s.id
       AND ec.equipment_id = e.id
 );
+
+-- Attach only the five new sensors and two new actuators to BR-001/BR-002.
+-- pH is intentionally excluded: it already belongs to the original set.
+INSERT INTO public.equipment_components (id, actuator_id, sensor_id, equipment_id)
+SELECT uuid_generate_v4(), a.id, s.id, e.id
+FROM public.sensors s
+CROSS JOIN public.actuators a
+CROSS JOIN public.equipments e
+WHERE s.variable IN (
+                    'temperature',
+                    'dissolved_oxygen_concentration',
+                    'CO2_percent_in_off_gas',
+                    'oxygen_in_percent_in_off_gas',
+                    'vessel_volume'
+            )
+    AND a.variable IN ('agitator', 'sugar_feed_rate')
+    AND e.name IN ('BR-001', 'BR-002')
+    AND NOT EXISTS (
+            SELECT 1 FROM public.equipment_components ec
+            WHERE ec.actuator_id = a.id
+                AND ec.sensor_id = s.id
+                AND ec.equipment_id = e.id
+    );
 
 -- 9.7 Resources + permissions for the new tables ------------------------
 -- Idempotent inserts: there's no UNIQUE constraint on resources.name in
