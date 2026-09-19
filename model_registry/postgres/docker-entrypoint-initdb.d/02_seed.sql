@@ -966,14 +966,15 @@ WHERE s.variable NOT IN (
       AND ec.equipment_id = e.id
 );
 
--- Attach only the five new sensors and two new actuators to BR-001/BR-002.
--- pH is intentionally excluded: it already belongs to the original set.
+-- Attach the five new sensors plus the existing pH sensor, together with
+-- the two new actuators, to BR-001/BR-002.
 INSERT INTO public.equipment_components (id, actuator_id, sensor_id, equipment_id)
 SELECT uuid_generate_v4(), a.id, s.id, e.id
 FROM public.sensors s
 CROSS JOIN public.actuators a
 CROSS JOIN public.equipments e
 WHERE s.variable IN (
+                    'pH',
                     'temperature',
                     'dissolved_oxygen_concentration',
                     'CO2_percent_in_off_gas',
