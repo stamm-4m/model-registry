@@ -55,6 +55,22 @@ services:
       - ml_net
     restart: unless-stopped
 
+  mqtt-consumer:
+    build: .
+    container_name: stamm-mqtt-consumer
+    command: >
+      python -m model_registry.mqtt_consumer.main
+    depends_on:
+      api:
+        condition: service_started
+    volumes:
+      - ./model_registry:/app/model_registry
+    networks:
+      - ml_net
+    restart: unless-stopped
+    env_file:
+      - ./model_registry/mqtt_consumer/.env
+
   r-api:
     build:
       context: .

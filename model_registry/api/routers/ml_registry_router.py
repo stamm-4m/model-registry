@@ -444,7 +444,7 @@ def download_model_artifact(
     project_id: str,
     model_id: str,
     req: Request,
-    user=Depends(require_permission_resource("models:read", "Models")),
+    user=Depends(require_permission_resource("soft_sensors:read", "soft_sensors")),
 ):
     """Stream the raw model binary. 404 if the model has no artifact on disk."""
     import os
