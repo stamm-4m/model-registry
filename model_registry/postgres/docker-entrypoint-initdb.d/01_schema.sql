@@ -386,6 +386,23 @@ CREATE TABLE public.instruments (
 ALTER TABLE public.instruments OWNER TO CURRENT_USER;
 
 --
+-- MQTT readings received from external instruments
+--
+
+CREATE TABLE public.instrument_readings (
+    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    instrument_id uuid,
+    topic text NOT NULL,
+    measurement text NOT NULL,
+    "time" timestamp with time zone NOT NULL,
+    payload jsonb NOT NULL,
+    received_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+ALTER TABLE public.instrument_readings OWNER TO CURRENT_USER;
+
+
+--
 -- TOC entry 294 (class 1259 OID 34403)
 -- Name: laboratories; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -1163,6 +1180,13 @@ ALTER TABLE ONLY public.runs
 ALTER TABLE ONLY public.sensor_readings
     ADD CONSTRAINT sensor_readings_pkey PRIMARY KEY ("time", run_id, sensor_id);
 
+ALTER TABLE ONLY public.instrument_readings
+    ADD CONSTRAINT instrument_readings_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.instrument_readings
+    ADD CONSTRAINT instrument_readings_instrument_fk
+    FOREIGN KEY (instrument_id) REFERENCES public.instruments(id) ON DELETE SET NULL;
+
 
 --
 -- TOC entry 5509 (class 2606 OID 34485)
@@ -1365,6 +1389,9 @@ CREATE INDEX predictions_time_idx ON public.predictions USING btree ("time" DESC
 --
 
 CREATE INDEX sensor_readings_time_idx ON public.sensor_readings USING btree ("time" DESC);
+
+CREATE INDEX idx_instrument_readings_time
+    ON public.instrument_readings USING btree ("time");
 
 -- 6. constraints foreign keys
 --
@@ -2090,4 +2117,3 @@ CREATE TABLE IF NOT EXISTS public.experiment_soft_sensors (
 COMMIT;
 
 -- end of 01_schema.sql --
-

@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from sqlalchemy import Column, DateTime, String
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy.orm import relationship
 
 from model_registry.api.core.database import Base
 
@@ -23,3 +24,4 @@ class Instrument(Base):
     typical_latency = Column(String, nullable=True)
     location = Column(String, nullable=True)
     created_at = Column(DateTime, nullable=True)
+    readings = relationship("InstrumentReading", back_populates="instrument")

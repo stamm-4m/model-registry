@@ -32,6 +32,7 @@ from .experiment_equipment import ExperimentEquipment
 from .federation import Federation
 from .federation_participant import FederationParticipant
 from .instrument import Instrument
+from .instrument_reading import InstrumentReading
 from .laboratory import Laboratory
 from .laboratory_project import LaboratoryProject
 from .laboratory_user import LaboratoryUser
@@ -90,6 +91,7 @@ __all__ = [
     "AccessRequest",
     "AuditEvent",
     "Instrument",
+    "InstrumentReading",
     "BioreactorInstrument",
     # Bioprocess (Step 4)
     "Equipment",

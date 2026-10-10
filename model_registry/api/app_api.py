@@ -7,6 +7,9 @@ from model_registry.api.routers.crud_router import router as crud_router
 from model_registry.api.routers.detector_packs_router import (
     router as detector_packs_router,
 )
+from model_registry.api.routers.instrument_readings_router import (
+    router as instrument_readings_router,
+)
 from model_registry.api.routers.ml_registry_router import router as ml_router
 from model_registry.api.routers.prediction_trigger_router import (
     router as prediction_trigger_router,
@@ -42,6 +45,7 @@ def startup_event():
 api.include_router(auth_router)
 # include ml router
 api.include_router(ml_router)
+api.include_router(instrument_readings_router)
 api.include_router(crud_router)  # /api/v1/<table>/ CRUD scaffold (Step 3)
 # Run-scoped timeseries endpoints — /api/v1/runs/{run_id}/{sensor_readings|actuator_states|predictions}.
 # Without these mounted, FermOps' chart falls back to paginating the WHOLE table

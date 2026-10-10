@@ -164,6 +164,7 @@ _TABLES = [
     ("access_requests", M.AccessRequest, None),
     ("audit_events", M.AuditEvent, None),
     ("instruments", M.Instrument, None),
+    ("instrument_readings", M.InstrumentReading, None),
     ("bioreactor_instruments", M.BioreactorInstrument, None),
     # --- bioprocess (Step 4)
     ("equipments", M.Equipment, None),
